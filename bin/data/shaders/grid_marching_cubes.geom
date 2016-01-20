@@ -13,7 +13,7 @@
 // The implementation is based on Paul Bourke's "Polygonising a Scalar Field" with appropriate adjustments made for this specific implementation.
 
 layout (points) in;
-layout (triangle_strip, max_vertices=16) out;
+layout (points, max_vertices=16) out;
 
 
 // We need to include the modelView and projection matrices so that we can transform the terrain's vertices based on the camera, and send them to the fragment shader.
@@ -21,7 +21,7 @@ uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 textureMatrix;
 uniform mat4 modelViewProjectionMatrix;
-uniform isampler2D src_tex_unit0;
+uniform isampler2D tritabletex;
 
 uniform float isolevel;
 
@@ -203,7 +203,7 @@ vec3 InterpolateVertex(vec3 point1, vec3 point2, float density1, float density2)
 
 int triTable(int cube, int index)
 {
-	return texelFetch2D(src_tex_unit0, ivec2(index, cube), 0).a;
+	return texture2D(tritabletex, ivec2(index, cube)).x;
 }
 
 
@@ -264,16 +264,23 @@ void main()
 
 	
 			// Create the triangles
-			for(int j = 0; triTable(cubeIndex,j) != -1; j += 3)
-			{
-				gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j)], 1.0);
-				EmitVertex();
-				gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+1)], 1.0);
-				EmitVertex();
-				gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+2)], 1.0);
-				EmitVertex();
-				EndPrimitive();
-			}
+			//for(int j = 0; triTable(cubeIndex,j) != -1; j += 3)
+			//{
+			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j)], 1.0);
+			//	EmitVertex();
+			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+1)], 1.0);
+			//	EmitVertex();
+			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+2)], 1.0);
+			//	EmitVertex();
+			//	EndPrimitive();
+			//}
+
+			gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,5)] - gridoffset_g[0], 1.0);
+			EmitVertex();
+			EndPrimitive();
+
+			// we need to test the triTable texture somehow
+
 
 		}
 	}

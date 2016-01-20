@@ -31,6 +31,7 @@ class TerrainGridMarchingCubes : public Terrain
 		// For marching cubes, store the triangle table as a texture.
 		ofBufferObject* triangleBuffer;
 		ofTexture* triangleTable;
+		GLuint triTableTex;
 
 	public:
 		// Fields
