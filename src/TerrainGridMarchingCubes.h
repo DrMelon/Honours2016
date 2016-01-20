@@ -23,6 +23,9 @@ class TerrainGridMarchingCubes : public Terrain
 		of3dPrimitive* theGrid;
 		ofVec3f OffsetPosition;
 
+		// For rendering
+		ofShader* theShader;
+
 	public:
 		// Fields
 		int XDimension = 16;

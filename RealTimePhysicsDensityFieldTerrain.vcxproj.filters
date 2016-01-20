@@ -34,8 +34,12 @@
     <ClCompile Include="src\Terrain.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainGridMarchingCubes.cpp" />
-    <ClCompile Include="src\ofxFirstPersonCamera.cpp" />
+    <ClCompile Include="src\ofxFirstPersonCamera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TerrainGridMarchingCubes.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -49,6 +53,9 @@
     </Filter>
     <Filter Include="addons\ofxGui\src">
       <UniqueIdentifier>{645E9533-4DCD-6179-1CDF-CB65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\shaders">
+      <UniqueIdentifier>{74ab08e4-fb6e-49cc-96ba-fc0dab3eaa15}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -85,10 +92,25 @@
     <ClInclude Include="src\Terrain.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainGridMarchingCubes.h" />
-    <ClInclude Include="src\ofxFirstPersonCamera.h" />
+    <ClInclude Include="src\ofxFirstPersonCamera.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TerrainGridMarchingCubes.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\data\shaders\grid_marching_cubes.frag">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\grid_marching_cubes.geom">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\grid_marching_cubes.vert">
+      <Filter>src\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

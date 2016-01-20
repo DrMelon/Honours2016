@@ -5,6 +5,10 @@
 TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 {
 	theGrid = new of3dPrimitive();
+	theShader = new ofShader();
+
+	// Load shader files
+	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
 	Rebuild();
 }
 
