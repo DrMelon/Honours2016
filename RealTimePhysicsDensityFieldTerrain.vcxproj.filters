@@ -112,5 +112,11 @@
     <None Include="bin\data\shaders\grid_marching_cubes.vert">
       <Filter>src\shaders</Filter>
     </None>
+    <None Include="bin\data\shaders\passthrough.frag">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\passthrough.vert">
+      <Filter>src\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

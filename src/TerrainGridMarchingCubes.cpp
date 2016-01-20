@@ -5,10 +5,14 @@
 TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 {
 	theGrid = new of3dPrimitive();
+
 	theShader = new ofShader();
 
 	// Load shader files
-	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
+	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
+	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
+	theShader->setGeometryInputType(GL_POINT);
+	
 	Rebuild();
 }
 
@@ -20,14 +24,23 @@ TerrainGridMarchingCubes::~TerrainGridMarchingCubes()
 void TerrainGridMarchingCubes::Update()
 {
 	theGrid->setPosition(OffsetPosition + ofVec3f(-PointScale * XDimension/2, -PointScale*YDimension/2, -PointScale*ZDimension/2));
+
 }
 
 void TerrainGridMarchingCubes::Draw()
 {
 	// The drawVertices function draws the vertices in order, and I'm rendering them as GL_POINT type.
-	ofColor(1.0f, 0.0f, 0.0f);
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
-	theGrid->drawVertices();
+	
+
+	// Draw using shader.
+	theShader->begin();
+		theShader->setUniform1f("gridscale", PointScale);
+		theShader->setUniform3f("gridoffset", OffsetPosition);
+		theGrid->draw(OF_MESH_POINTS);
+		
+
+	theShader->end();
 	
 }
 

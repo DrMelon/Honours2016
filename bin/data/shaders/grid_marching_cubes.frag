@@ -1,4 +1,4 @@
-#version 150
+#version 410
 
 // Grid-Based Marching Cubes Implementation, Fragment Shader
 // Author: J. Brown (1201717)
@@ -7,7 +7,9 @@
 
 out vec4 outcolour;
 
+in vec3 worldspaceposition;
+
 void main()
 {
-	outcolour = vec4(1.0, 1.0, 1.0, 1.0);
+	outcolour = vec4(1.0, worldspaceposition.x / 100, 0.0, 1.0);
 }
