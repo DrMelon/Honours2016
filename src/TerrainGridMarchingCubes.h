@@ -1,6 +1,6 @@
 #pragma once
 #include "Terrain.h"
-
+#include "tables.h"
 
 
 //Filename: TerrainGridMarchingCubes.h
@@ -16,6 +16,8 @@
 //
 // This will be fairly lightweight on the CPU side; it's likely, in fact, that it won't even store very much in memory, holding only one single mesh.
 
+// Paul Bourke's Triangle Table from his 1994 paper, Polygonizing A Scalar Field
+
 
 class TerrainGridMarchingCubes : public Terrain
 {
@@ -25,6 +27,10 @@ class TerrainGridMarchingCubes : public Terrain
 
 		// For rendering
 		ofShader* theShader;
+
+		// For marching cubes, store the triangle table as a texture.
+		ofBufferObject* triangleBuffer;
+		ofTexture* triangleTable;
 
 	public:
 		// Fields

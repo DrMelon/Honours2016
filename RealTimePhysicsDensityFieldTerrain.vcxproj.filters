@@ -40,6 +40,9 @@
     <ClCompile Include="src\TerrainGridMarchingCubes.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\tables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -96,6 +99,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\TerrainGridMarchingCubes.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tables.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

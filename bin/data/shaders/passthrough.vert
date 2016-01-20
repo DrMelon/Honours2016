@@ -9,7 +9,7 @@ uniform mat4 modelViewProjectionMatrix;
 uniform float usingTexture;
 uniform float usingColors;
 uniform vec4 globalColor;
-uniform sampler2D src_tex_unit0;
+
 
 
 in vec4 position;
