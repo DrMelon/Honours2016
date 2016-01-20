@@ -117,7 +117,9 @@ void main()
 		// Create the 8 cube edge vertices.
 		for(int j = 0; j < 8; j++)
 		{
-			gl_Position =  modelViewProjectionMatrix * ExtrapolateVertex(j, worldspaceposition[i], worldspacescale[i]);
+			vec4 extrapolatedVertex = ExtrapolateVertex(j, worldspaceposition[i], worldspacescale[i]);
+			worldspaceposition_g =  worldspaceposition[i].xyz;
+			gl_Position =  modelViewProjectionMatrix * extrapolatedVertex;
 			EmitVertex();
 			EndPrimitive();
 		}
