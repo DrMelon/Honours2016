@@ -1,4 +1,4 @@
-#version 410
+#version 330
 
 // Grid-Based Marching Cubes Implementation, Geometry Shader
 // Author: J. Brown (1201717)
@@ -7,15 +7,35 @@
 // The implementation is based on Paul Bourke's "Polygonising a Scalar Field" with appropriate adjustments made for this specific implementation.
 
 layout (points) in;
-layout (points) out;
+layout (points, max_vertices=8) out;
 
 
 // We need to include the modelView and projection matrices so that we can transform the terrain's vertices based on the camera, and send them to the fragment shader.
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 textureMatrix;
+uniform mat4 modelViewProjectionMatrix;
 
-in vec4 worldspaceposition;
-in vec4 worldspacescale;
+in gl_PerVertex
+{
+	vec4 gl_Position;
+	float gl_PointSize;
+	float gl_ClipDistance[];
+
+}gl_in[];
+
+in vec4 worldspaceposition[];
+in float worldspacescale[];
+
+out gl_PerVertex
+{
+	vec4 gl_Position;
+	float gl_PointSize;
+	float gl_ClipDistance[];
+};
+
+out vec3 worldspaceposition_g;
+
 
 // Because the Marching Cube Algorithm requires we look at the 8 vertices of a cube, upon which the density functions are tested, we need to extrapolate 8 vertices from the single point.
 // This implemention will do this by sampling the position near the worldspace of the input vertex, at a distance defined by the scale of the grid.
@@ -27,7 +47,7 @@ in vec4 worldspacescale;
 //
 //
 
-vec4 ExtrapolateVertex(int index, vec3 invertexpos, float invertexscale)
+vec4 ExtrapolateVertex(int index, vec4 invertexpos, float invertexscale)
 {
 	vec4 outputPosition;
 
@@ -82,6 +102,8 @@ vec4 ExtrapolateVertex(int index, vec3 invertexpos, float invertexscale)
 		outputPosition.z = invertexpos.z - (0.5f * invertexscale);
 	}
 
+	outputPosition.w = 1.0f;
+
 	return outputPosition;
 
 }
@@ -91,15 +113,15 @@ void main()
 	int i;
 	for(i = 0; i < gl_in.length(); i++)
 	{
+	
+		// Create the 8 cube edge vertices.
 		for(int j = 0; j < 8; j++)
 		{
-			//gl_Position = ExtrapolateVertex(j, worldspaceposition, worldspacescale);
-			//EmitVertex();
-			//EndPrimitive();
+			gl_Position =  modelViewProjectionMatrix * ExtrapolateVertex(j, worldspaceposition[i], worldspacescale[i]);
+			EmitVertex();
+			EndPrimitive();
 		}
-		gl_Position = gl_in[i].gl_Position;
-		EmitVertex();
 	}
 
-	EndPrimitive();
+	
 }

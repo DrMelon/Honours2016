@@ -9,8 +9,8 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader = new ofShader();
 
 	// Load shader files
-	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
-	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
+	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
+	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
 	theShader->setGeometryInputType(GL_POINT);
 	
 	Rebuild();

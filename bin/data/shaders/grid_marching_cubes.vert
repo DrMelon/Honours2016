@@ -1,4 +1,4 @@
-#version 410
+#version 330
 
 // Grid-Based Marching Cubes Implementation, Vertex Shader
 // Author: J. Brown (1201717)
@@ -18,13 +18,14 @@ in vec4 texcoord;
 uniform float gridscale;
 uniform vec3 gridoffset;
 
-out vec3 worldspaceposition;
+out vec4 worldspaceposition;
 out float worldspacescale;
 
 void main()
 {
-	worldspaceposition = position.xyz + gridoffset;
+	
+	worldspaceposition = (position + vec4(gridoffset,1.0));
 	worldspacescale = gridscale;
-	gl_Position = modelViewProjectionMatrix * position;
+	gl_Position = position;
 
 }
