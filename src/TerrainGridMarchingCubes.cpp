@@ -9,20 +9,27 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader = new ofShader();
 
 	// Load shader files
-	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
-	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
 	theShader->setGeometryInputType(GL_POINTS);
 	theShader->setGeometryOutputCount(16);
 	theShader->setGeometryOutputType(GL_TRIANGLE_STRIP);
+	theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
+	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
+
 
 	// Create triangle table.
 	triangleBuffer = new ofBufferObject();
-	triangleBuffer->allocate(sizeof(triTable), triTable, GL_DYNAMIC_READ);
-	triangleBuffer->setData(sizeof(triTable), triTable, GL_DYNAMIC_READ);
-	triangleTable = new ofTexture();
-	triangleTable->disableMipmap();
-	triangleTable->allocateAsBufferTexture(*triangleBuffer, GL_DYNAMIC_READ);
+	triangleBuffer->allocate();
+	triangleBuffer->bind(GL_TEXTURE_BUFFER);
+	triangleBuffer->setData(triTableV, GL_STREAM_DRAW);
 	
+	triangleTable = new ofTexture();
+	triangleTable->allocateAsBufferTexture(*triangleBuffer, GL_R32F);
+	triangleTable->setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+	
+	
+	theShader->begin();
+	theShader->setUniformTexture("tritabletex", *triangleTable, 0);
+	theShader->end();
 	
 
 	Rebuild();
@@ -52,12 +59,26 @@ void TerrainGridMarchingCubes::Draw()
 		theShader->setUniform1f("gridscale", PointScale);
 		theShader->setUniform3f("gridoffset", OffsetPosition);
 		theShader->setUniform1f("isolevel", 0);
-		theShader->setUniformTexture("tritabletex", *triangleTable, 0);
 		
-		theGrid->draw(OF_MESH_POINTS);
+
+		
+		theGrid->draw();
 		
 
 	theShader->end();
+
+	// render a plane with the texture
+	//ofPlanePrimitive* thePlane = new ofPlanePrimitive();
+	//thePlane->set(640, 480);
+	//thePlane->setPosition(320, 240, -100);
+	//thePlane->setResolution(2, 2);
+	//thePlane->mapTexCoords(0, 1, 0, 1);
+	//thePlane->drawWireframe();
+	//triangleTable->bind();
+	//thePlane->draw();
+	
+	//delete thePlane;
+	//thePlane = 0;
 	
 }
 

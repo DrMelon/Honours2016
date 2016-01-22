@@ -11,5 +11,5 @@ in vec3 worldspaceposition_g;
 
 void main()
 {
-	outcolour = vec4(1.0, worldspaceposition_g.x / 100, 0.0, 1.0);
+	outcolour = vec4(worldspaceposition_g.x, 1.0, 0.0, 1.0);
 }

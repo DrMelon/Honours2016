@@ -13,7 +13,7 @@
 // The implementation is based on Paul Bourke's "Polygonising a Scalar Field" with appropriate adjustments made for this specific implementation.
 
 layout (points) in;
-layout (points, max_vertices=16) out;
+layout (triangle_strip, max_vertices=16) out;
 
 
 // We need to include the modelView and projection matrices so that we can transform the terrain's vertices based on the camera, and send them to the fragment shader.
@@ -21,7 +21,7 @@ uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 textureMatrix;
 uniform mat4 modelViewProjectionMatrix;
-uniform isampler2D tritabletex;
+uniform samplerBuffer tritabletex;
 
 uniform float isolevel;
 
@@ -125,7 +125,7 @@ float DensityFunction(vec3 worldspaceposition)
 {
 	float density;
 
-	density = -worldspaceposition.y;
+	density = 80 - length(worldspaceposition - vec3(0, -80, 0));
 
 	return density;
 }
@@ -203,7 +203,7 @@ vec3 InterpolateVertex(vec3 point1, vec3 point2, float density1, float density2)
 
 int triTable(int cube, int index)
 {
-	return texture2D(tritabletex, ivec2(index, cube)).x;
+	return int(texelFetch(tritabletex, (index + 16*cube)).r);
 }
 
 
@@ -241,7 +241,7 @@ void main()
 
 		// Now that we have the cube index, we can create a triangle from the verts listed in the triangle table.
 		// This list will keep track of which vertices of the cube will be used when creating new triangles.
-		vec3 vertList[120];
+		vec3 vertList[12];
 
 		if(!(edgeTable[cubeIndex] == 0)) // point is not fully inside or outside the surface
 		{
@@ -275,11 +275,28 @@ void main()
 			//	EndPrimitive();
 			//}
 
-			gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,5)] - gridoffset_g[0], 1.0);
-			EmitVertex();
-			EndPrimitive();
+			for(int j = 0; j < 16; j += 3)
+			{
+				if(triTable(cubeIndex, j) != -1)
+				{
+					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+2)] - gridoffset_g[0], 1.0);
+					EmitVertex();
+					//EndPrimitive();
+					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+1)] - gridoffset_g[0], 1.0);
+					EmitVertex();
+					//EndPrimitive();
+					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j)] - gridoffset_g[0], 1.0);
+					EmitVertex();
+					EndPrimitive();
+				}
+			}
 
-			// we need to test the triTable texture somehow
+			
+
+			//gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,5)] - gridoffset_g[0], 1.0);
+			//EmitVertex();
+			//EndPrimitive();
+
 
 
 		}
