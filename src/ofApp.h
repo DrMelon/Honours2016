@@ -39,5 +39,8 @@ class ofApp : public ofBaseApp{
 		ofxFirstPersonCamera* theCamera;
 		Terrain* theTerrain;
 
+		int GridTerrainResolution = 64;
+		float GridTerrainSize = 5;
+
 		
 };

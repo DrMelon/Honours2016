@@ -44,7 +44,33 @@ out gl_PerVertex
 	float gl_ClipDistance[];
 };
 
-out vec3 worldspaceposition_g;
+out vec3 normalOfVertex;
+
+float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float noise_g(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
 
 
 // Because the Marching Cube Algorithm requires we look at the 8 vertices of a cube, upon which the density functions are tested, we need to extrapolate 8 vertices from the single point.
@@ -125,7 +151,13 @@ float DensityFunction(vec3 worldspaceposition)
 {
 	float density;
 
-	density = 80 - length(worldspaceposition - vec3(0, -80, 0));
+	//density = 80 - length(worldspaceposition - vec3(0, -80, 0));
+	//density += (noise_g(worldspaceposition / 20)+ 0.5f) * 40.0f;
+
+	density = -worldspaceposition.y;
+	density += (noise_g(worldspaceposition / 20)) * 40.0f;
+	density += (noise_g(worldspaceposition / 40)) * 80.0f;
+	
 
 	return density;
 }
@@ -245,59 +277,78 @@ void main()
 
 		if(!(edgeTable[cubeIndex] == 0)) // point is not fully inside or outside the surface
 		{
+				// Rather than call DensityFunction a ton, it's quicker to precalculate each cube vertex's density.
+				float cv0Density = DensityFunction(cubeVertex0.xyz);
+				float cv1Density = DensityFunction(cubeVertex1.xyz);
+				float cv2Density = DensityFunction(cubeVertex2.xyz);
+				float cv3Density = DensityFunction(cubeVertex3.xyz);
+				float cv4Density = DensityFunction(cubeVertex4.xyz);
+				float cv5Density = DensityFunction(cubeVertex5.xyz);
+				float cv6Density = DensityFunction(cubeVertex6.xyz);
+				float cv7Density = DensityFunction(cubeVertex7.xyz);
 
-				vertList[0] = InterpolateVertex(cubeVertex0.xyz, cubeVertex1.xyz, DensityFunction(cubeVertex0.xyz), DensityFunction(cubeVertex1.xyz));
-				vertList[1] = InterpolateVertex(cubeVertex1.xyz, cubeVertex2.xyz, DensityFunction(cubeVertex1.xyz), DensityFunction(cubeVertex2.xyz));
-				vertList[2] = InterpolateVertex(cubeVertex2.xyz, cubeVertex3.xyz, DensityFunction(cubeVertex2.xyz), DensityFunction(cubeVertex3.xyz));
-				vertList[3] = InterpolateVertex(cubeVertex3.xyz, cubeVertex0.xyz, DensityFunction(cubeVertex3.xyz), DensityFunction(cubeVertex0.xyz));
-				vertList[4] = InterpolateVertex(cubeVertex4.xyz, cubeVertex5.xyz, DensityFunction(cubeVertex4.xyz), DensityFunction(cubeVertex5.xyz));
-				vertList[5] = InterpolateVertex(cubeVertex5.xyz, cubeVertex6.xyz, DensityFunction(cubeVertex5.xyz), DensityFunction(cubeVertex6.xyz));
-				vertList[6] = InterpolateVertex(cubeVertex6.xyz, cubeVertex7.xyz, DensityFunction(cubeVertex6.xyz), DensityFunction(cubeVertex7.xyz));
-				vertList[7] = InterpolateVertex(cubeVertex7.xyz, cubeVertex4.xyz, DensityFunction(cubeVertex7.xyz), DensityFunction(cubeVertex4.xyz));
-				vertList[8] = InterpolateVertex(cubeVertex0.xyz, cubeVertex4.xyz, DensityFunction(cubeVertex0.xyz), DensityFunction(cubeVertex4.xyz));
-				vertList[9] = InterpolateVertex(cubeVertex1.xyz, cubeVertex5.xyz, DensityFunction(cubeVertex1.xyz), DensityFunction(cubeVertex5.xyz));
-				vertList[10] = InterpolateVertex(cubeVertex2.xyz, cubeVertex6.xyz, DensityFunction(cubeVertex2.xyz), DensityFunction(cubeVertex6.xyz));
-				vertList[11] = InterpolateVertex(cubeVertex3.xyz, cubeVertex7.xyz, DensityFunction(cubeVertex3.xyz), DensityFunction(cubeVertex7.xyz));
+
+				vertList[0] = InterpolateVertex(cubeVertex0.xyz, cubeVertex1.xyz, cv0Density, cv1Density);
+				vertList[1] = InterpolateVertex(cubeVertex1.xyz, cubeVertex2.xyz, cv1Density, cv2Density);
+				vertList[2] = InterpolateVertex(cubeVertex2.xyz, cubeVertex3.xyz, cv2Density, cv3Density);
+				vertList[3] = InterpolateVertex(cubeVertex3.xyz, cubeVertex0.xyz, cv3Density, cv0Density);
+				vertList[4] = InterpolateVertex(cubeVertex4.xyz, cubeVertex5.xyz, cv4Density, cv5Density);
+				vertList[5] = InterpolateVertex(cubeVertex5.xyz, cubeVertex6.xyz, cv5Density, cv6Density);
+				vertList[6] = InterpolateVertex(cubeVertex6.xyz, cubeVertex7.xyz, cv6Density, cv7Density);
+				vertList[7] = InterpolateVertex(cubeVertex7.xyz, cubeVertex4.xyz, cv7Density, cv4Density);
+				vertList[8] = InterpolateVertex(cubeVertex0.xyz, cubeVertex4.xyz, cv0Density, cv4Density);
+				vertList[9] = InterpolateVertex(cubeVertex1.xyz, cubeVertex5.xyz, cv1Density, cv5Density);
+				vertList[10] = InterpolateVertex(cubeVertex2.xyz, cubeVertex6.xyz, cv2Density, cv6Density);
+				vertList[11] = InterpolateVertex(cubeVertex3.xyz, cubeVertex7.xyz, cv3Density, cv7Density);
 			
 			
 		
 
 	
-			// Create the triangles
-			//for(int j = 0; triTable(cubeIndex,j) != -1; j += 3)
-			//{
-			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j)], 1.0);
-			//	EmitVertex();
-			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+1)], 1.0);
-			//	EmitVertex();
-			//	gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+2)], 1.0);
-			//	EmitVertex();
-			//	EndPrimitive();
-			//}
-
-			for(int j = 0; j < 16; j += 3)
+			// Create the triangles, and set up per-vertex face normals.			
+			for(int j = 0; triTable(cubeIndex, j) != -1; j += 3)
 			{
 				if(triTable(cubeIndex, j) != -1)
 				{
-					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+2)] - gridoffset_g[0], 1.0);
+					vec3 vertex0 = vertList[triTable(cubeIndex,j+2)];
+					vec3 vertex1 = vertList[triTable(cubeIndex,j+1)];
+					vec3 vertex2 = vertList[triTable(cubeIndex,j+0)];
+
+					
+
+					gl_Position = modelViewProjectionMatrix * vec4(vertex0 - gridoffset_g[0], 1.0);
+					//normalOfVertex.x = DensityFunction(vec3(vertex0.x - (0.5f * worldspacescale[0]), vertex0.y, vertex0.z)) - DensityFunction(vec3(vertex0.x + (0.5f * worldspacescale[0]), vertex0.y, vertex0.z));
+					//normalOfVertex.y = DensityFunction(vec3(vertex0.x, vertex0.y  - (0.5f * worldspacescale[0]), vertex0.z)) - DensityFunction(vec3(vertex0.x, vertex0.y  + (0.5f * worldspacescale[0]), vertex0.z));
+					//normalOfVertex.z = DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  + (0.5f * worldspacescale[0])));
+					normalOfVertex = cross(vertex2 - vertex1, vertex2 - vertex0);
+					normalOfVertex = normalize(normalOfVertex);
 					EmitVertex();
-					//EndPrimitive();
-					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j+1)] - gridoffset_g[0], 1.0);
+
+					gl_Position = modelViewProjectionMatrix * vec4(vertex1 - gridoffset_g[0], 1.0);
+					//normalOfVertex.x = DensityFunction(vec3(vertex1.x - (0.5f * worldspacescale[0]), vertex1.y, vertex1.z)) - DensityFunction(vec3(vertex1.x + (0.5f * worldspacescale[0]), vertex1.y, vertex1.z));
+					//normalOfVertex.y = DensityFunction(vec3(vertex1.x, vertex1.y  - (0.5f * worldspacescale[0]), vertex1.z)) - DensityFunction(vec3(vertex1.x, vertex1.y  + (0.5f * worldspacescale[0]), vertex1.z));
+					//normalOfVertex.z = DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  + (0.5f * worldspacescale[0])));
+					//normalOfVertex = cross(vertex0 - vertex1, vertex0 - vertex2);
+					normalOfVertex = normalize(normalOfVertex);
 					EmitVertex();
-					//EndPrimitive();
-					gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,j)] - gridoffset_g[0], 1.0);
+
+					gl_Position = modelViewProjectionMatrix * vec4(vertex2 - gridoffset_g[0], 1.0);
+					//normalOfVertex.x = DensityFunction(vec3(vertex2.x - (0.5f * worldspacescale[0]), vertex2.y, vertex2.z)) - DensityFunction(vec3(vertex2.x + (0.5f * worldspacescale[0]), vertex2.y, vertex2.z));
+					//normalOfVertex.y = DensityFunction(vec3(vertex2.x, vertex2.y  - (0.5f * worldspacescale[0]), vertex2.z)) - DensityFunction(vec3(vertex2.x, vertex2.y  + (0.5f * worldspacescale[0]), vertex2.z));
+					//normalOfVertex.z = DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  + (0.5f * worldspacescale[0])));
+					//normalOfVertex = cross(vertex0 - vertex1, vertex0 - vertex2);
+					normalOfVertex = normalize(normalOfVertex);
 					EmitVertex();
+
+		
+
 					EndPrimitive();
+
 				}
 			}
-
 			
-
-			//gl_Position = modelViewProjectionMatrix * vec4(vertList[triTable(cubeIndex,5)] - gridoffset_g[0], 1.0);
-			//EmitVertex();
-			//EndPrimitive();
-
-
+			
+			
 
 		}
 	}

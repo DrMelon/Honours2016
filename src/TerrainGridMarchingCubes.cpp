@@ -50,35 +50,17 @@ void TerrainGridMarchingCubes::Draw()
 {
 	// The drawVertices function draws the vertices in order, and I'm rendering them as GL_POINT type.
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
-	
-	// Bind buffer texture
-	//triangleTable->bind();
 
 	// Draw using shader.
 	theShader->begin();
 		theShader->setUniform1f("gridscale", PointScale);
 		theShader->setUniform3f("gridoffset", OffsetPosition);
 		theShader->setUniform1f("isolevel", 0);
-		
 
-		
 		theGrid->draw();
 		
 
 	theShader->end();
-
-	// render a plane with the texture
-	//ofPlanePrimitive* thePlane = new ofPlanePrimitive();
-	//thePlane->set(640, 480);
-	//thePlane->setPosition(320, 240, -100);
-	//thePlane->setResolution(2, 2);
-	//thePlane->mapTexCoords(0, 1, 0, 1);
-	//thePlane->drawWireframe();
-	//triangleTable->bind();
-	//thePlane->draw();
-	
-	//delete thePlane;
-	//thePlane = 0;
 	
 }
 

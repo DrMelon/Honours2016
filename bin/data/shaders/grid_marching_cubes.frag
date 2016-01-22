@@ -7,9 +7,11 @@
 
 out vec4 outcolour;
 
-in vec3 worldspaceposition_g;
+in vec3 normalOfVertex;
 
 void main()
 {
-	outcolour = vec4(worldspaceposition_g.x, 1.0, 0.0, 1.0);
+	// Calculate Vertex Normals by using Partial Derivatives
+
+	outcolour = vec4(normalOfVertex.x, normalOfVertex.y, normalOfVertex.z, 1.0);
 }

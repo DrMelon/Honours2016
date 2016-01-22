@@ -12,7 +12,7 @@ void ofApp::setup()
 {
 	// Set maximum framerate.
 	ofSetFrameRate(60);
-	ofSetBackgroundColor(ofColor::black);
+	ofSetBackgroundColor(ofColor::white);
 	ofSetVerticalSync(true);
 
 	// Set up z-buffer.
@@ -23,7 +23,7 @@ void ofApp::setup()
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
 	theTerrain = new TerrainGridMarchingCubes();
-	
+	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
 }
 
 //--------------------------------------------------------------
@@ -32,6 +32,7 @@ void ofApp::update()
 	// Update camera offset for terrain.
 	theTerrain->SetOffset(theCamera->getPosition());
 	theTerrain->Update();
+	
 }
 
 //--------------------------------------------------------------
@@ -47,7 +48,21 @@ void ofApp::draw()
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::keyPressed(int key)
+{
+	if (key == 'o')
+	{
+		GridTerrainResolution *= 2;
+		GridTerrainSize /= 2;
+		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	}
+	if (key == 'i')
+	{
+		GridTerrainResolution /= 2;
+		GridTerrainSize *= 2;
+		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	}
+
 
 }
 
@@ -69,7 +84,11 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button)
 {
-	theCamera->toggleControl();
+	if (button == 2)
+	{
+		theCamera->toggleControl();
+	}
+	
 }
 
 //--------------------------------------------------------------
