@@ -5,13 +5,19 @@
 // Date: 19/01/2016
 // Purpose: After the marching cubes algorithm has concluded in the geometry shader, this shader will colour and shade the terrain appropriately.
 
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 textureMatrix;
+uniform mat4 modelViewProjectionMatrix;
+
 out vec4 outcolour;
+
+
 
 in vec3 normalOfVertex;
 
 void main()
 {
-	// Calculate Vertex Normals by using Partial Derivatives
-
+	
 	outcolour = vec4(normalOfVertex.x, normalOfVertex.y, normalOfVertex.z, 1.0);
 }

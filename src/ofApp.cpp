@@ -20,6 +20,7 @@ void ofApp::setup()
 
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
+	GridExpensiveNormals = 0.0f;
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
 	theTerrain = new TerrainGridMarchingCubes();
@@ -31,6 +32,7 @@ void ofApp::update()
 {
 	// Update camera offset for terrain.
 	theTerrain->SetOffset(theCamera->getPosition());
+	((TerrainGridMarchingCubes*)theTerrain)->expensiveNormals = GridExpensiveNormals;
 	theTerrain->Update();
 	
 }
@@ -62,7 +64,17 @@ void ofApp::keyPressed(int key)
 		GridTerrainSize *= 2;
 		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
 	}
-
+	if (key == 'p')
+	{
+		if (GridExpensiveNormals == 0.0f)
+		{
+			GridExpensiveNormals = 1.0f;
+		}
+		else
+		{
+			GridExpensiveNormals = 0.0f;
+		}
+	}
 
 }
 

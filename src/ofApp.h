@@ -41,6 +41,7 @@ class ofApp : public ofBaseApp{
 
 		int GridTerrainResolution = 64;
 		float GridTerrainSize = 5;
+		float GridExpensiveNormals = 0;
 
 		
 };

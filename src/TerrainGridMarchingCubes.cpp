@@ -56,6 +56,7 @@ void TerrainGridMarchingCubes::Draw()
 		theShader->setUniform1f("gridscale", PointScale);
 		theShader->setUniform3f("gridoffset", OffsetPosition);
 		theShader->setUniform1f("isolevel", 0);
+		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 
 		theGrid->draw();
 		

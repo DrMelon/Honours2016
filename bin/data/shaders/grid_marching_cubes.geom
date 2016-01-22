@@ -24,6 +24,7 @@ uniform mat4 modelViewProjectionMatrix;
 uniform samplerBuffer tritabletex;
 
 uniform float isolevel;
+uniform float expensiveNormals;
 
 in gl_PerVertex
 {
@@ -305,39 +306,54 @@ void main()
 		
 
 	
-			// Create the triangles, and set up per-vertex face normals.			
+			// Create the triangles, and set up per-vertex normals.			
 			for(int j = 0; triTable(cubeIndex, j) != -1; j += 3)
 			{
+				// For each triangle...
 				if(triTable(cubeIndex, j) != -1)
 				{
+					// Select the vertices based on the results of the triTable.
+
 					vec3 vertex0 = vertList[triTable(cubeIndex,j+2)];
 					vec3 vertex1 = vertList[triTable(cubeIndex,j+1)];
 					vec3 vertex2 = vertList[triTable(cubeIndex,j+0)];
 
-					
-
-					gl_Position = modelViewProjectionMatrix * vec4(vertex0 - gridoffset_g[0], 1.0);
-					//normalOfVertex.x = DensityFunction(vec3(vertex0.x - (0.5f * worldspacescale[0]), vertex0.y, vertex0.z)) - DensityFunction(vec3(vertex0.x + (0.5f * worldspacescale[0]), vertex0.y, vertex0.z));
-					//normalOfVertex.y = DensityFunction(vec3(vertex0.x, vertex0.y  - (0.5f * worldspacescale[0]), vertex0.z)) - DensityFunction(vec3(vertex0.x, vertex0.y  + (0.5f * worldspacescale[0]), vertex0.z));
-					//normalOfVertex.z = DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  + (0.5f * worldspacescale[0])));
+					// Calculate cheap normals.
 					normalOfVertex = cross(vertex2 - vertex1, vertex2 - vertex0);
 					normalOfVertex = normalize(normalOfVertex);
+					
+					// Triangle Vertex Positions must be transformed by projection matrices to look correct! 
+					gl_Position = modelViewProjectionMatrix * vec4(vertex0 - gridoffset_g[0], 1.0);
+					if(expensiveNormals > 0)
+					{
+						normalOfVertex.x = DensityFunction(vec3(vertex0.x - (0.5f * worldspacescale[0]), vertex0.y, vertex0.z)) - DensityFunction(vec3(vertex0.x + (0.5f * worldspacescale[0]), vertex0.y, vertex0.z));
+						normalOfVertex.y = DensityFunction(vec3(vertex0.x, vertex0.y  - (0.5f * worldspacescale[0]), vertex0.z)) - DensityFunction(vec3(vertex0.x, vertex0.y  + (0.5f * worldspacescale[0]), vertex0.z));
+						normalOfVertex.z = DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  + (0.5f * worldspacescale[0])));
+						normalOfVertex = normalize(normalOfVertex);
+					}					
+					
 					EmitVertex();
 
 					gl_Position = modelViewProjectionMatrix * vec4(vertex1 - gridoffset_g[0], 1.0);
-					//normalOfVertex.x = DensityFunction(vec3(vertex1.x - (0.5f * worldspacescale[0]), vertex1.y, vertex1.z)) - DensityFunction(vec3(vertex1.x + (0.5f * worldspacescale[0]), vertex1.y, vertex1.z));
-					//normalOfVertex.y = DensityFunction(vec3(vertex1.x, vertex1.y  - (0.5f * worldspacescale[0]), vertex1.z)) - DensityFunction(vec3(vertex1.x, vertex1.y  + (0.5f * worldspacescale[0]), vertex1.z));
-					//normalOfVertex.z = DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  + (0.5f * worldspacescale[0])));
-					//normalOfVertex = cross(vertex0 - vertex1, vertex0 - vertex2);
-					normalOfVertex = normalize(normalOfVertex);
+					if(expensiveNormals > 0)
+					{
+						normalOfVertex.x = DensityFunction(vec3(vertex1.x - (0.5f * worldspacescale[0]), vertex1.y, vertex1.z)) - DensityFunction(vec3(vertex1.x + (0.5f * worldspacescale[0]), vertex1.y, vertex1.z));
+						normalOfVertex.y = DensityFunction(vec3(vertex1.x, vertex1.y  - (0.5f * worldspacescale[0]), vertex1.z)) - DensityFunction(vec3(vertex1.x, vertex1.y  + (0.5f * worldspacescale[0]), vertex1.z));
+						normalOfVertex.z = DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  + (0.5f * worldspacescale[0])));
+						normalOfVertex = normalize(normalOfVertex);
+					}	
+					
 					EmitVertex();
 
 					gl_Position = modelViewProjectionMatrix * vec4(vertex2 - gridoffset_g[0], 1.0);
-					//normalOfVertex.x = DensityFunction(vec3(vertex2.x - (0.5f * worldspacescale[0]), vertex2.y, vertex2.z)) - DensityFunction(vec3(vertex2.x + (0.5f * worldspacescale[0]), vertex2.y, vertex2.z));
-					//normalOfVertex.y = DensityFunction(vec3(vertex2.x, vertex2.y  - (0.5f * worldspacescale[0]), vertex2.z)) - DensityFunction(vec3(vertex2.x, vertex2.y  + (0.5f * worldspacescale[0]), vertex2.z));
-					//normalOfVertex.z = DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  + (0.5f * worldspacescale[0])));
-					//normalOfVertex = cross(vertex0 - vertex1, vertex0 - vertex2);
-					normalOfVertex = normalize(normalOfVertex);
+					if(expensiveNormals > 0)
+					{
+						normalOfVertex.x = DensityFunction(vec3(vertex2.x - (0.5f * worldspacescale[0]), vertex2.y, vertex2.z)) - DensityFunction(vec3(vertex2.x + (0.5f * worldspacescale[0]), vertex2.y, vertex2.z));
+						normalOfVertex.y = DensityFunction(vec3(vertex2.x, vertex2.y  - (0.5f * worldspacescale[0]), vertex2.z)) - DensityFunction(vec3(vertex2.x, vertex2.y  + (0.5f * worldspacescale[0]), vertex2.z));
+						normalOfVertex.z = DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  + (0.5f * worldspacescale[0])));
+						normalOfVertex = normalize(normalOfVertex);
+					}	
+					
 					EmitVertex();
 
 		
