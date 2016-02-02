@@ -52,6 +52,10 @@ out gl_PerVertex
 
 out vec3 normalOfVertex;
 
+
+//
+// Noise functions borrowed from: [SOURCE]
+//
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
@@ -152,14 +156,25 @@ vec4 ExtrapolateVertex(int index, vec4 invertexpos, float invertexscale)
 
 // These are Constructive Solid Geometry (CSG) functions:
 // They allow the building of complex shapes within the scalar field, through boolean operations.
-// Primitives can be defined here.
+
+// Primitives are defined here.
 
 float CSG_Sphere( vec3 position, float size, vec3 worldspace )
 {
 	return length(worldspace - position) - size;
 }
 
+float CSG_Box(vec3 position, vec3 bounds, vec3 worldspace)
+{
+	return length(max(abs(worldspace - position) - bounds, 0.0));
+}
 
+float CSG_RoundBox(vec3 position, vec3 bounds, vec3 worldspace, float roundness)
+{
+	return length(max(abs(worldspace - position) - bounds, 0.0)) - roundness;
+}
+
+// And these functions are used to combine shapes and fields together.
 
 float CSG_Union( float density1, float density2 )
 {
@@ -172,6 +187,8 @@ float CSG_Subtract( float density1, float density2 )
 }
 
 
+
+
 // This is the density function that represents our entire terrain. 
 // It is through this value that the terrain can be explored.
 //
@@ -179,20 +196,19 @@ float DensityFunction(vec3 worldspaceposition)
 {
 	float density = 0.0f;
 
-	//density = 80 - length(worldspaceposition - vec3(0, -80, 0));
-	//density += (noise_g(worldspaceposition / 20)+ 0.5f) * 40.0f;
 
-	
-	
+	// Set a floor at 0, 0, 0.
 	density = -worldspaceposition.y;
 	
+	// Perturb the surface with noise.
 	density += (noise_g(worldspaceposition / 80)) * 50.0f;
 	density += (noise_g(worldspaceposition / 40)) * 50.0f;
 
-	//density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 50.0f, 0.0f), 50.0f, worldspaceposition));
+	// Perform CSG functions here.
 	density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
 	density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));
-
+	density = CSG_Union(density, CSG_RoundBox(vec3(0.0f, 50.0f, 130.0f), vec3(30.0f, 45.0f*sin(time)+45.0f, 30.0f*cos(time)+30.0f), worldspaceposition, 5.0f));
+	
 	
 	
 	
