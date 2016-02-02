@@ -40,6 +40,7 @@ class TerrainGridMarchingCubes : public Terrain
 		int ZDimension = 16;
 		float PointScale = 1.0f;
 		float expensiveNormals = 0.0f;
+		float time = 0.0f;
 
 
 		// Methods

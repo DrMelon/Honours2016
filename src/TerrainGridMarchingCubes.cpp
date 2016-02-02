@@ -43,7 +43,7 @@ TerrainGridMarchingCubes::~TerrainGridMarchingCubes()
 void TerrainGridMarchingCubes::Update()
 {
 	theGrid->setPosition(OffsetPosition + ofVec3f(-PointScale * XDimension/2, -PointScale*YDimension/2, -PointScale*ZDimension/2));
-
+	time += (float)ofGetLastFrameTime();
 }
 
 void TerrainGridMarchingCubes::Draw()
@@ -57,6 +57,7 @@ void TerrainGridMarchingCubes::Draw()
 		theShader->setUniform3f("gridoffset", OffsetPosition);
 		theShader->setUniform1f("isolevel", 0);
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
+		theShader->setUniform1f("time", time);
 
 		theGrid->draw();
 		

@@ -29,6 +29,7 @@ uniform samplerBuffer CSGOperations;
 
 uniform float isolevel;
 uniform float expensiveNormals;
+uniform float time;
 
 in gl_PerVertex
 {
@@ -153,14 +154,21 @@ vec4 ExtrapolateVertex(int index, vec4 invertexpos, float invertexscale)
 // They allow the building of complex shapes within the scalar field, through boolean operations.
 // Primitives can be defined here.
 
-float CSG_Sphere( vec3 position, float size )
+float CSG_Sphere( vec3 position, float size, vec3 worldspace )
 {
-	return length(position) - size;
+	return length(worldspace - position) - size;
 }
+
+
 
 float CSG_Union( float density1, float density2 )
 {
-	return max(density1, density2);
+	return max(density1, isolevel - density2);
+}
+
+float CSG_Subtract( float density1, float density2 )
+{
+	return min(density1, density2 - isolevel);
 }
 
 
@@ -180,8 +188,11 @@ float DensityFunction(vec3 worldspaceposition)
 	
 	density += (noise_g(worldspaceposition / 80)) * 50.0f;
 	density += (noise_g(worldspaceposition / 40)) * 50.0f;
-	density *= -(50 - length(vec3(0, 50, 0) - worldspaceposition));
-	
+
+	//density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 50.0f, 0.0f), 50.0f, worldspaceposition));
+	density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
+	density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));
+
 	
 	
 	
