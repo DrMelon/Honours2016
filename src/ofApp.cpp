@@ -25,6 +25,7 @@ void ofApp::setup()
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
 	theTerrain = new TerrainGridMarchingCubes();
 	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
 }
 
 //--------------------------------------------------------------
@@ -32,7 +33,11 @@ void ofApp::update()
 {
 	// Update camera offset for terrain.
 	theTerrain->SetOffset(theCamera->getPosition());
-	((TerrainGridMarchingCubes*)theTerrain)->expensiveNormals = GridExpensiveNormals;
+	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		((TerrainGridMarchingCubes*)theTerrain)->expensiveNormals = GridExpensiveNormals;
+	}
+	
 	theTerrain->Update();
 	
 }
@@ -47,34 +52,72 @@ void ofApp::draw()
 
 
 	theCamera->end(); // Cease drawing with the camera.
+
+	// Draw the GUI
+	ofxGuiGroup* gui = new ofxGuiGroup();
+	gui->add(new ofxButton());
+	gui->draw();
+	delete gui;
+	gui = 0;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	if (key == 'o')
+	//
+	// Marching Cube Grid Terrain Controls.
+	//
+	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
-		GridTerrainResolution *= 2;
-		GridTerrainSize /= 2;
-		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
-	}
-	if (key == 'i')
-	{
-		GridTerrainResolution /= 2;
-		GridTerrainSize *= 2;
-		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
-	}
-	if (key == 'p')
-	{
-		if (GridExpensiveNormals == 0.0f)
+		if (key == 'o')
 		{
-			GridExpensiveNormals = 1.0f;
+			GridTerrainResolution *= 2;
+			GridTerrainSize /= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
 		}
-		else
+		if (key == 'i')
 		{
-			GridExpensiveNormals = 0.0f;
+			GridTerrainResolution /= 2;
+			GridTerrainSize *= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+		}
+		if (key == 'u')
+		{
+			//GridTerrainResolution /= 2;
+			GridTerrainSize /= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+		}
+		if (key == 'y')
+		{
+			//GridTerrainResolution /= 2;
+			GridTerrainSize *= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+		}
+		if (key == 't')
+		{
+			GridTerrainResolution *= 2;
+			//GridTerrainSize /= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+		}
+		if (key == 'r')
+		{
+			GridTerrainResolution /= 2;
+			//GridTerrainSize *= 2;
+			((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+		}
+		if (key == 'p')
+		{
+			if (GridExpensiveNormals == 0.0f)
+			{
+				GridExpensiveNormals = 1.0f;
+			}
+			else
+			{
+				GridExpensiveNormals = 0.0f;
+			}
 		}
 	}
+
 
 }
 

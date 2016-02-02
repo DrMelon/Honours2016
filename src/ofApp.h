@@ -12,11 +12,15 @@
 
 #include "Terrain.h"
 #include "TerrainGridMarchingCubes.h"
+#include "ofxBullet.h"
+#include "ofxGui.h"
 
 
 class ofApp : public ofBaseApp{
 
 	public:
+
+		enum TERRAIN_TYPE{ TERRAIN_GRID_MC, TERRAIN_PS_DIST };
 
 		// openFrameworks Template Stuff
 		void setup();
@@ -38,6 +42,7 @@ class ofApp : public ofBaseApp{
 		// Fields/Members
 		ofxFirstPersonCamera* theCamera;
 		Terrain* theTerrain;
+		TERRAIN_TYPE currentTerrainType;
 
 		int GridTerrainResolution = 64;
 		float GridTerrainSize = 5;

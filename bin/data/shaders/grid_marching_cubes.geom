@@ -23,6 +23,10 @@ uniform mat4 textureMatrix;
 uniform mat4 modelViewProjectionMatrix;
 uniform samplerBuffer tritabletex;
 
+// This buffer is written about in more detail in the main application; 
+// its purpose is to transfer information about additions/removals to the terrain.
+uniform samplerBuffer CSGOperations;
+
 uniform float isolevel;
 uniform float expensiveNormals;
 
@@ -145,23 +149,47 @@ vec4 ExtrapolateVertex(int index, vec4 invertexpos, float invertexscale)
 
 }
 
+// These are Constructive Solid Geometry (CSG) functions:
+// They allow the building of complex shapes within the scalar field, through boolean operations.
+// Primitives can be defined here.
+
+float CSG_Sphere( vec3 position, float size )
+{
+	return length(position) - size;
+}
+
+float CSG_Union( float density1, float density2 )
+{
+	return max(density1, density2);
+}
+
+
 // This is the density function that represents our entire terrain. 
 // It is through this value that the terrain can be explored.
 //
 float DensityFunction(vec3 worldspaceposition)
 {
-	float density;
+	float density = 0.0f;
 
 	//density = 80 - length(worldspaceposition - vec3(0, -80, 0));
 	//density += (noise_g(worldspaceposition / 20)+ 0.5f) * 40.0f;
 
+	
+	
 	density = -worldspaceposition.y;
-	density += (noise_g(worldspaceposition / 20)) * 40.0f;
-	density += (noise_g(worldspaceposition / 40)) * 80.0f;
+	
+	density += (noise_g(worldspaceposition / 80)) * 50.0f;
+	density += (noise_g(worldspaceposition / 40)) * 50.0f;
+	density *= -(50 - length(vec3(0, 50, 0) - worldspaceposition));
+	
+	
+	
 	
 
 	return density;
 }
+
+
 
 // Marching Cubes Tables
 // These are from Paul Bourke's 1994 Paper, Polygonising A Scalar Field, and are used here because their generation is nontrivial.

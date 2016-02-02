@@ -21,8 +21,8 @@ void main()
 	
 	outcolour = vec4(normalOfVertex.x, normalOfVertex.y, normalOfVertex.z, 1.0);
 
-	float fogAmt = ((gl_FragCoord.z / gl_FragCoord.w) / 128.0f);
+	//float fogAmt = ((gl_FragCoord.z / gl_FragCoord.w) / 128.0f);
 
-	outcolour = mix(outcolour, vec4(1.0, 1.0,1.0,1.0), fogAmt);
-	outcolour.a = 1.0f;
+	//outcolour = mix(outcolour, vec4(1.0, 1.0,1.0,1.0), fogAmt);
+	//outcolour.a = 1.0f;
 }
