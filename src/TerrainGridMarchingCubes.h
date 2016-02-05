@@ -33,6 +33,9 @@ class TerrainGridMarchingCubes : public Terrain
 		ofTexture* triangleTable;
 		GLuint triTableTex;
 
+		// For multipass
+		ofBufferObject* outputBuffer;
+
 	public:
 		// Fields
 		int XDimension = 16;
