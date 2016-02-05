@@ -53,12 +53,7 @@ void ofApp::draw()
 
 	theCamera->end(); // Cease drawing with the camera.
 
-	// Draw the GUI
-	ofxGuiGroup* gui = new ofxGuiGroup();
-	gui->add(new ofxButton());
-	gui->draw();
-	delete gui;
-	gui = 0;
+
 }
 
 //--------------------------------------------------------------

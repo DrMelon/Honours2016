@@ -13,7 +13,7 @@
 #include "Terrain.h"
 #include "TerrainGridMarchingCubes.h"
 #include "ofxBullet.h"
-#include "ofxGui.h"
+#include "ofxDatGui.h"
 
 
 class ofApp : public ofBaseApp{
