@@ -38,11 +38,15 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+		void buildGUI();
 
 		// Fields/Members
 		ofxFirstPersonCamera* theCamera;
 		Terrain* theTerrain;
 		TERRAIN_TYPE currentTerrainType;
+
+		// GUI stuff
+		ofxDatGui* theGUI;
 
 		int GridTerrainResolution = 64;
 		float GridTerrainSize = 5;

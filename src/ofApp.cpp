@@ -18,6 +18,14 @@ void ofApp::setup()
 	// Set up z-buffer.
 	ofEnableDepthTest();
 
+	// Set up GUI
+	theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
+	theGUI->setTheme(new ofxDatGuiThemeWireframe());
+	theGUI->setAutoDraw(false);
+
+	// Add elements to GUI.
+	buildGUI();
+
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
 	GridExpensiveNormals = 0.0f;
@@ -31,6 +39,9 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+	// Update gui
+	theGUI->update();
+
 	// Update camera offset for terrain.
 	theTerrain->SetOffset(theCamera->getPosition());
 	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
@@ -53,6 +64,11 @@ void ofApp::draw()
 
 	theCamera->end(); // Cease drawing with the camera.
 
+
+	// Draw GUI
+	ofDisableDepthTest();
+	theGUI->draw();
+	ofEnableDepthTest();
 
 }
 
@@ -168,5 +184,23 @@ void ofApp::gotMessage(ofMessage msg){
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
+
+}
+
+// Build GUI
+void ofApp::buildGUI()
+{
+	theGUI->addLabel("Real-Time Physics Based Destruction With\nDensity-Field Terrains");
+	theGUI->addLabel("J. Brown (1201717)");
+	theGUI->addBreak()->setHeight(2.0f);
+	ofxDatGuiFolder* diagnosticsFolder = theGUI->addFolder("Diagnostics", ofColor::white);
+	diagnosticsFolder->addFRM();
+	theGUI->addBreak()->setHeight(2.0f);
+	theGUI->addLabel("Terrain Type: ");
+	vector<string> terrainOptions = { "Grid-Based Naive Marching Cubes", "Grid-Based Optimised Marching Cubes" };
+	theGUI->addDropdown("Grid-Based Naive Marching Cubes",terrainOptions);
+	theGUI->addBreak()->setHeight(2.0f);
+	ofxDatGuiFolder* terrainFolder = theGUI->addFolder("Terrain Controls", ofColor::darkCyan);
+	
 
 }
