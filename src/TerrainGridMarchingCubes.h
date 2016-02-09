@@ -1,7 +1,7 @@
 #pragma once
 #include "Terrain.h"
 #include "tables.h"
-
+#include "ofxBullet.h"
 
 //Filename: TerrainGridMarchingCubes.h
 //Version: 1.0
@@ -53,5 +53,6 @@ class TerrainGridMarchingCubes : public Terrain
 		virtual void Draw();
 		virtual void Rebuild(int newX = 16, int newY = 16, int newZ = 16, float newScale = 10.0f);
 		virtual void SetOffset(ofVec3f newOffset);
+		ofxBulletTriMeshShape* CreatePhysicsMesh();
 };
 

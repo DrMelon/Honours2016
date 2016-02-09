@@ -21,7 +21,7 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader->setupShaderFromFile(GL_FRAGMENT_SHADER, "data/shaders/grid_marching_cubes.frag");
 	
 	// Set Feedback Parameters
-	const GLchar* feedbackVaryings[] = { "normalOfVertex" };
+	const GLchar* feedbackVaryings[] = { "vertexPosition" };
 	glTransformFeedbackVaryings(theShader->getProgram(), 1, feedbackVaryings, GL_SEPARATE_ATTRIBS);
 	theShader->linkProgram();
 
@@ -85,6 +85,9 @@ void TerrainGridMarchingCubes::Draw()
 	theShader->end();
 
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outputBuffer->getId());
+
+	
+
 	float* feedback = new float[XDimension*YDimension*ZDimension * 3 * 15];
 	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
 
@@ -123,4 +126,11 @@ void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newSc
 void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 {
 	OffsetPosition = newOffset;
+}
+
+
+ofxBulletTriMeshShape* TerrainGridMarchingCubes::CreatePhysicsMesh()
+{
+	ofxBulletTriMeshShape* newShape = new ofxBulletTriMeshShape();
+	newShape->updateMesh()
 }

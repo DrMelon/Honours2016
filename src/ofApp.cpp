@@ -34,6 +34,11 @@ void ofApp::setup()
 	theTerrain = new TerrainGridMarchingCubes();
 	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
 	currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
+
+	// Make the physics world.
+	thePhysicsWorld = new ofxBulletWorldRigid();
+	thePhysicsWorld->setup();
+	thePhysicsWorld->setCamera(theCamera);
 }
 
 //--------------------------------------------------------------
@@ -187,9 +192,34 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
+void ofApp::onSliderChanged(ofxDatGuiSliderEvent e)
+{
+	
+	
+}
+
+void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
+{
+	if (e.target->getName() == "Rebuild Terrain" && currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	}
+
+}
+
 // Build GUI
 void ofApp::buildGUI()
 {
+	if (theGUI != 0)
+	{
+		delete theGUI;
+		theGUI = 0;
+		theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
+		theGUI->setTheme(new ofxDatGuiThemeWireframe());
+		theGUI->setAutoDraw(false);
+		theGUI->onButtonEvent(this, &ofApp::onButtonChanged);
+		theGUI->onSliderEvent(this, &ofApp::onSliderChanged);
+	}
 	theGUI->addLabel("Real-Time Physics Based Destruction With\nDensity-Field Terrains");
 	theGUI->addLabel("J. Brown (1201717)");
 	theGUI->addBreak()->setHeight(2.0f);
@@ -197,10 +227,23 @@ void ofApp::buildGUI()
 	diagnosticsFolder->addFRM();
 	theGUI->addBreak()->setHeight(2.0f);
 	theGUI->addLabel("Terrain Type: ");
-	vector<string> terrainOptions = { "Grid-Based Naive Marching Cubes", "Grid-Based Optimised Marching Cubes" };
+	vector<string> terrainOptions = { "Grid-Based Naive Marching Cubes", "Grid-Based Optimised Marching Cubes", "Raymarched Distance Field" };
 	theGUI->addDropdown("Grid-Based Naive Marching Cubes",terrainOptions);
 	theGUI->addBreak()->setHeight(2.0f);
 	ofxDatGuiFolder* terrainFolder = theGUI->addFolder("Terrain Controls", ofColor::darkCyan);
+	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		auto gridResolutionSlider = terrainFolder->addSlider("Grid Resolution", 3, 128, 64);
+		gridResolutionSlider->setPrecision(0);
+		gridResolutionSlider->bind(GridTerrainResolution);
+
+		auto gridScaleSlider = terrainFolder->addSlider("Grid Zoom", 1, 20, 5);
+		gridScaleSlider->setPrecision(1);
+		gridScaleSlider->bind(GridTerrainSize);
+
+		terrainFolder->addButton("Rebuild Terrain");
+	}
+	
 	
 
 }

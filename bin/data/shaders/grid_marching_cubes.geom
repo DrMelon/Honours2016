@@ -50,8 +50,8 @@ out gl_PerVertex
 	float gl_ClipDistance[];
 };
 
+out vec3 vertexPosition;
 out vec3 normalOfVertex;
-
 
 //
 // Noise functions borrowed from: [SOURCE]
@@ -373,6 +373,8 @@ void main()
 					vec3 vertex1 = vertList[triTable(cubeIndex,j+1)];
 					vec3 vertex2 = vertList[triTable(cubeIndex,j+0)];
 
+					
+
 					// Calculate cheap normals.
 					normalOfVertex = cross(vertex2 - vertex1, vertex2 - vertex0);
 					normalOfVertex = normalize(normalOfVertex);
@@ -385,7 +387,9 @@ void main()
 						normalOfVertex.y = DensityFunction(vec3(vertex0.x, vertex0.y  - (0.5f * worldspacescale[0]), vertex0.z)) - DensityFunction(vec3(vertex0.x, vertex0.y  + (0.5f * worldspacescale[0]), vertex0.z));
 						normalOfVertex.z = DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex0.x, vertex0.y, vertex0.z  + (0.5f * worldspacescale[0])));
 						normalOfVertex = normalize(normalOfVertex);
-					}					
+					}			
+					
+					vertexPosition = vertex0;		
 					
 					EmitVertex();
 
@@ -397,6 +401,8 @@ void main()
 						normalOfVertex.z = DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex1.x, vertex1.y, vertex1.z  + (0.5f * worldspacescale[0])));
 						normalOfVertex = normalize(normalOfVertex);
 					}	
+
+					vertexPosition = vertex1;
 					
 					EmitVertex();
 
@@ -408,6 +414,8 @@ void main()
 						normalOfVertex.z = DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  - (0.5f * worldspacescale[0]))) - DensityFunction(vec3(vertex2.x, vertex2.y, vertex2.z  + (0.5f * worldspacescale[0])));
 						normalOfVertex = normalize(normalOfVertex);
 					}	
+
+					vertexPosition = vertex2;
 					
 					EmitVertex();
 

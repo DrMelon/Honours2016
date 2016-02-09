@@ -40,10 +40,28 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 		void buildGUI();
 
+		// Gui event handlers
+		void onButtonChanged(ofxDatGuiButtonEvent e);
+		void onSliderChanged(ofxDatGuiSliderEvent e);
+
+		// Flag to tell physics engine that something has changed
+		bool physicsNeedsRebuilding = false;
+
+		// Operations to change terrain via Constructive Solid Geometry (adding/removing regions of terrain via primitives)
+		// std::vector<CSGOperation*> csgOperations;
+		// CSGOperation will include type, parameters, serialization for buffer.
+		// Buffer will have a line of 8 floats: type, x, y, z - then remaining 4 are optionals - bounding, radius etc
+		// will need separate list for n-sided polygonals, which will evaluate their density function once and pass in as number; only calculated once
+
+
 		// Fields/Members
 		ofxFirstPersonCamera* theCamera;
 		Terrain* theTerrain;
 		TERRAIN_TYPE currentTerrainType;
+
+		// Physics Stuff - Built from Vertices from the GPU.
+		ofxBulletWorldRigid* thePhysicsWorld;
+		ofxBulletTriMeshShape* thePhysicsMesh;
 
 		// GUI stuff
 		ofxDatGui* theGUI;
