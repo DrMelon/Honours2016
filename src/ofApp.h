@@ -45,7 +45,7 @@ class ofApp : public ofBaseApp{
 		void onSliderChanged(ofxDatGuiSliderEvent e);
 
 		// Flag to tell physics engine that something has changed
-		bool physicsNeedsRebuilding = false;
+		bool physicsNeedsRebuilding = true;
 
 		// Operations to change terrain via Constructive Solid Geometry (adding/removing regions of terrain via primitives)
 		// std::vector<CSGOperation*> csgOperations;
@@ -62,6 +62,7 @@ class ofApp : public ofBaseApp{
 		// Physics Stuff - Built from Vertices from the GPU.
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
+		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 
 		// GUI stuff
 		ofxDatGui* theGUI;

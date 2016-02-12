@@ -86,14 +86,33 @@ void TerrainGridMarchingCubes::Draw()
 
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outputBuffer->getId());
 
-	
+	// Check to see if we need to update the current mesh.
+	if (updatePhysicsMesh)
+	{
+		// For this operation, we need to fetch the data back from the GPU.
+		float* feedback = new float[XDimension*YDimension*ZDimension * 3 * 15];
+		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
 
-	float* feedback = new float[XDimension*YDimension*ZDimension * 3 * 15];
-	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
+		// Now, we create an ofMesh for the physics terrain to make use of.
+		ofMesh newPhysicsMesh;
+		for (int i = 0; i < (XDimension*YDimension*ZDimension * 3 * 15) - 2; i += 3)
+		{
+			newPhysicsMesh.addVertex(ofVec3f(feedback[i], feedback[i + 1], feedback[i + 2]));
+		}
+		for (int i = 0; i < (XDimension*YDimension*ZDimension * 15); i++)
+		{
+			newPhysicsMesh.addIndex(i);
+		}
+		
+		UpdatePhysicsMesh(thePhysicsWorld, &newPhysicsMesh);
+		
+		updatePhysicsMesh = false;
 
-	cout << feedback[0] << endl;
-	delete feedback;
-	feedback = 0;
+		// Cleanup.
+		delete feedback;
+		feedback = 0;
+	}
+
 	
 }
 
@@ -129,8 +148,17 @@ void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 }
 
 
-ofxBulletTriMeshShape* TerrainGridMarchingCubes::CreatePhysicsMesh()
+
+void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh)
 {
-	ofxBulletTriMeshShape* newShape = new ofxBulletTriMeshShape();
-	newShape->updateMesh()
+	//thePhysicsMesh->remove();
+	delete thePhysicsMesh;
+	thePhysicsMesh = 0;
+
+	thePhysicsMesh = new ofxBulletTriMeshShape();
+	thePhysicsMesh->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f);
+	thePhysicsMesh->add();
+	thePhysicsMesh->enableKinematic();
+	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);
+	//thePhysicsMesh->updateMesh(world->world, *theMesh);
 }

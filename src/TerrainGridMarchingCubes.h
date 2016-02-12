@@ -44,7 +44,7 @@ class TerrainGridMarchingCubes : public Terrain
 		float PointScale = 1.0f;
 		float expensiveNormals = 0.0f;
 		float time = 0.0f;
-
+		bool updatePhysicsMesh = false;
 
 		// Methods
 		TerrainGridMarchingCubes();
@@ -53,6 +53,10 @@ class TerrainGridMarchingCubes : public Terrain
 		virtual void Draw();
 		virtual void Rebuild(int newX = 16, int newY = 16, int newZ = 16, float newScale = 10.0f);
 		virtual void SetOffset(ofVec3f newOffset);
-		ofxBulletTriMeshShape* CreatePhysicsMesh();
+		
+		ofxBulletWorldRigid* thePhysicsWorld;
+		ofxBulletTriMeshShape* thePhysicsMesh;
+
+		void UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 };
 
