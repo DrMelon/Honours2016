@@ -22,13 +22,13 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	
 	// Set Feedback Parameters
 	const GLchar* feedbackVaryings[] = { "vertexPosition" };
-	glTransformFeedbackVaryings(theShader->getProgram(), 1, feedbackVaryings, GL_SEPARATE_ATTRIBS);
+	glTransformFeedbackVaryings(theShader->getProgram(), 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	theShader->linkProgram();
 
 	// Assign feedback buffer
 	outputBuffer = new ofBufferObject();
 	outputBuffer->allocate();
-	outputBuffer->setData(sizeof(float) * 3 * XDimension*YDimension*ZDimension, NULL, GL_DYNAMIC_DRAW);
+	outputBuffer->setData(sizeof(float) * 15 * 3 * XDimension*YDimension*ZDimension, NULL, GL_DYNAMIC_DRAW);
 
 	// Assign output buffer to feedback
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outputBuffer->getId());
@@ -49,6 +49,7 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader->setUniformTexture("tritabletex", *triangleTable, 0);
 	theShader->end();
 	
+	glGenQueries(1, &feedbackQuery);
 
 	Rebuild();
 }
@@ -77,9 +78,20 @@ void TerrainGridMarchingCubes::Draw()
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 		theShader->setUniform1f("time", time);
 
-		glBeginTransformFeedback(GL_TRIANGLES);
-		theGrid->draw();
-		glEndTransformFeedback();
+		if (updatePhysicsMesh)
+		{
+			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, feedbackQuery); // <- this line instructs openGL to record how many triangles come back from the geometry shader.
+			glBeginTransformFeedback(GL_TRIANGLES);
+			theGrid->draw();
+			glEndTransformFeedback();
+			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+		}
+		else
+		{
+			theGrid->draw();
+		}
+
+		
 		
 
 	theShader->end();
@@ -90,18 +102,33 @@ void TerrainGridMarchingCubes::Draw()
 	if (updatePhysicsMesh)
 	{
 		// For this operation, we need to fetch the data back from the GPU.
-		float* feedback = new float[XDimension*YDimension*ZDimension * 3 * 15];
-		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
+
+		// We need to know how many vertices to store.
+		GLuint numTriangles;
+		glGetQueryObjectuiv(feedbackQuery, GL_QUERY_RESULT, &numTriangles);
+		
+		
+
+		float* feedback = new float[numTriangles * 3 * 3];
+		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * numTriangles * 3 * 3, feedback);
 
 		// Now, we create an ofMesh for the physics terrain to make use of.
 		ofMesh newPhysicsMesh;
-		for (int i = 0; i < (XDimension*YDimension*ZDimension * 3 * 15) - 2; i += 3)
+		for (int i = 0; i < (numTriangles * 3 * 3) - 2; i += 3)
 		{
-			newPhysicsMesh.addVertex(ofVec3f(feedback[i], feedback[i + 1], feedback[i + 2]));
+			// sanity-check on mesh; we don't want to generate vertices for blank spaces.
+
+				newPhysicsMesh.addVertex(ofVec3f(feedback[i], feedback[i + 1], feedback[i + 2]));
+			
+			
+			
 		}
-		for (int i = 0; i < (XDimension*YDimension*ZDimension * 15); i++)
+		for (int i = 0; i < (numTriangles * 3); i++)
 		{
-			newPhysicsMesh.addIndex(i);
+			// sanity-check on mesh
+		
+				newPhysicsMesh.addIndex(i);
+			
 		}
 		
 		UpdatePhysicsMesh(thePhysicsWorld, &newPhysicsMesh);
@@ -109,7 +136,7 @@ void TerrainGridMarchingCubes::Draw()
 		updatePhysicsMesh = false;
 
 		// Cleanup.
-		delete feedback;
+		delete[] feedback;
 		feedback = 0;
 	}
 
@@ -156,7 +183,7 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 	thePhysicsMesh = 0;
 
 	thePhysicsMesh = new ofxBulletTriMeshShape();
-	thePhysicsMesh->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f);
+	thePhysicsMesh->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
 	thePhysicsMesh->add();
 	thePhysicsMesh->enableKinematic();
 	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);

@@ -36,6 +36,9 @@ class TerrainGridMarchingCubes : public Terrain
 		// For multipass
 		ofBufferObject* outputBuffer;
 
+		// Feedback query
+		GLuint feedbackQuery;
+
 	public:
 		// Fields
 		int XDimension = 16;

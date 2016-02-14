@@ -88,7 +88,8 @@ void ofApp::draw()
 		theTerrain->Draw();
 
 		// Debug: draw the physics mesh
-		thePhysicsWorld->drawDebug();
+		
+		//thePhysicsWorld->drawDebug();
 
 
 	theCamera->end(); // Cease drawing with the camera.
