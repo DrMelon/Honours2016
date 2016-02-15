@@ -67,7 +67,7 @@ class ofApp : public ofBaseApp{
 		// GUI stuff
 		ofxDatGui* theGUI;
 
-		int GridTerrainResolution = 64;
+		int GridTerrainResolution = 16;
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 

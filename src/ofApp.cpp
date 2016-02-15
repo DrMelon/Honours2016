@@ -50,7 +50,8 @@ void ofApp::setup()
 	singleTriangle.addIndex(2);
 	thePhysicsMesh = CreatePhysicsMesh(thePhysicsWorld, &singleTriangle);
 
-	
+	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
+
 }
 
 //--------------------------------------------------------------
@@ -66,7 +67,7 @@ void ofApp::update()
 	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
 		((TerrainGridMarchingCubes*)theTerrain)->expensiveNormals = GridExpensiveNormals;
-		((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = physicsNeedsRebuilding;
+		//((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = physicsNeedsRebuilding;
 		((TerrainGridMarchingCubes*)theTerrain)->thePhysicsWorld = thePhysicsWorld;
 		((TerrainGridMarchingCubes*)theTerrain)->thePhysicsMesh = thePhysicsMesh;
 	}
@@ -89,7 +90,7 @@ void ofApp::draw()
 
 		// Debug: draw the physics mesh
 		
-		//thePhysicsWorld->drawDebug();
+		thePhysicsWorld->drawDebug();
 
 
 	theCamera->end(); // Cease drawing with the camera.

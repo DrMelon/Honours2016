@@ -107,7 +107,10 @@ void TerrainGridMarchingCubes::Draw()
 		GLuint numTriangles;
 		glGetQueryObjectuiv(feedbackQuery, GL_QUERY_RESULT, &numTriangles);
 		
-		
+		if (numTriangles < 1)
+		{
+			return;
+		}
 
 		float* feedback = new float[numTriangles * 3 * 3];
 		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * numTriangles * 3 * 3, feedback);
@@ -131,9 +134,11 @@ void TerrainGridMarchingCubes::Draw()
 			
 		}
 		
+		
+
 		UpdatePhysicsMesh(thePhysicsWorld, &newPhysicsMesh);
 		
-		updatePhysicsMesh = false;
+		
 
 		// Cleanup.
 		delete[] feedback;
@@ -165,7 +170,9 @@ void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newSc
 		}
 	}
 
-	
+	updatePhysicsMesh = true;
+
+	outputBuffer->setData(sizeof(float) * 15 * 3 * XDimension*YDimension*ZDimension, NULL, GL_DYNAMIC_DRAW);
 
 }
 
@@ -178,14 +185,20 @@ void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 
 void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh)
 {
-	//thePhysicsMesh->remove();
-	delete thePhysicsMesh;
-	thePhysicsMesh = 0;
+	if (thePhysicsMesh != 0)
+	{
+		thePhysicsMesh->remove();
+		delete thePhysicsMesh;
+		thePhysicsMesh = 0;
+	}
+	
 
 	thePhysicsMesh = new ofxBulletTriMeshShape();
-	thePhysicsMesh->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
+	thePhysicsMesh->create(world->world, *theMesh, theGrid->getPosition() - OffsetPosition, 1.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
 	thePhysicsMesh->add();
 	thePhysicsMesh->enableKinematic();
 	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);
 	//thePhysicsMesh->updateMesh(world->world, *theMesh);
+
+	updatePhysicsMesh = true;
 }
