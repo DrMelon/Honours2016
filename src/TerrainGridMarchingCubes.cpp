@@ -70,6 +70,8 @@ void TerrainGridMarchingCubes::Draw()
 	// The drawVertices function draws the vertices in order, and I'm rendering them as GL_POINT type.
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
 
+	
+
 	// Draw using shader.
 	theShader->begin();
 		theShader->setUniform1f("gridscale", PointScale);
@@ -178,6 +180,10 @@ void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newSc
 
 void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 {
+	if (OffsetPosition != newOffset)
+	{
+		updatePhysicsMesh = true;
+	}
 	OffsetPosition = newOffset;
 }
 
@@ -188,17 +194,20 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 	if (thePhysicsMesh != 0)
 	{
 		thePhysicsMesh->remove();
-		delete thePhysicsMesh;
-		thePhysicsMesh = 0;
+		//delete thePhysicsMesh;
+		//thePhysicsMesh = 0;
 	}
 	
-
-	thePhysicsMesh = new ofxBulletTriMeshShape();
+	if (thePhysicsMesh == 0)
+	{
+		thePhysicsMesh = new ofxBulletTriMeshShape();
+	}
+	
 	thePhysicsMesh->create(world->world, *theMesh, theGrid->getPosition() - OffsetPosition, 1.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
 	thePhysicsMesh->add();
 	thePhysicsMesh->enableKinematic();
 	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);
 	//thePhysicsMesh->updateMesh(world->world, *theMesh);
 
-	updatePhysicsMesh = true;
+	updatePhysicsMesh = false;
 }

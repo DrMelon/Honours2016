@@ -85,7 +85,11 @@ void ofApp::update()
 	
 	theTerrain->Update();
 
-	thePhysicsWorld->update();
+	if (PhysicsEnabled)
+	{
+		thePhysicsWorld->update();
+	}
+	
 	
 }
 
@@ -129,23 +133,6 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//
-	// Marching Cube Grid Terrain Controls.
-	//
-	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
-	{
-		if (key == 'p')
-		{
-			if (GridExpensiveNormals == 0.0f)
-			{
-				GridExpensiveNormals = 1.0f;
-			}
-			else
-			{
-				GridExpensiveNormals = 0.0f;
-			}
-		}
-	}
 
 
 }
@@ -221,6 +208,10 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		GridExpensiveNormals = e.enabled;
 	}
+	if (e.target->getName() == "Physics Enabled" && currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		PhysicsEnabled = e.enabled;
+	}
 
 }
 
@@ -267,6 +258,9 @@ void ofApp::buildGUI()
 
 		terrainFolder->addButton("Rebuild Terrain");
 	}
+
+	ofxDatGuiFolder* physicsFolder = theGUI->addFolder("Physics", ofColor::red);
+	physicsFolder->addToggle("Physics Enabled", false);
 	
 	
 

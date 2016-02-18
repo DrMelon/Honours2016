@@ -72,5 +72,6 @@ class ofApp : public ofBaseApp{
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
+		bool PhysicsEnabled = false;
 		
 };

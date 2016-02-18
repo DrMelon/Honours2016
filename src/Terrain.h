@@ -26,4 +26,5 @@ class Terrain
 
 		virtual void SetOffset(ofVec3f newOffset);
 		
+		
 };
