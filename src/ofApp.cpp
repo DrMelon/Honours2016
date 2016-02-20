@@ -87,7 +87,8 @@ void ofApp::update()
 
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update();
+		
+		thePhysicsWorld->update(0.016f * PhysicsTimescale);
 	}
 	
 	
@@ -260,7 +261,12 @@ void ofApp::buildGUI()
 	}
 
 	ofxDatGuiFolder* physicsFolder = theGUI->addFolder("Physics", ofColor::red);
+
 	physicsFolder->addToggle("Physics Enabled", false);
+
+	auto physicsSlider = physicsFolder->addSlider("Timescale", 0.01f, 1.0f, 1.0f);
+	physicsSlider->setPrecision(2);
+	physicsSlider->bind(PhysicsTimescale);
 	
 	
 

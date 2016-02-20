@@ -68,10 +68,14 @@ class ofApp : public ofBaseApp{
 		// GUI stuff
 		ofxDatGui* theGUI;
 
+		// Terrain stuff
+
 		int GridTerrainResolution = 16;
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
+		// Physics stuff
+
 		bool PhysicsEnabled = false;
-		
+		float PhysicsTimescale = 1.0f;
 };
