@@ -195,6 +195,7 @@
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\core\ofxDatGuiComponent.cpp" />
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\ofxDatGui.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MeshCutting.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxSlider.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxLabel.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\ofxDatGui.h" />
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\themes\ofxDatGuiTheme.h" />
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\themes\ofxDatGuiThemes.h" />
+    <ClInclude Include="src\MeshCutting.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxGui.h" />

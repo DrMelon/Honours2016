@@ -61,6 +61,13 @@ void ofApp::setup()
 
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
+	// Test mesh cutting
+	testBox = new ofBoxPrimitive(10, 10, 10, 4, 4, 4);
+	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	planeNormal.normalize();
+	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+
+	cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 }
 
 //--------------------------------------------------------------
@@ -105,7 +112,15 @@ void ofApp::draw()
 		// Debug: draw the physics mesh
 		
 		//thePhysicsWorld->drawDebug();
+
+		// Draw physics sphere
 		testSphere->draw();
+
+		// Draw cut meshes
+		for (int i = 0; i < cutMeshes.size(); i++)
+		{
+			cutMeshes.at(i)->drawWireframe();
+		}
 
 
 	theCamera->end(); // Cease drawing with the camera.

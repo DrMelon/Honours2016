@@ -9,6 +9,7 @@
 
 #include "ofMain.h"
 #include "ofxFirstPersonCamera.h"
+#include "MeshCutting.h"
 
 #include "Terrain.h"
 #include "TerrainGridMarchingCubes.h"
@@ -78,4 +79,12 @@ class ofApp : public ofBaseApp{
 
 		bool PhysicsEnabled = false;
 		float PhysicsTimescale = 1.0f;
+
+
+		// Mesh Cutting Test
+		ofBoxPrimitive*  testBox;
+		ofVec3f planeNormal;
+		ofVec3f planePoint;
+
+		std::vector<ofMesh*> cutMeshes;
 };
