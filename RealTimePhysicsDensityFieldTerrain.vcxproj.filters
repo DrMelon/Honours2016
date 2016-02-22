@@ -109,6 +109,9 @@
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\core\ofxDatGuiComponent.cpp">
       <Filter>addons\ofxDatGui\core</Filter>
     </ClCompile>
+    <ClCompile Include="src\MeshCutting.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -340,6 +343,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\components\ofxDatGui2dPad.h">
       <Filter>addons\ofxDatGui\components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MeshCutting.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

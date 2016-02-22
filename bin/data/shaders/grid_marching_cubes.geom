@@ -205,9 +205,9 @@ float DensityFunction(vec3 worldspaceposition)
 	density += (noise_g(worldspaceposition / 40)) * 50.0f;
 
 	// Perform CSG functions here.
-	density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
-	density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));
-	density = CSG_Union(density, CSG_RoundBox(vec3(0.0f, 50.0f, 130.0f), vec3(30.0f, 45.0f*sin(time)+45.0f, 30.0f*cos(time)+30.0f), worldspaceposition, 5.0f));
+	//density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
+	//density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));
+	//density = CSG_Union(density, CSG_RoundBox(vec3(0.0f, 50.0f, 130.0f), vec3(30.0f, 45.0f*sin(time)+45.0f, 30.0f*cos(time)+30.0f), worldspaceposition, 5.0f));
 	
 	
 	

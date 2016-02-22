@@ -38,5 +38,6 @@ void Terrain::Draw()
 
 void Terrain::SetOffset(ofVec3f newOffset)
 {
+
 	OffsetPosition = newOffset;
 }

@@ -61,6 +61,13 @@ void ofApp::setup()
 
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
+	// Test mesh cutting
+	testBox = new ofBoxPrimitive(10, 10, 10, 4, 4, 4);
+	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	planeNormal.normalize();
+	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+
+	cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 }
 
 //--------------------------------------------------------------
@@ -85,7 +92,12 @@ void ofApp::update()
 	
 	theTerrain->Update();
 
-	thePhysicsWorld->update();
+	if (PhysicsEnabled)
+	{
+		
+		thePhysicsWorld->update(0.016f * PhysicsTimescale);
+	}
+	
 	
 }
 
@@ -100,7 +112,15 @@ void ofApp::draw()
 		// Debug: draw the physics mesh
 		
 		//thePhysicsWorld->drawDebug();
+
+		// Draw physics sphere
 		testSphere->draw();
+
+		// Draw cut meshes
+		for (int i = 0; i < cutMeshes.size(); i++)
+		{
+			cutMeshes.at(i)->drawWireframe();
+		}
 
 
 	theCamera->end(); // Cease drawing with the camera.
@@ -129,23 +149,6 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	//
-	// Marching Cube Grid Terrain Controls.
-	//
-	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
-	{
-		if (key == 'p')
-		{
-			if (GridExpensiveNormals == 0.0f)
-			{
-				GridExpensiveNormals = 1.0f;
-			}
-			else
-			{
-				GridExpensiveNormals = 0.0f;
-			}
-		}
-	}
 
 
 }
@@ -221,6 +224,10 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		GridExpensiveNormals = e.enabled;
 	}
+	if (e.target->getName() == "Physics Enabled" && currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		PhysicsEnabled = e.enabled;
+	}
 
 }
 
@@ -267,6 +274,14 @@ void ofApp::buildGUI()
 
 		terrainFolder->addButton("Rebuild Terrain");
 	}
+
+	ofxDatGuiFolder* physicsFolder = theGUI->addFolder("Physics", ofColor::red);
+
+	physicsFolder->addToggle("Physics Enabled", false);
+
+	auto physicsSlider = physicsFolder->addSlider("Timescale", 0.01f, 1.0f, 1.0f);
+	physicsSlider->setPrecision(2);
+	physicsSlider->bind(PhysicsTimescale);
 	
 	
 
