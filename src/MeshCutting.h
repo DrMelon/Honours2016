@@ -17,4 +17,7 @@
 std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVector, ofMesh meshToCut);
 
 // This function tells us which side of a plane a point is on.
-float PointPlaneSide(ofVec3f planeNormalVector, ofVec3f testPoint);
+float PointPlaneSide(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f testPoint);
+
+// This function tells us how far along a line a plane has intersected it. This will be used to get the intersection points of the mesh.
+float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f lineStart, ofVec3f lineEnd);

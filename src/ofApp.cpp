@@ -68,6 +68,7 @@ void ofApp::setup()
 	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
 
 	cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
+	
 }
 
 //--------------------------------------------------------------
@@ -119,6 +120,11 @@ void ofApp::draw()
 		// Draw cut meshes
 		for (int i = 0; i < cutMeshes.size(); i++)
 		{
+			if(i == 1)
+			{
+				ofTranslate(-planeNormal * 15.0f);
+			}
+			
 			cutMeshes.at(i)->drawWireframe();
 		}
 

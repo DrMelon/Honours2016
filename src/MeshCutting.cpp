@@ -20,57 +20,301 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 	std::vector<ofMesh*> meshList;
 
-	
-	// We should loop through all the vertices
-	// and for each vertex, mark it as being positive or negative of the plane
-	// then take all positive vertices & make contiguous shapes of them
-	// and same for all negative
-	// by filling the hole that appears?
-
-	// extremely naive. alternative is to use Paul Bourke's method.
-	// first use naive method.
-
 	// Create a key-value list of vertices to store which side of the plane the meshes belong on.
-	std::multimap<bool, ofVec3f> splitVertices;
+	std::multimap<int, ofVec3f> splitVertices;
 
-	for (int i = 0; i < meshToCut.getNumVertices(); i++)
-	{
-		// Pick the vertex
-		ofVec3f currentVertex = meshToCut.getVertex(i);
-		
-		// Store it in the map depending on if it's "inside" or "outside" of the plane.
-		// Because it's possible for points to be exactly on the plane, we'll store those on the "inside" side.
-		bool isInside = (PointPlaneSide(planeNormalVector, currentVertex) >= 0);
+	// Create an index list to store the new indices, for each half.
+	std::vector<int> outsideIndices;
+	std::vector<int> insideIndices;
 
-		splitVertices.insert(std::make_pair(isInside, currentVertex));
-	}
+	// Track the last known index / vertex numbers.
+	// Useful when we're adding extras.
+	int newIndexNumber = meshToCut.getNumIndices();
+	int newVertexNumber = meshToCut.getNumVertices();
 
-	// Now that we know which side the vertices are on, we can generate the resultant meshes.
+	// We need to keep a master-list of all the vertices, that we can add more to.
+	std::vector<ofPoint> masterListVertices = meshToCut.getVertices();
+
+	// These are used to store the outgoing meshes
 	ofMesh* insideMesh;
 	ofMesh* outsideMesh;
+
+	
+
+	// Loop through the faces of the mesh, finding which vertices are on the inside and outside of the mesh.
+	// Also, add the vertices where the faces intersect with the plane to both lists.
+	for (int i = 0; i < meshToCut.getNumIndices() / 3; i++)
+	{
+		ofMeshFace currentFace = meshToCut.getFace(i);
+		
+		// Discover which case we're dealing with - no verts inside, all verts inside, two verts "inside" the plane, or only one inside
+		bool Vert0Inside = PointPlaneSide(planePoint, planeNormalVector, currentFace.getVertex(0)) >= 0;
+		bool Vert1Inside = PointPlaneSide(planePoint, planeNormalVector, currentFace.getVertex(1)) >= 0;
+		bool Vert2Inside = PointPlaneSide(planePoint, planeNormalVector, currentFace.getVertex(2)) >= 0;
+		
+		int VerticesInside = 0;
+
+		if (Vert0Inside)
+		{
+			VerticesInside++;
+		}
+		if (Vert1Inside)
+		{
+			VerticesInside++;
+		}
+		if (Vert2Inside)
+		{
+			VerticesInside++;
+		}
+
+		// Indices tracking; we need to know the current index of any given vertex.
+		int index0, index1, index2;
+		index0 = meshToCut.getIndex((i * 3) + 0);
+		index1 = meshToCut.getIndex((i * 3) + 1);
+		index2 = meshToCut.getIndex((i * 3) + 2);
+
+		if (VerticesInside == 0)
+		{
+			// No vertices inside! Add the face's indices to the outside list only.
+			outsideIndices.push_back(index0);
+			outsideIndices.push_back(index1);
+			outsideIndices.push_back(index2);
+			
+		}
+		if (VerticesInside == 3)
+		{
+			// All vertices inside! Add the face's indices to the inside list only.
+			insideIndices.push_back(index0);
+			insideIndices.push_back(index1);
+			insideIndices.push_back(index2);
+		}
+		
+		// Now, the only remaining cases are:
+		// 1. There's two vertices outside, one inside
+		// 2. There's two vertices inside, one outside
+		
+		// Only one vertex inside
+		if (VerticesInside == 1)
+		{
+			// If it's the first one in the triangle...
+			// So, that's 0. 1 and 2 are outside.
+			if (Vert0Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(1) - meshToCut.getVertex(0)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(1));
+				intersectVert2 = (meshToCut.getVertex(2) - meshToCut.getVertex(0)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(2));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				insideIndices.push_back(index0);
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(newIndex2);
+
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(index1);
+				outsideIndices.push_back(index2);
+
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(index2);
+				outsideIndices.push_back(newIndex2);
+			}
+			// Repeat for index 1, and index 2...
+			if (Vert1Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(2) - meshToCut.getVertex(1)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(2));
+				intersectVert2 = (meshToCut.getVertex(0) - meshToCut.getVertex(1)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(0));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				insideIndices.push_back(index1);
+				insideIndices.push_back(newIndex2);
+				insideIndices.push_back(newIndex1);
+
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(newIndex2);
+				outsideIndices.push_back(index2);
+
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(index2);
+				outsideIndices.push_back(index0);
+			}
+			if (Vert2Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(0) - meshToCut.getVertex(2)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(0));
+				intersectVert2 = (meshToCut.getVertex(1) - meshToCut.getVertex(2)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(1));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(newIndex2);
+				insideIndices.push_back(index2);
+
+				outsideIndices.push_back(index1);
+				outsideIndices.push_back(newIndex2);
+				outsideIndices.push_back(newIndex1);
+
+				outsideIndices.push_back(index1);
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(index0);
+			}
+		}
+
+		// Two vertices inside -- basically identical to the block above,
+		// but with the order of outside/inside swapped!
+		if (VerticesInside == 2)
+		{
+			// If it's the first one in the triangle that's outside...
+			// So, that's 0. 1 and 2 are inside.
+			if (!Vert0Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(1) - meshToCut.getVertex(0)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(1));
+				intersectVert2 = (meshToCut.getVertex(2) - meshToCut.getVertex(0)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(2));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				outsideIndices.push_back(index0);
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(newIndex2);
+
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(index1);
+				insideIndices.push_back(index2);
+
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(index2);
+				insideIndices.push_back(newIndex2);
+			}
+			// Repeat for index 1, and index 2...
+			if (!Vert1Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(2) - meshToCut.getVertex(1)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(2));
+				intersectVert2 = (meshToCut.getVertex(0) - meshToCut.getVertex(1)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(0));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				outsideIndices.push_back(index1);
+				outsideIndices.push_back(newIndex2);
+				outsideIndices.push_back(newIndex1);
+
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(newIndex2);
+				insideIndices.push_back(index2);
+
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(index2);
+				insideIndices.push_back(index0);
+			}
+			if (!Vert2Inside)
+			{
+				// Get intersecting points
+				ofVec3f intersectVert1, intersectVert2;
+				intersectVert1 = (meshToCut.getVertex(0) - meshToCut.getVertex(2)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(0));
+				intersectVert2 = (meshToCut.getVertex(1) - meshToCut.getVertex(2)) * 1.0 - PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(1));
+
+				// Add these vertices to the masterlist.
+				masterListVertices.push_back(intersectVert1);
+				masterListVertices.push_back(intersectVert2);
+
+				int newIndex1, newIndex2;
+				newIndex1 = newVertexNumber++;
+				newIndex2 = newVertexNumber++;
+
+				// Then, add the indices in the right places
+				outsideIndices.push_back(newIndex1);
+				outsideIndices.push_back(newIndex2);
+				outsideIndices.push_back(index2);
+
+				insideIndices.push_back(index1);
+				insideIndices.push_back(newIndex2);
+				insideIndices.push_back(newIndex1);
+
+				insideIndices.push_back(index1);
+				insideIndices.push_back(newIndex1);
+				insideIndices.push_back(index0);
+			}
+		}
+
+
+		
+		
+
+
+
+
+	}
+
+	
+	// Now that the lists of indices and vertices have been finalized, we can build the new meshes.
 
 	insideMesh = new ofMesh();
 	insideMesh->setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 	//insideMesh->disableIndices();
-	insideMesh->setupIndicesAuto();
+	//insideMesh->setupIndicesAuto();
 	
 	outsideMesh = new ofMesh();
 	outsideMesh->setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
 	//outsideMesh->disableIndices();
-	outsideMesh->setupIndicesAuto();
-	// For all meshes inside...
-	for (std::multimap<bool, ofVec3f>::iterator iter = splitVertices.find(true); iter != splitVertices.end(); iter++)
+	//outsideMesh->setupIndicesAuto();
+
+
+	// For all the indices in the new mesh...
+	for (int i = 0; i < insideIndices.size(); i++)
 	{
-		insideMesh->addVertex(iter->second);
+		insideMesh->addVertex(masterListVertices.at(insideIndices.at(i)));
+		insideMesh->addIndex(i);
 		insideMesh->addColor(ofColor::red);
 	}
-
-	// And for all meshes outside...
-	for (std::multimap<bool, ofVec3f>::iterator iter = splitVertices.find(false); iter != splitVertices.end(); iter++)
+	for (int i = 0; i < outsideIndices.size(); i++)
 	{
-		outsideMesh->addVertex(iter->second);
+		outsideMesh->addVertex(masterListVertices.at(outsideIndices.at(i)));
+		outsideMesh->addIndex(i);
 		outsideMesh->addColor(ofColor::cyan);
 	}
+
 
 	// If there are at least some vertices in each side, send them out of this function. Otherwise, delete them.
 	if (insideMesh->getNumVertices() > 0)
@@ -97,7 +341,13 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 }
 
 // This function tells us which side of a plane a point is on.
-float PointPlaneSide(ofVec3f planeNormalVector, ofVec3f testPoint)
+float PointPlaneSide(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f testPoint)
 {
-	return planeNormalVector.dot(testPoint);
+	return planeNormalVector.dot(testPoint - planePoint);
 }
+
+float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f lineStart, ofVec3f lineEnd)
+{
+	return (planeNormalVector.dot(planePoint - lineStart)) / (planeNormalVector.dot(lineEnd - lineStart));
+}
+
