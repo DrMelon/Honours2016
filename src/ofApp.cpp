@@ -62,7 +62,7 @@ void ofApp::setup()
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
 	// Test mesh cutting
-	testBox = new ofBoxPrimitive(10, 10, 10, 4, 4, 4);
+	testBox = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
 	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
 	planeNormal.normalize();
 	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
@@ -122,12 +122,13 @@ void ofApp::draw()
 		{
 			if(i == 1)
 			{
-				ofTranslate(-planeNormal * 15.0f);
+				ofTranslate(-planeNormal);
 			}
+			
 			
 			cutMeshes.at(i)->drawWireframe();
 		}
-
+		testBox->drawWireframe();
 
 	theCamera->end(); // Cease drawing with the camera.
 
