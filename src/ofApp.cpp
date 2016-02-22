@@ -12,7 +12,7 @@ void ofApp::setup()
 {
 	// Set maximum framerate.
 	ofSetFrameRate(60);
-	ofSetBackgroundColor(ofColor::black);
+	ofSetBackgroundColor(ofColor::white);
 	ofSetVerticalSync(true);
 
 	// Set up z-buffer.
@@ -38,16 +38,7 @@ void ofApp::setup()
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
 	thePhysicsWorld->setup();
-	thePhysicsWorld->setGravity(ofVec3f(0, -98.1f, 0));
-	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
-
-	// Create the physics sphere
-	testSphere = new ofxBulletSphere();
-	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
-	testSphere->setActivationState(DISABLE_DEACTIVATION);
-	
-	testSphere->add();
 
 	// Create a blank mesh
 	ofMesh singleTriangle;
@@ -85,7 +76,7 @@ void ofApp::update()
 	
 	theTerrain->Update();
 
-	thePhysicsWorld->update();
+
 	
 }
 
@@ -99,8 +90,7 @@ void ofApp::draw()
 
 		// Debug: draw the physics mesh
 		
-		//thePhysicsWorld->drawDebug();
-		testSphere->draw();
+		thePhysicsWorld->drawDebug();
 
 
 	theCamera->end(); // Cease drawing with the camera.
