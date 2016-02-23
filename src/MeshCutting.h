@@ -21,3 +21,6 @@ float PointPlaneSide(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f test
 
 // This function tells us how far along a line a plane has intersected it. This will be used to get the intersection points of the mesh.
 float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f lineStart, ofVec3f lineEnd);
+
+// This function allows us to linearly interpolate between two ofVec3f points.
+ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount);

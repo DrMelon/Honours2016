@@ -61,10 +61,13 @@ class ofApp : public ofBaseApp{
 		TERRAIN_TYPE currentTerrainType;
 
 		// Physics Stuff - Built from Vertices from the GPU.
+		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
+		
+		// Physics objects
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
-		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 		ofxBulletSphere* testSphere;
+		ofxBulletTriMeshShape* testBox;
 
 		// GUI stuff
 		ofxDatGui* theGUI;
@@ -82,7 +85,7 @@ class ofApp : public ofBaseApp{
 
 
 		// Mesh Cutting Test
-		ofBoxPrimitive*  testBox;
+		ofBoxPrimitive*  testBoxMesh;
 		ofVec3f planeNormal;
 		ofVec3f planePoint;
 

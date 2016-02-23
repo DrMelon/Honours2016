@@ -46,8 +46,15 @@ void ofApp::setup()
 	testSphere = new ofxBulletSphere();
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
 	testSphere->setActivationState(DISABLE_DEACTIVATION);
+
+	testBoxMesh = new ofBoxPrimitive(1, 1, 1, 2, 2, 2);
+
+	testBox = new ofxBulletTriMeshShape();
+	testBox->create(thePhysicsWorld->world, testBoxMesh->getMesh(), theCamera->getPosition() + theCamera->upvector * 45, 1.0f, ofVec3f(-1,-1,-1), ofVec3f(1, 1, 1));
+	testBox->setActivationState(DISABLE_DEACTIVATION);
 	
 	testSphere->add();
+	testBox->add();
 
 	// Create a blank mesh
 	ofMesh singleTriangle;
@@ -62,12 +69,13 @@ void ofApp::setup()
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
 	// Test mesh cutting
-	testBox = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
 	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
 	planeNormal.normalize();
 	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	//planeNormal = ofVec3f(0.5, 0.5, 0);
+	//planePoint = ofVec3f(0, 0, 0);
 
-	cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
+	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 	
 }
 
@@ -111,24 +119,27 @@ void ofApp::draw()
 		theTerrain->Draw();
 
 		// Debug: draw the physics mesh
+		ofDisableDepthTest();
+		if (thePhysicsWorld->world->getDebugDrawer() != 0)
+		{
+			thePhysicsWorld->world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+		}
 		
-		//thePhysicsWorld->drawDebug();
-
+		thePhysicsWorld->drawDebug();
+		
+		ofEnableDepthTest();
 		// Draw physics sphere
+
 		testSphere->draw();
 
-		// Draw cut meshes
-		for (int i = 0; i < cutMeshes.size(); i++)
+		// Draw physics box
+		testBox->draw();
+
+		if (cutMeshes.size() > 0)
 		{
-			if(i == 1)
-			{
-				ofTranslate(-planeNormal);
-			}
-			
-			
-			cutMeshes.at(i)->drawWireframe();
+			cutMeshes.at(0)->draw();
+			cutMeshes.at(1)->draw();
 		}
-		testBox->drawWireframe();
 
 	theCamera->end(); // Cease drawing with the camera.
 
@@ -235,6 +246,14 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		PhysicsEnabled = e.enabled;
 	}
+	if (e.target->getName() == "Slice")
+	{
+		// attempt to slice the cube
+		planePoint = testBox->getPosition();
+		ofMesh sliceMesh;
+		testBox->
+		cutMeshes = CutMeshWithPlane(planePoint, planeNormal, );
+	}
 
 }
 
@@ -290,6 +309,7 @@ void ofApp::buildGUI()
 	physicsSlider->setPrecision(2);
 	physicsSlider->bind(PhysicsTimescale);
 	
+	auto sliceButton = physicsFolder->addButton("Slice");
 	
 
 }

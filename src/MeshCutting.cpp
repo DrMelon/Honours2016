@@ -102,8 +102,10 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(1) - meshToCut.getVertex(0)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(1));
-				intersectVert2 = (meshToCut.getVertex(2) - meshToCut.getVertex(0)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(2));
+				intersectVert1 = LerpVec3(currentFace.getVertex(0), currentFace.getVertex(1), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(0), currentFace.getVertex(1)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(0), currentFace.getVertex(2), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(0), currentFace.getVertex(2)));
+
+				
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -131,8 +133,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(2) - meshToCut.getVertex(1)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(2));
-				intersectVert2 = (meshToCut.getVertex(0) - meshToCut.getVertex(1)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(0));
+				intersectVert1 = LerpVec3(currentFace.getVertex(1), currentFace.getVertex(2), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(1), currentFace.getVertex(2)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(1), currentFace.getVertex(0), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(1), currentFace.getVertex(0)));
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -159,8 +161,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(0) - meshToCut.getVertex(2)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(0));
-				intersectVert2 = (meshToCut.getVertex(1) - meshToCut.getVertex(2)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(1));
+				intersectVert1 = LerpVec3(currentFace.getVertex(2), currentFace.getVertex(0), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(2), currentFace.getVertex(0)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(2), currentFace.getVertex(1), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(2), currentFace.getVertex(1)));
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -195,8 +197,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(1) - meshToCut.getVertex(0)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(1));
-				intersectVert2 = (meshToCut.getVertex(2) - meshToCut.getVertex(0)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(0), meshToCut.getVertex(2));
+				intersectVert1 = LerpVec3(currentFace.getVertex(0), currentFace.getVertex(1), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(0), currentFace.getVertex(1)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(0), currentFace.getVertex(2), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(0), currentFace.getVertex(2)));
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -224,8 +226,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(2) - meshToCut.getVertex(1)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(2));
-				intersectVert2 = (meshToCut.getVertex(0) - meshToCut.getVertex(1)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(1), meshToCut.getVertex(0));
+				intersectVert1 = LerpVec3(currentFace.getVertex(1), currentFace.getVertex(2), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(1), currentFace.getVertex(2)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(1), currentFace.getVertex(0), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(1), currentFace.getVertex(0)));
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -252,8 +254,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			{
 				// Get intersecting points
 				ofVec3f intersectVert1, intersectVert2;
-				intersectVert1 = (meshToCut.getVertex(0) - meshToCut.getVertex(2)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(0));
-				intersectVert2 = (meshToCut.getVertex(1) - meshToCut.getVertex(2)) * PlaneIntersectLine(planePoint, planeNormalVector, meshToCut.getVertex(2), meshToCut.getVertex(1));
+				intersectVert1 = LerpVec3(currentFace.getVertex(2), currentFace.getVertex(0), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(2), currentFace.getVertex(0)));
+				intersectVert2 = LerpVec3(currentFace.getVertex(2), currentFace.getVertex(1), PlaneIntersectLine(planePoint, planeNormalVector, currentFace.getVertex(2), currentFace.getVertex(1)));
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -277,12 +279,6 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 				insideIndices.push_back(index0);
 			}
 		}
-
-
-		
-		
-
-
 
 
 	}
@@ -348,8 +344,17 @@ float PointPlaneSide(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f test
 
 float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f lineStart, ofVec3f lineEnd)
 {
-	ofVec3f difference = (planePoint - lineStart).getNormalized();
-	ofVec3f lineDirection = (lineEnd - lineStart).getNormalized();
-	return 1.0 - ((planeNormalVector.dot(difference)) / (planeNormalVector.dot(lineDirection)));
+	ofVec3f difference = (planePoint - lineStart);// .getNormalized();
+	ofVec3f lineDirection = (lineEnd - lineStart);// .getNormalized();
+	float result = ((planeNormalVector.dot(difference)) / (planeNormalVector.dot(lineDirection)));
+	return result;
 }
 
+ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount)
+{
+	ofVec3f output;
+
+	output = start + amount * (end - start);
+
+	return output;
+}
