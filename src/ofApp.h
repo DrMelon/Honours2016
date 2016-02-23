@@ -67,7 +67,8 @@ class ofApp : public ofBaseApp{
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
 		ofxBulletSphere* testSphere;
-		ofxBulletTriMeshShape* testBox;
+		ofxBulletCustomShape* testBox;
+	
 
 		// GUI stuff
 		ofxDatGui* theGUI;

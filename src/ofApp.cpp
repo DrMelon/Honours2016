@@ -47,11 +47,12 @@ void ofApp::setup()
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
 	testSphere->setActivationState(DISABLE_DEACTIVATION);
 
-	testBoxMesh = new ofBoxPrimitive(1, 1, 1, 2, 2, 2);
+	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 2, 2, 2);
 
-	testBox = new ofxBulletTriMeshShape();
-	testBox->create(thePhysicsWorld->world, testBoxMesh->getMesh(), theCamera->getPosition() + theCamera->upvector * 45, 1.0f, ofVec3f(-1,-1,-1), ofVec3f(1, 1, 1));
-	testBox->setActivationState(DISABLE_DEACTIVATION);
+	testBox = new ofxBulletCustomShape();
+	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);
+	testBox->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 35, 1.0f);
+	//testBox->setActivationState(DISABLE_DEACTIVATION);
 	
 	testSphere->add();
 	testBox->add();
@@ -138,7 +139,11 @@ void ofApp::draw()
 		if (cutMeshes.size() > 0)
 		{
 			cutMeshes.at(0)->draw();
-			cutMeshes.at(1)->draw();
+			if (cutMeshes.size() > 1)
+			{
+				cutMeshes.at(1)->draw();
+			}
+			
 		}
 
 	theCamera->end(); // Cease drawing with the camera.
@@ -251,8 +256,18 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 		// attempt to slice the cube
 		planePoint = testBox->getPosition();
 		ofMesh sliceMesh;
-		testBox->
-		cutMeshes = CutMeshWithPlane(planePoint, planeNormal, );
+		sliceMesh = testBoxMesh->getMesh();
+		for (int v = 0; v < sliceMesh.getNumVertices(); v++)
+		{
+			ofVec3f currentVertex = sliceMesh.getVertex(v);
+
+			// Move to match physics cube
+			currentVertex += testBox->getPosition();
+
+			sliceMesh.setVertex(v, currentVertex);
+		}
+
+		cutMeshes = CutMeshWithPlane(planePoint, planeNormal, sliceMesh);
 	}
 
 }
