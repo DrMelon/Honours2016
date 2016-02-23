@@ -262,6 +262,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 			ofVec3f currentVertex = sliceMesh.getVertex(v);
 
 			// Move to match physics cube
+			currentVertex = currentVertex.getRotated(testBox->getRotation().x, -testBox->getRotation().y, testBox->getRotation().z);
 			currentVertex += testBox->getPosition();
 
 			sliceMesh.setVertex(v, currentVertex);
