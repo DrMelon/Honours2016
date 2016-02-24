@@ -302,7 +302,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	{
 		insideMesh->addVertex(masterListVertices.at(insideIndices.at(i)));
 		insideMesh->addIndex(i);
-		insideMesh->addColor(ofColor::red);
+		insideMesh->addColor(ofColor::magenta);
 	}
 	for (int i = 0; i < outsideIndices.size(); i++)
 	{
@@ -360,7 +360,7 @@ ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount)
 }
 
 // This function slices a physics object into two new physics objects & meshes.
-std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletBaseShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal)
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal)
 {
 	// Create our output
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputList;
@@ -388,6 +388,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	// Store translation & rotation of physics object
 	ofVec3f physObjTranslation = physicsObject->getPosition();
 	ofQuaternion physObjRotation = physicsObject->getRotationQuat();
+	
+	btVector3 shapeVelocity = physicsObject->getRigidBody()->getLinearVelocity();
 
 	// Delete original object, if desired
 	if (deleteOriginal)
@@ -403,8 +405,15 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 		
 		newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
-		newShape->create(theWorld->world, physObjTranslation, physObjRotation, 1.0f);
+		ofVec3f meshPosition = cutMeshes.at(i)->getCentroid();
+		float tmp = meshPosition.x;
+		meshPosition.x = meshPosition.z;
+		meshPosition.z = tmp;
+		ofVec3f newOffset = physObjTranslation + (meshPosition - physObjTranslation);
+		// Creating the object requires that we offset by the relative distance between the centroids.
+		newShape->create(theWorld->world, newOffset, physObjRotation, 1.0f);
 		newShape->add();
+		newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 
 		// Populate List
 		outputList.push_back(std::make_pair(cutMeshes.at(i), newShape));

@@ -70,11 +70,11 @@ void ofApp::setup()
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
 	// Test mesh cutting
-	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	planeNormal.normalize();
-	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	//planeNormal = ofVec3f(0.5, 0.5, 0);
-	//planePoint = ofVec3f(0, 0, 0);
+	//planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	//planeNormal.normalize();
+	//planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	planeNormal = ofVec3f(0.5, 0.5, 0);
+	planePoint = ofVec3f(0, 1, 2);
 
 	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 	
