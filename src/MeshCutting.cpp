@@ -410,8 +410,11 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 		meshPosition.x = meshPosition.z;
 		meshPosition.z = tmp;
 		ofVec3f newOffset = physObjTranslation + (meshPosition - physObjTranslation);
+		tmp = newOffset.x;
+		newOffset.x = newOffset.z;
+		newOffset.z = tmp;
 		// Creating the object requires that we offset by the relative distance between the centroids.
-		newShape->create(theWorld->world, newOffset, physObjRotation, 1.0f);
+		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
 		newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 
