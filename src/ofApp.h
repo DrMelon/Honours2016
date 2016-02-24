@@ -91,4 +91,5 @@ class ofApp : public ofBaseApp{
 		ofVec3f planePoint;
 
 		std::vector<ofMesh*> cutMeshes;
+		std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> cutPhysicsObjects;
 };

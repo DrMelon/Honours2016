@@ -287,12 +287,12 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	// Now that the lists of indices and vertices have been finalized, we can build the new meshes.
 
 	insideMesh = new ofMesh();
-	insideMesh->setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+	insideMesh->setMode(OF_PRIMITIVE_TRIANGLES);
 	//insideMesh->disableIndices();
 	//insideMesh->setupIndicesAuto();
 	
 	outsideMesh = new ofMesh();
-	outsideMesh->setMode(OF_PRIMITIVE_TRIANGLE_STRIP);
+	outsideMesh->setMode(OF_PRIMITIVE_TRIANGLES);
 	//outsideMesh->disableIndices();
 	//outsideMesh->setupIndicesAuto();
 
@@ -357,4 +357,63 @@ ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount)
 	output = start + amount * (end - start);
 
 	return output;
+}
+
+// This function slices a physics object into two new physics objects & meshes.
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletBaseShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal)
+{
+	// Create our output
+	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputList;
+
+	
+	// Prepare to slice mesh - transform it to the location of the physics object.
+	ofMesh sliceMesh;
+	sliceMesh = *physicsObjectMesh;
+	for (int v = 0; v < sliceMesh.getNumVertices(); v++)
+	{
+		ofVec3f currentVertex = sliceMesh.getVertex(v);
+
+		//Transform each vertex by the physics object's transformation matrix		
+		ofMatrix4x4 newTransform = physicsObject->getTransformationMatrix();
+
+		currentVertex = newTransform.transform3x3(currentVertex, newTransform);
+		currentVertex += physicsObject->getPosition();
+
+		sliceMesh.setVertex(v, currentVertex);
+	}
+
+	// Slice the mesh.
+	std::vector<ofMesh*> cutMeshes = CutMeshWithPlane(planePoint, planeNormalVector, sliceMesh);
+
+	// Store translation & rotation of physics object
+	ofVec3f physObjTranslation = physicsObject->getPosition();
+	ofQuaternion physObjRotation = physicsObject->getRotationQuat();
+
+	// Delete original object, if desired
+	if (deleteOriginal)
+	{
+		physicsObject->remove();
+		//delete physicsObject;
+		//physicsObject = 0;
+	}
+
+	// Create physics objects from sliced meshes.
+	for (int i = 0; i < cutMeshes.size(); i++)
+	{
+		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
+		
+		newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
+		newShape->create(theWorld->world, physObjTranslation, physObjRotation, 1.0f);
+		newShape->add();
+
+		// Populate List
+		outputList.push_back(std::make_pair(cutMeshes.at(i), newShape));
+
+	}
+
+
+
+	
+
+	return outputList;
 }

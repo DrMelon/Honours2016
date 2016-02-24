@@ -45,14 +45,14 @@ void ofApp::setup()
 	// Create the physics sphere
 	testSphere = new ofxBulletSphere();
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
-	testSphere->setActivationState(DISABLE_DEACTIVATION);
+	
 
 	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 2, 2, 2);
 
 	testBox = new ofxBulletCustomShape();
 	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);
 	testBox->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 35, 1.0f);
-	//testBox->setActivationState(DISABLE_DEACTIVATION);
+	
 	
 	testSphere->add();
 	testBox->add();
@@ -83,6 +83,8 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+	float deltaTime = ofGetLastFrameTime();
+	
 	// Update gui
 	theGUI->update();
 
@@ -99,16 +101,20 @@ void ofApp::update()
 	}
 
 	
-	
+	// Update terrain
 	theTerrain->Update();
 
+	// Update physics
 	if (PhysicsEnabled)
 	{
-		
-		thePhysicsWorld->update(0.016f * PhysicsTimescale);
+		thePhysicsWorld->update(deltaTime * PhysicsTimescale);
 	}
+
+	// Update GUI
 	
-	
+	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
+	frametimeGUI->setText(std::to_string(deltaTime) + "ms");
+
 }
 
 //--------------------------------------------------------------
@@ -134,16 +140,20 @@ void ofApp::draw()
 		testSphere->draw();
 
 		// Draw physics box
-		testBox->draw();
-
-		if (cutMeshes.size() > 0)
+		if (testBox->getCollisionShape() != NULL)
 		{
-			cutMeshes.at(0)->draw();
-			if (cutMeshes.size() > 1)
-			{
-				cutMeshes.at(1)->draw();
-			}
-			
+			testBox->draw();
+			testBox->transformGL();
+			testBoxMesh->draw();
+			testBox->restoreTransformGL();
+		}
+		
+
+
+
+		for (int i = 0; i < cutPhysicsObjects.size(); i++)
+		{
+			cutPhysicsObjects.at(i).second->draw();
 		}
 
 	theCamera->end(); // Cease drawing with the camera.
@@ -165,7 +175,7 @@ void ofApp::draw()
 	}
 
 	
-
+	
 
 }
 
@@ -253,22 +263,10 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	}
 	if (e.target->getName() == "Slice")
 	{
-		// attempt to slice the cube
-		planePoint = testBox->getPosition();
-		ofMesh sliceMesh;
-		sliceMesh = testBoxMesh->getMesh();
-		for (int v = 0; v < sliceMesh.getNumVertices(); v++)
-		{
-			ofVec3f currentVertex = sliceMesh.getVertex(v);
 
-			// Move to match physics cube
-			currentVertex = currentVertex.getRotated(testBox->getRotation().x, -testBox->getRotation().y, testBox->getRotation().z);
-			currentVertex += testBox->getPosition();
 
-			sliceMesh.setVertex(v, currentVertex);
-		}
-
-		cutMeshes = CutMeshWithPlane(planePoint, planeNormal, sliceMesh);
+		//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, sliceMesh);
+		cutPhysicsObjects = SlicePhysicsObject(testBox, testBoxMesh->getMeshPtr(), planePoint + testBox->getPosition(), planeNormal, thePhysicsWorld, true);
 	}
 
 }
@@ -293,6 +291,7 @@ void ofApp::buildGUI()
 
 	ofxDatGuiFolder* diagnosticsFolder = theGUI->addFolder("Diagnostics", ofColor::white);
 	diagnosticsFolder->addFRM();
+	diagnosticsFolder->addTextInput("Frame-Time", "0ms");
 	theGUI->addBreak()->setHeight(2.0f);
 
 	theGUI->addLabel("Terrain Type: ");

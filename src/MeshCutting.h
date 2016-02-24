@@ -1,5 +1,6 @@
 #pragma once
 #include "ofMain.h"
+#include "ofxBullet.h"
 #include <vector>
 #include <map>
 
@@ -24,3 +25,6 @@ float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f 
 
 // This function allows us to linearly interpolate between two ofVec3f points.
 ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount);
+
+// This function slices a physics object into two new physics objects & meshes.
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletBaseShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal);
