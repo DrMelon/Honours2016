@@ -154,6 +154,9 @@ void ofApp::draw()
 		for (int i = 0; i < cutPhysicsObjects.size(); i++)
 		{
 			cutPhysicsObjects.at(i).second->draw();
+			cutPhysicsObjects.at(i).second->transformGL();
+			cutPhysicsObjects.at(i).first->draw();
+			cutPhysicsObjects.at(i).second->restoreTransformGL();
 		}
 
 	theCamera->end(); // Cease drawing with the camera.
