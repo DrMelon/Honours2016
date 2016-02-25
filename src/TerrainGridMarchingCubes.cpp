@@ -84,12 +84,14 @@ void TerrainGridMarchingCubes::Draw()
 		{
 			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, feedbackQuery); // <- this line instructs openGL to record how many triangles come back from the geometry shader.
 			glBeginTransformFeedback(GL_TRIANGLES);
+			
 			theGrid->draw();
 			glEndTransformFeedback();
 			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 		}
 		else
 		{
+			
 			theGrid->draw();
 		}
 
@@ -166,12 +168,13 @@ void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newSc
 		{
 			for (int k = 0; k < ZDimension; k++)
 			{
-				theGrid->getMeshPtr()->addVertex(ofVec3f(((float)i * PointScale), ((float)j * PointScale), ((float)k * PointScale)));
+				ofVec3f newVertex = ofVec3f(((float)i * PointScale), ((float)j * PointScale), ((float)k * PointScale));
+				theGrid->getMeshPtr()->addVertex(newVertex);
 				theGrid->getMeshPtr()->addColor(ofColor::red);
 			}
 		}
 	}
-
+	
 	updatePhysicsMesh = true;
 
 	outputBuffer->setData(sizeof(float) * 15 * 3 * XDimension*YDimension*ZDimension, NULL, GL_DYNAMIC_DRAW);

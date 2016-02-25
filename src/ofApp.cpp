@@ -29,6 +29,7 @@ void ofApp::setup()
 
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
+	
 	GridExpensiveNormals = 0.0f;
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
@@ -114,7 +115,7 @@ void ofApp::update()
 	// Update physics
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update(deltaTime * PhysicsTimescale, 0);
+		thePhysicsWorld->update(deltaTime * PhysicsTimescale, 6);
 	}
 
 
@@ -136,7 +137,7 @@ void ofApp::draw()
 			thePhysicsWorld->world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 		}
 		
-		thePhysicsWorld->drawDebug();
+		//thePhysicsWorld->drawDebug();
 		
 		ofEnableDepthTest();
 		// Draw physics sphere
@@ -296,6 +297,7 @@ void ofApp::buildGUI()
 
 	auto titleLabel = theGUI->addLabel("Real-Time Physics Based Destruction With Density-Field Terrains");
 	
+	
 	theGUI->addLabel("J. Brown (1201717)");
 	theGUI->addBreak()->setHeight(2.0f);
 
@@ -343,6 +345,10 @@ void ofApp::buildGUI()
 	
 	auto sliceButton = physicsFolder->addButton("Slice");
 	
+
+	auto footerGUI = theGUI->addFooter();
+	footerGUI->setLabelWhenCollapsed(":: SHOW TOOLS ::");
+	footerGUI->setLabelWhenExpanded(":: HIDE TOOLS ::");
 
 }
 

@@ -97,56 +97,60 @@ vec4 ExtrapolateVertex(int index, vec4 invertexpos, float invertexscale)
 {
 	vec4 outputPosition;
 
+	
+
 	// Note: Conditionals should ideally be avoided when writing shaders, but occasionally become necessary. This particular, simple, implementation is one such case.
 	// A more advanced approach is included in texture_marching_cubes.*
 	if(index == 0)
 	{
-		outputPosition.x = invertexpos.x - (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y - (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z + (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x - (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y - (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z + (0.5f) * invertexscale;
 	}
 	if(index == 1)
 	{
-		outputPosition.x = invertexpos.x + (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y - (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z + (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x + (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y - (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z + (0.5f) * invertexscale;
 	}
 	if(index == 2)
 	{
-		outputPosition.x = invertexpos.x + (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y - (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z - (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x + (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y - (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z - (0.5f) * invertexscale;
 	}
 	if(index == 3)
 	{
-		outputPosition.x = invertexpos.x - (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y - (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z - (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x - (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y - (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z - (0.5f) * invertexscale;
 	}
 	if(index == 4)
 	{
-		outputPosition.x = invertexpos.x - (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y + (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z + (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x - (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y + (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z + (0.5f) * invertexscale;
 	}
 	if(index == 5)
 	{
-		outputPosition.x = invertexpos.x + (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y + (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z + (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x + (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y + (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z + (0.5f) * invertexscale;
 	}
 	if(index == 6)
 	{
-		outputPosition.x = invertexpos.x + (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y + (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z - (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x + (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y + (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z - (0.5f) * invertexscale;
 	}
 	if(index == 7)
 	{
-		outputPosition.x = invertexpos.x - (0.5f * invertexscale);
-		outputPosition.y = invertexpos.y + (0.5f * invertexscale);
-		outputPosition.z = invertexpos.z - (0.5f * invertexscale);
+		outputPosition.x = invertexpos.x - (0.5f) * invertexscale;
+		outputPosition.y = invertexpos.y + (0.5f) * invertexscale;
+		outputPosition.z = invertexpos.z - (0.5f) * invertexscale;
 	}
+
+
 
 	outputPosition.w = 1.0f;
 

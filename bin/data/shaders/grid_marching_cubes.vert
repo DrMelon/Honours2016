@@ -27,6 +27,7 @@ void main()
 	
 	worldspaceposition = (position + vec4(gridoffset,1.0));
 	worldspacescale = gridscale;
+
 	gridoffset_g = gridoffset;
 	gl_Position = position;
 
