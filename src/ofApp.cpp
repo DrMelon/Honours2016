@@ -114,7 +114,9 @@ void ofApp::update()
 	
 	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
 	frametimeGUI->setText(std::to_string(deltaTime) + "ms");
-
+	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
+	frametimePlot->setValue(deltaTime);
+	
 }
 
 //--------------------------------------------------------------
@@ -295,6 +297,11 @@ void ofApp::buildGUI()
 	ofxDatGuiFolder* diagnosticsFolder = theGUI->addFolder("Diagnostics", ofColor::white);
 	diagnosticsFolder->addFRM();
 	diagnosticsFolder->addTextInput("Frame-Time", "0ms");
+	auto diagPlot = diagnosticsFolder->addValuePlotter("FT", 0.010, 0.100);
+	diagPlot->setDrawMode(ofxDatGuiGraph::FILLED);
+	
+
+
 	theGUI->addBreak()->setHeight(2.0f);
 
 	theGUI->addLabel("Terrain Type: ");

@@ -44,10 +44,13 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	// Loop through the faces of the mesh, finding which vertices are on the inside and outside of the mesh.
 	// Also, add the vertices where the faces intersect with the plane to both lists.
 	
+
+	// --------------------------------v try get num vertices?
 	for (int i = 0; i < meshToCut.getUniqueFaces().size(); i++)
 	{
 		ofMeshFace currentFace = meshToCut.getFace(i);
 
+		//TODO: Try mesh.vertex(i) or sth
 		ofVec3f vert0 = currentFace.getVertex(0);
 		ofVec3f vert1 = currentFace.getVertex(1);
 		ofVec3f vert2 = currentFace.getVertex(2);
