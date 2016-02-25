@@ -112,6 +112,9 @@
     <ClCompile Include="src\MeshCutting.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\ofxSmartFont.cpp">
+      <Filter>addons\ofxDatGui\libs\ofxSmartFont</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -158,6 +161,12 @@
     </Filter>
     <Filter Include="addons\ofxDatGui\themes">
       <UniqueIdentifier>{e685fc2b-72ac-4ead-a4dc-2bda988bf3de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxDatGui\libs">
+      <UniqueIdentifier>{7d2810c8-361d-49af-a549-56bc4fd3b2a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxDatGui\libs\ofxSmartFont">
+      <UniqueIdentifier>{e208251e-2861-4d58-9ba7-676c44905078}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -346,6 +355,9 @@
     </ClInclude>
     <ClInclude Include="src\MeshCutting.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\ofxSmartFont.h">
+      <Filter>addons\ofxDatGui\libs\ofxSmartFont</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

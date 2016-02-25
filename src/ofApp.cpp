@@ -20,7 +20,8 @@ void ofApp::setup()
 
 	// Set up GUI
 	theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
-	theGUI->setTheme(new ofxDatGuiThemeWireframe());
+	theGUI->setTheme(new ofxDatGuiThemeCharcoal());
+	
 	theGUI->setAutoDraw(false);
 
 	// Add elements to GUI.
@@ -85,7 +86,13 @@ void ofApp::update()
 {
 	float deltaTime = ofGetLastFrameTime();
 	
-	// Update gui
+	// Update GUI
+	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
+	frametimeGUI->setText(std::to_string(deltaTime) + "ms");
+	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
+	frametimePlot->setValue(deltaTime);
+	//frametimePlot->setSpeed(0.1f);
+
 	theGUI->update();
 
 	// Update camera offset for terrain.
@@ -107,15 +114,10 @@ void ofApp::update()
 	// Update physics
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update(deltaTime * PhysicsTimescale);
+		thePhysicsWorld->update(deltaTime * PhysicsTimescale, 0);
 	}
 
-	// Update GUI
-	
-	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
-	frametimeGUI->setText(std::to_string(deltaTime) + "ms");
-	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
-	frametimePlot->setValue(deltaTime);
+
 	
 }
 
@@ -284,21 +286,26 @@ void ofApp::buildGUI()
 		delete theGUI;
 		theGUI = 0;
 		theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
-		theGUI->setTheme(new ofxDatGuiThemeWireframe());
+		
+		//theGUI->setTheme(new ofxDatGuiThemeWireframe());
 		theGUI->setAutoDraw(false);
 		theGUI->onButtonEvent(this, &ofApp::onButtonChanged);
 		theGUI->onSliderEvent(this, &ofApp::onSliderChanged);
+		theGUI->setWidth(500);
 	}
 
-	theGUI->addLabel("Real-Time Physics Based Destruction With\nDensity-Field Terrains");
+	auto titleLabel = theGUI->addLabel("Real-Time Physics Based Destruction With Density-Field Terrains");
+	
 	theGUI->addLabel("J. Brown (1201717)");
 	theGUI->addBreak()->setHeight(2.0f);
 
 	ofxDatGuiFolder* diagnosticsFolder = theGUI->addFolder("Diagnostics", ofColor::white);
 	diagnosticsFolder->addFRM();
 	diagnosticsFolder->addTextInput("Frame-Time", "0ms");
-	auto diagPlot = diagnosticsFolder->addValuePlotter("FT", 0.010, 0.100);
+	auto diagPlot = diagnosticsFolder->addValuePlotter("FT", 0.00f, 0.05f);
 	diagPlot->setDrawMode(ofxDatGuiGraph::FILLED);
+	
+	
 	
 
 
