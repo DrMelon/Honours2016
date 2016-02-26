@@ -14,6 +14,8 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetBackgroundColor(ofColor::black);
 	ofSetVerticalSync(true);
+	
+	
 
 	// Set up z-buffer.
 	ofEnableDepthTest();
@@ -90,7 +92,7 @@ void ofApp::update()
 	
 	// Update GUI
 	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
-	frametimeGUI->setText(std::to_string(deltaTime) + "ms");
+	frametimeGUI->setText(std::to_string(deltaTime) + " ms");
 	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
 	frametimePlot->setValue(deltaTime);
 	//frametimePlot->setSpeed(0.1f);
@@ -314,7 +316,7 @@ void ofApp::buildGUI()
 		theGUI = 0;
 		theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
 		
-		//theGUI->setTheme(new ofxDatGuiThemeWireframe());
+		theGUI->setTheme(new ofxDatGuiThemeWireframe());
 		theGUI->setAutoDraw(false);
 		theGUI->onButtonEvent(this, &ofApp::onButtonChanged);
 		theGUI->onSliderEvent(this, &ofApp::onSliderChanged);
@@ -330,8 +332,9 @@ void ofApp::buildGUI()
 	ofxDatGuiFolder* diagnosticsFolder = theGUI->addFolder("Diagnostics", ofColor::white);
 	diagnosticsFolder->addFRM();
 	diagnosticsFolder->addTextInput("Frame-Time", "0ms");
-	auto diagPlot = diagnosticsFolder->addValuePlotter("FT", 0.00f, 0.05f);
+	auto diagPlot = diagnosticsFolder->addValuePlotter("FT", 0.00f, 0.1f);
 	diagPlot->setDrawMode(ofxDatGuiGraph::FILLED);
+	diagPlot->setSpeed(2.0f);
 	
 	
 	
