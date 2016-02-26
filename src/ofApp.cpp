@@ -40,6 +40,7 @@ void ofApp::setup()
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
 	thePhysicsWorld->setup();
+	
 	thePhysicsWorld->setGravity(ofVec3f(0, -9.81f, 0));
 	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
@@ -115,7 +116,7 @@ void ofApp::update()
 	// Update physics
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update(PhysicsTimescale, 6);
+		thePhysicsWorld->update(deltaTime * (PhysicsTimescale*2), 0);
 	}
 
 
