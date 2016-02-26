@@ -83,6 +83,7 @@ class ofApp : public ofBaseApp{
 
 		bool PhysicsEnabled = false;
 		float PhysicsTimescale = 1.0f;
+		bool PhysicsWireframe = false;
 
 
 		// Mesh Cutting Test

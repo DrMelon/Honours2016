@@ -291,6 +291,87 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 	}
 
+	// Now we need to cap the meshes; that is, we need to look at the vertices that were generated along the intersection points,
+	// find an average/center point of them all, and connect that point to all the interpolated points on both meshes to fill the hole left behind from slicing.
+
+	ofVec3f averagePosition(0,0,0);
+	
+	int firstInterpVert = meshToCut.getNumVertices();
+	int lastInterpVert = masterListVertices.size() - 1;
+	int numNewVertices = lastInterpVert - firstInterpVert;
+
+	// First we must check that we have enough new verts to fill a hole with.
+
+	if (numNewVertices < 3)
+	{
+		// Not enough
+	}
+	else if (numNewVertices == 3)
+	{
+		// Just one new triangle on both meshes
+		outsideIndices.push_back(newVertexNumber - 2);
+		outsideIndices.push_back(newVertexNumber - 1);
+		outsideIndices.push_back(newVertexNumber - 0);
+
+
+		insideIndices.push_back(newVertexNumber - 2);
+		insideIndices.push_back(newVertexNumber - 1);
+		insideIndices.push_back(newVertexNumber - 0);
+
+
+	}
+	else
+	{
+		// More triangles - need to create center vertex.
+
+
+		for (int i = firstInterpVert; i < lastInterpVert; i++)
+		{
+			// Starting at the first intersected vertex, we build an average.
+			averagePosition += masterListVertices.at(i);
+			
+		}
+
+		// Average out the position.
+		averagePosition /= numNewVertices;
+
+		// Create a vertex at this position.
+		masterListVertices.push_back(averagePosition);
+		
+
+		// Get the starting indices
+		int startInsideIndex = insideIndices.size();
+		int startOutsideIndex = outsideIndices.size();
+
+		// For each of the interpolated vertices, we need to add indices to link this last one to them.
+		
+		for (int i = firstInterpVert; i < lastInterpVert; i++)
+		{
+			insideIndices.push_back(newVertexNumber);
+			insideIndices.push_back(i);
+			
+			outsideIndices.push_back(newVertexNumber);
+			outsideIndices.push_back(i);
+
+			// last verts of triangles have to check to make sure they aren't running over memory
+			if (i == lastInterpVert - 1)
+			{
+				insideIndices.push_back(firstInterpVert);
+				outsideIndices.push_back(firstInterpVert);
+			}
+			else
+			{
+				insideIndices.push_back(i + 1);
+				outsideIndices.push_back(i + 1);
+			}
+			
+
+			
+		}
+	}
+
+
+
 	
 	// Now that the lists of indices and vertices have been finalized, we can build the new meshes.
 

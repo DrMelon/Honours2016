@@ -40,7 +40,7 @@ void ofApp::setup()
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
 	thePhysicsWorld->setup();
-	thePhysicsWorld->setGravity(ofVec3f(0, -98.1f, 0));
+	thePhysicsWorld->setGravity(ofVec3f(0, -9.81f, 0));
 	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
 
@@ -72,11 +72,11 @@ void ofApp::setup()
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 
 	// Test mesh cutting
-	//planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	//planeNormal.normalize();
-	//planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	planeNormal = ofVec3f(0.5, 0.5, 0);
-	planePoint = ofVec3f(0, 1, 2);
+	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	planeNormal.normalize();
+	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
+	//planeNormal = ofVec3f(0.5, 0.5, 0);
+	//planePoint = ofVec3f(0, 1, 2);
 
 	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 	
@@ -115,7 +115,7 @@ void ofApp::update()
 	// Update physics
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update(deltaTime * PhysicsTimescale, 6);
+		thePhysicsWorld->update(PhysicsTimescale, 6);
 	}
 
 
@@ -137,7 +137,11 @@ void ofApp::draw()
 			thePhysicsWorld->world->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 		}
 		
-		//thePhysicsWorld->drawDebug();
+		if (PhysicsWireframe)
+		{
+			thePhysicsWorld->drawDebug();
+		}
+		
 		
 		ofEnableDepthTest();
 		// Draw physics sphere
@@ -147,9 +151,17 @@ void ofApp::draw()
 		// Draw physics box
 		if (testBox->getCollisionShape() != NULL)
 		{
-			testBox->draw();
+			
 			testBox->transformGL();
-			testBoxMesh->draw();
+			if (!PhysicsWireframe)
+			{
+				testBoxMesh->draw();
+			}
+			else
+			{
+				testBoxMesh->drawWireframe();
+			}
+			
 			testBox->restoreTransformGL();
 		}
 		
@@ -158,9 +170,18 @@ void ofApp::draw()
 
 		for (int i = 0; i < cutPhysicsObjects.size(); i++)
 		{
-			cutPhysicsObjects.at(i).second->draw();
+			//cutPhysicsObjects.at(i).second->draw();
 			cutPhysicsObjects.at(i).second->transformGL();
-			cutPhysicsObjects.at(i).first->draw();
+			
+			if (PhysicsWireframe)
+			{
+				cutPhysicsObjects.at(i).first->drawWireframe();
+			}
+			else
+			{
+				cutPhysicsObjects.at(i).first->draw();
+			}
+			
 			cutPhysicsObjects.at(i).second->restoreTransformGL();
 		}
 
@@ -265,9 +286,13 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		GridExpensiveNormals = e.enabled;
 	}
-	if (e.target->getName() == "Physics Enabled" && currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	if (e.target->getName() == "Physics Enabled")
 	{
 		PhysicsEnabled = e.enabled;
+	}
+	if (e.target->getName() == "Wireframe")
+	{
+		PhysicsWireframe = e.enabled;
 	}
 	if (e.target->getName() == "Slice")
 	{
@@ -338,12 +363,15 @@ void ofApp::buildGUI()
 	ofxDatGuiFolder* physicsFolder = theGUI->addFolder("Physics", ofColor::red);
 
 	physicsFolder->addToggle("Physics Enabled", false);
+	physicsFolder->addToggle("Wireframe", false);
 
 	auto physicsSlider = physicsFolder->addSlider("Timescale", 0.01f, 1.0f, 1.0f);
 	physicsSlider->setPrecision(2);
 	physicsSlider->bind(PhysicsTimescale);
 	
 	auto sliceButton = physicsFolder->addButton("Slice");
+
+
 	
 
 	auto footerGUI = theGUI->addFooter();
