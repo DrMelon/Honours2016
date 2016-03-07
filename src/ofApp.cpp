@@ -312,43 +312,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 		// Do voronoi test
 
-		// Create voronoi volume (bounding box of object)
-		btTransform boxTform;
-		//btScalar* glMat = new btScalar[15];
-		//testBox->getOpenGLMatrix(glMat);
-		//ofMatrix4x4 transMat = testBox->getTransformationMatrix();
-		ofVec3f origin;
-		origin = testBox->getPosition();
-		//origin -= testBox->getCentroid();
-
-		
-		btVector3 boxMin, boxMax;
-		//if (testBox->getCollisionShape() != NULL)
-		//{
-		//	testBox->getCollisionShape()->getAabb(boxTform, boxMin, boxMax);
-		//}
-		//else
-		{
-			boxMin.setX(-10 + origin.x);
-			boxMin.setY(-10 + origin.y);
-			boxMin.setZ(-10 + origin.z);
-
-			boxMax.setX(10 + origin.x);
-			boxMax.setY(10 + origin.y);
-			boxMax.setZ(10 + origin.z);
-		}
-		
-		voronoiContainer = new voro::container(boxMin.getX(), boxMax.getX(), boxMin.getY(), boxMax.getY(), boxMin.getZ(), boxMax.getZ(), 6, 6, 6, false, false, false, 8);
-
-		// Add voronoi cell centrepoints (based on radial impact?)
-		for (int i = 0; i < 16; i++)
-		{
-			ofPoint* newPoint = new ofPoint(ofRandom(boxMin.getX(), boxMax.getX()), ofRandom(boxMin.getY(), boxMax.getY()), ofRandom(boxMin.getZ(), boxMax.getZ()));
-			addCellSeed(*voronoiContainer, newPoint, i, true);
-		}
-
-		// Retrieve voronoi mesh planes
-		voronoiMeshes = getCellsFromContainer(*voronoiContainer, 0.05);
+		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 8, NULL);
 
 		// Move meshes to new locations
 		/*

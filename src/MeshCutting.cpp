@@ -501,6 +501,16 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	{
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 		
+		// Don't try to add empty meshes
+		if (cutMeshes.at(i)->getVertices().size() <= 0)
+		{
+			continue;
+		}
+		if (cutMeshes.at(i)->getIndices().size() <= 0)
+		{
+			cutMeshes.at(i)->setupIndicesAuto();
+		}
+
 		newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
 		ofVec3f meshPosition = cutMeshes.at(i)->getCentroid();
 		float tmp = meshPosition.x;
@@ -525,4 +535,103 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	
 
 	return outputList;
+}
+
+
+// This function fractures a physics object using a 3D Voronoi Diagram.
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofxBulletWorldRigid* theWorld, int numCells, ofVec3f* impactPoint = NULL)
+{
+
+	// First creating the container for the voronoi diagram.
+	// This is essentially the same as the physics object's bounding box.
+	btVector3 boundsMin, boundsMax;
+	btTransform objectTransform;
+
+	// First storing transform
+	physicsObject->getRigidBody()->getMotionState()->getWorldTransform(objectTransform);
+	// Then fetching AABB from collision mesh.
+	physicsObject->getCollisionShape()->getAabb(objectTransform, boundsMin, boundsMax);
+
+	// Now, create the container.
+	// The container is not smoothed; we want simple plane divisions between the fragments.
+	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 1, 1, 1, false, false, false, 8);
+
+	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
+	if (impactPoint != NULL)
+	{
+		// Impact-point seeding
+	}
+	else
+	{
+		// Randomized seeding
+		for (int cell = 0; cell < numCells; cell++)
+		{
+			addCellSeed(voroContainer, new ofPoint(ofRandom(boundsMin.getX(), boundsMax.getX()), ofRandom(boundsMin.getY(), boundsMax.getY()), ofRandom(boundsMin.getZ(), boundsMax.getZ())), cell, true);
+		}
+	}
+
+	// Now that the diagram is seeded, we can fetch all the cells' meshes.
+	std::vector<ofVboMesh> cellMeshes;
+	getCellsFromContainer(voroContainer, cellMeshes, false);
+
+	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
+	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
+	// We're basically going to iterate over the mesh and keep dumping the outside mesh.
+
+	// Set up output container.
+	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputShapes;
+
+	// For each voronoi cell, we'll be creating an output mesh.
+	for (int cellmesh = 0; cellmesh < cellMeshes.size(); cellmesh++)
+	{
+		// Set up indices & faces
+		//cellMeshes.at(cellmesh).setupIndicesAuto();
+
+		// Create the output mesh required, based on original physics mesh
+		std::pair<ofMesh*, ofxBulletCustomShape*> cellOutputMesh = std::make_pair(new ofMesh(*physicsObjectMesh), new ofxBulletCustomShape(*physicsObject));
+
+
+		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
+		for (int face = 0; face < cellMeshes.at(cellmesh).getUniqueFaces().size(); face++)
+		{
+			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
+
+			if (cellOutputMesh.first->getNumVertices() <= 0 || cellOutputMesh.first->getNumIndices() <= 0)
+			{
+				continue;
+			}
+
+			// get center of face
+			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
+
+			// slice output mesh.
+			std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> sliced = SlicePhysicsObject(cellOutputMesh.second, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false);
+			
+		    // store only the "inside" mesh of this slice, discarding the other.
+			if (sliced.size() > 0)
+			{
+				if (sliced.size() > 1)
+				{
+					delete sliced.at(1).first;
+					delete sliced.at(1).second;
+				}
+
+				// Iterating over this mesh
+				cellOutputMesh = sliced.at(0);
+
+			}
+
+		}
+
+		// Now we add the output mesh to the list of output meshes
+		outputShapes.push_back(cellOutputMesh);
+
+		
+	}
+
+	// We can safely now delete the original physics object.
+
+	// do that now...
+
+	return outputShapes;
 }
