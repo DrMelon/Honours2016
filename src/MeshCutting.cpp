@@ -457,7 +457,7 @@ ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount)
 }
 
 // This function slices a physics object into two new physics objects & meshes.
-std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal)
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal, bool addToWorld)
 {
 	// Create our output
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputList;
@@ -508,7 +508,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 		}
 		if (cutMeshes.at(i)->getIndices().size() <= 0)
 		{
-			cutMeshes.at(i)->setupIndicesAuto();
+			//cutMeshes.at(i)->setupIndicesAuto();
+			continue;
 		}
 
 		newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
@@ -522,8 +523,12 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 		newOffset.z = tmp;
 		// Creating the object requires that we offset by the relative distance between the centroids.
 		newShape->create(theWorld->world, newOffset, 1.0f);
-		newShape->add();
-		newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
+		if (addToWorld)
+		{
+			newShape->add();
+			newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
+		}
+
 
 		// Populate List
 		outputList.push_back(std::make_pair(cutMeshes.at(i), newShape));
@@ -554,8 +559,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
-	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 1, 1, 1, false, false, false, 8);
-
+	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 6, 6, 6, false, false, false, 8);
+	
 	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
 	if (impactPoint != NULL)
 	{
@@ -574,6 +579,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<ofVboMesh> cellMeshes;
 	getCellsFromContainer(voroContainer, cellMeshes, false);
 
+
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
 	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
 	// We're basically going to iterate over the mesh and keep dumping the outside mesh.
@@ -585,7 +591,11 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	for (int cellmesh = 0; cellmesh < cellMeshes.size(); cellmesh++)
 	{
 		// Set up indices & faces
-		//cellMeshes.at(cellmesh).setupIndicesAuto();
+		for (int i = 0; i < cellMeshes.at(cellmesh).getVertices().size(); i++)
+		{
+			cellMeshes.at(cellmesh).getVertices().at(i) += physicsObject->getPosition();
+		}
+		cellMeshes.at(cellmesh).setupIndicesAuto();
 
 		// Create the output mesh required, based on original physics mesh
 		std::pair<ofMesh*, ofxBulletCustomShape*> cellOutputMesh = std::make_pair(new ofMesh(*physicsObjectMesh), new ofxBulletCustomShape(*physicsObject));
@@ -603,22 +613,37 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 			// get center of face
 			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
-
+			std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> sliced;
 			// slice output mesh.
-			std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> sliced = SlicePhysicsObject(cellOutputMesh.second, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false);
+			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
+			{
+				sliced = SlicePhysicsObject(physicsObject, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false, true);
+			}
+			else
+			{
+				sliced = SlicePhysicsObject(physicsObject, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false, false);
+			}
 			
+			
+
+
 		    // store only the "inside" mesh of this slice, discarding the other.
 			if (sliced.size() > 0)
 			{
 				if (sliced.size() > 1)
 				{
 					delete sliced.at(1).first;
+					sliced.at(1).second->remove();
 					delete sliced.at(1).second;
 				}
 
 				// Iterating over this mesh
-				cellOutputMesh = sliced.at(0);
-
+				cellOutputMesh = sliced.at(0);	
+				for (int vt = 0; vt < cellOutputMesh.first->getVertices().size(); vt++)
+				{
+					cellOutputMesh.first->getVertices().at(vt) -= physicsObject->getPosition();
+				}
+				
 			}
 
 		}

@@ -28,7 +28,7 @@ float PlaneIntersectLine(ofVec3f planePoint, ofVec3f planeNormalVector, ofVec3f 
 ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount);
 
 // This function slices a physics object into two new physics objects & meshes.
-std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal);
+std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal, bool addToWorld);
 
 // This function fractures a physics object using a 3D Voronoi Diagram.
 std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofxBulletWorldRigid* theWorld, int numCells, ofVec3f* impactPoint);
