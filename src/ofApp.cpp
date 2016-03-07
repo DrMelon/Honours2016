@@ -81,6 +81,8 @@ void ofApp::setup()
 	//planePoint = ofVec3f(0, 1, 2);
 
 	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
+
+	
 	
 }
 
@@ -167,6 +169,11 @@ void ofApp::draw()
 			testBox->restoreTransformGL();
 		}
 		
+		// Draw voronoi
+		for (int i = 0; i < voronoiMeshes.size(); i++)
+		{
+			voronoiMeshes.at(i).drawWireframe();
+		}
 
 
 
@@ -301,7 +308,62 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 
 		//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, sliceMesh);
-		cutPhysicsObjects = SlicePhysicsObject(testBox, testBoxMesh->getMeshPtr(), planePoint + testBox->getPosition(), planeNormal, thePhysicsWorld, true);
+		//cutPhysicsObjects = SlicePhysicsObject(testBox, testBoxMesh->getMeshPtr(), planePoint + testBox->getPosition(), planeNormal, thePhysicsWorld, true);
+
+		// Do voronoi test
+
+		// Create voronoi volume (bounding box of object)
+		btTransform boxTform;
+		//btScalar* glMat = new btScalar[15];
+		//testBox->getOpenGLMatrix(glMat);
+		//ofMatrix4x4 transMat = testBox->getTransformationMatrix();
+		ofVec3f origin;
+		origin = testBox->getPosition();
+		//origin -= testBox->getCentroid();
+
+		
+		btVector3 boxMin, boxMax;
+		//if (testBox->getCollisionShape() != NULL)
+		//{
+		//	testBox->getCollisionShape()->getAabb(boxTform, boxMin, boxMax);
+		//}
+		//else
+		{
+			boxMin.setX(-10 + origin.x);
+			boxMin.setY(-10 + origin.y);
+			boxMin.setZ(-10 + origin.z);
+
+			boxMax.setX(10 + origin.x);
+			boxMax.setY(10 + origin.y);
+			boxMax.setZ(10 + origin.z);
+		}
+		
+		voronoiContainer = new voro::container(boxMin.getX(), boxMax.getX(), boxMin.getY(), boxMax.getY(), boxMin.getZ(), boxMax.getZ(), 6, 6, 6, false, false, false, 8);
+
+		// Add voronoi cell centrepoints (based on radial impact?)
+		for (int i = 0; i < 16; i++)
+		{
+			ofPoint* newPoint = new ofPoint(ofRandom(boxMin.getX(), boxMax.getX()), ofRandom(boxMin.getY(), boxMax.getY()), ofRandom(boxMin.getZ(), boxMax.getZ()));
+			addCellSeed(*voronoiContainer, newPoint, i, true);
+		}
+
+		// Retrieve voronoi mesh planes
+		voronoiMeshes = getCellsFromContainer(*voronoiContainer, 0.05);
+
+		// Move meshes to new locations
+		/*
+		for (int mesh = 0; mesh < voronoiMeshes.size(); mesh++)
+		{
+			for (int i = 0; i < voronoiMeshes.at(mesh).getVertices().size(); i++)
+			{
+				voronoiMeshes.at(mesh).getVertices().at(i) += origin;
+			}
+		}*/
+		
+		// Cut object by planes
+
+
+
 	}
 
 }

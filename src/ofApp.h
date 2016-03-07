@@ -15,6 +15,7 @@
 #include "TerrainGridMarchingCubes.h"
 #include "ofxBullet.h"
 #include "ofxDatGui.h"
+#include "ofxVoro.h"
 
 
 class ofApp : public ofBaseApp{
@@ -93,4 +94,9 @@ class ofApp : public ofBaseApp{
 
 		std::vector<ofMesh*> cutMeshes;
 		std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> cutPhysicsObjects;
+
+		// Voronoi Diagram-based Mesh Cutting
+		voro::container* voronoiContainer;
+		std::vector<ofPoint> voronoiCentres;
+		std::vector<ofVboMesh> voronoiMeshes;
 };
