@@ -14,8 +14,6 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetBackgroundColor(ofColor::black);
 	ofSetVerticalSync(true);
-	
-	
 
 	// Set up z-buffer.
 	ofEnableDepthTest();
@@ -24,6 +22,7 @@ void ofApp::setup()
 	theGUI = new ofxDatGui(ofxDatGuiAnchor::TOP_RIGHT);
 	theGUI->setTheme(new ofxDatGuiThemeCharcoal());
 	
+	// Disable the GUI's own automatic rendering, as we're doing shader passes and things.
 	theGUI->setAutoDraw(false);
 
 	// Add elements to GUI.
@@ -32,6 +31,7 @@ void ofApp::setup()
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
 	
+	// Scalar value for shader to determine if we should use smoothed normals or not on the grid terrain.
 	GridExpensiveNormals = 0.0f;
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
@@ -42,7 +42,8 @@ void ofApp::setup()
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
 	thePhysicsWorld->setup();
-	
+
+	// Set up gravity
 	thePhysicsWorld->setGravity(ofVec3f(0, -9.81f, 0));
 	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
@@ -51,13 +52,11 @@ void ofApp::setup()
 	testSphere = new ofxBulletSphere();
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
 	
-
 	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 2, 2, 2);
 
 	testBox = new ofxBulletCustomShape();
 	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);
 	testBox->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 35, 1.0f);
-	
 	
 	testSphere->add();
 	testBox->add();

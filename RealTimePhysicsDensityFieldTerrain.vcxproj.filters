@@ -115,6 +115,39 @@
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\ofxSmartFont.cpp">
       <Filter>addons\ofxDatGui\libs\ofxSmartFont</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\src\ofxVoro.cpp">
+      <Filter>addons\ofxVoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\c_loops.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\cell.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\common.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\container.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\container_prd.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\pre_container.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\unitcell.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\v_base.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\v_compute.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\wall.cc">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -167,6 +200,15 @@
     </Filter>
     <Filter Include="addons\ofxDatGui\libs\ofxSmartFont">
       <UniqueIdentifier>{e208251e-2861-4d58-9ba7-676c44905078}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxVoro">
+      <UniqueIdentifier>{010db209-1e09-492f-b0c2-2579251af50c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxVoro\libs">
+      <UniqueIdentifier>{519147cc-c516-432c-8fb1-888390808778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="addons\ofxVoro\libs\voro++">
+      <UniqueIdentifier>{6d3f91f1-6fb9-436e-ad0c-99f49e323e4c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -358,6 +400,51 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\ofxSmartFont.h">
       <Filter>addons\ofxDatGui\libs\ofxSmartFont</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\src\ofxVoro.h">
+      <Filter>addons\ofxVoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\c_loops.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\cell.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\common.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\config.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\container.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\container_prd.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\pre_container.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\rad_option.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\unitcell.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\v_base.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\v_compute.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\voro++.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\wall.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\worklist.hh">
+      <Filter>addons\ofxVoro\libs\voro++</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

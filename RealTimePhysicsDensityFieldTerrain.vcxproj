@@ -96,7 +96,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;..\..\..\addons\ofxGui\src;..\..\..\addons\ofxBullet\src;..\..\..\addons\ofxBullet\src\events;..\..\..\addons\ofxBullet\src\joints;..\..\..\addons\ofxBullet\src\render;..\..\..\addons\ofxBullet\src\shapes;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\BroadphaseCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\CollisionDispatch;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\CollisionShapes;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\Gimpact;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\NarrowPhaseCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Character;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\ConstraintSolver;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Dynamics;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Featherstone;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\MLCPSolvers;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Vehicle;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletSoftBody;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\LinearMath;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\neon;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\scalar;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\sse;..\..\..\addons\ofxDatGui\src;..\..\..\addons\ofxDatGui\src\themes;..\..\..\addons\ofxDatGui\src\core;..\..\..\addons\ofxDatGui\src\components;..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);src;..\..\..\addons\ofxGui\src;..\..\..\addons\ofxBullet\src;..\..\..\addons\ofxBullet\src\events;..\..\..\addons\ofxBullet\src\joints;..\..\..\addons\ofxBullet\src\render;..\..\..\addons\ofxBullet\src\shapes;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\BroadphaseCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\CollisionDispatch;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\CollisionShapes;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\Gimpact;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletCollision\NarrowPhaseCollision;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Character;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\ConstraintSolver;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Dynamics;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Featherstone;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\MLCPSolvers;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletDynamics\Vehicle;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\BulletSoftBody;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\LinearMath;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\neon;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\scalar;..\..\..\addons\ofxBullet\libs\bullet2.8.2\include\vectormath\sse;..\..\..\addons\ofxDatGui\src;..\..\..\addons\ofxDatGui\src\themes;..\..\..\addons\ofxDatGui\src\core;..\..\..\addons\ofxDatGui\src\components;..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\;..\..\..\addons\ofxVoro\libs\voro++\;..\..\..\addons\ofxVoro\src\</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -195,6 +195,17 @@
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\core\ofxDatGuiComponent.cpp" />
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\libs\ofxSmartFont\ofxSmartFont.cpp" />
     <ClCompile Include="..\..\..\addons\ofxDatGui\src\ofxDatGui.cpp" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\cell.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\common.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\container.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\container_prd.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\c_loops.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\pre_container.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\unitcell.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\v_base.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\v_compute.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\wall.cc" />
+    <ClCompile Include="..\..\..\addons\ofxVoro\src\ofxVoro.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshCutting.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
@@ -260,6 +271,21 @@
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\ofxDatGui.h" />
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\themes\ofxDatGuiTheme.h" />
     <ClInclude Include="..\..\..\addons\ofxDatGui\src\themes\ofxDatGuiThemes.h" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\cell.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\common.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\config.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\container.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\container_prd.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\c_loops.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\pre_container.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\rad_option.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\unitcell.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\voro++.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\v_base.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\v_compute.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\wall.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\worklist.hh" />
+    <ClInclude Include="..\..\..\addons\ofxVoro\src\ofxVoro.h" />
     <ClInclude Include="src\MeshCutting.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
