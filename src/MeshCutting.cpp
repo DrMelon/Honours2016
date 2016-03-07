@@ -559,7 +559,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
-	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 6, 6, 6, false, false, false, 8);
+	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 1, 1, 1, false, false, false, 8);
 	
 	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
 	if (impactPoint != NULL)
@@ -574,6 +574,10 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			addCellSeed(voroContainer, new ofPoint(ofRandom(boundsMin.getX(), boundsMax.getX()), ofRandom(boundsMin.getY(), boundsMax.getY()), ofRandom(boundsMin.getZ(), boundsMax.getZ())), cell, true);
 		}
 	}
+
+	// TODO:
+	// Check for too many cell faces or for liminal cuts from cells, massive amounts of verts should not happen
+
 
 	// Now that the diagram is seeded, we can fetch all the cells' meshes.
 	std::vector<ofVboMesh> cellMeshes;
@@ -595,8 +599,9 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		{
 			cellMeshes.at(cellmesh).getVertices().at(i) += physicsObject->getPosition();
 		}
+		cellMeshes.at(cellmesh).setMode(OF_PRIMITIVE_TRIANGLES);
 		cellMeshes.at(cellmesh).setupIndicesAuto();
-
+		
 		// Create the output mesh required, based on original physics mesh
 		std::pair<ofMesh*, ofxBulletCustomShape*> cellOutputMesh = std::make_pair(new ofMesh(*physicsObjectMesh), new ofxBulletCustomShape(*physicsObject));
 
