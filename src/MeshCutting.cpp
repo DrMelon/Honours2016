@@ -683,22 +683,36 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// We also need to create a physics mesh for it too.
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
+		
+
+
+
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
 		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
 		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true); 
-		//ofVec3f meshPosition = newShape->getCentroid();
 		ofVec3f meshPosition = cellOutputMesh->getCentroid();
-		float tmp = meshPosition.x;
-		meshPosition.x = meshPosition.z;
-		meshPosition.z = tmp;
 		ofVec3f distancer = (meshPosition - physicsObject->getPosition());
 		ofVec3f newOffset = physicsObject->getPosition() + distancer;
-		tmp = newOffset.x;
-		newOffset.x = newOffset.z;
-		newOffset.z = tmp;
-		
 		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
+		
+
+		// Now simplify the render mesh to fit the physics mesh
+		//cellOutputMesh->clear();
+		//btConvexHullShape* physMesh = (btConvexHullShape*)newShape->shapes.at(0);
+		
+		//for (int i = 0; i < physMesh->getNumVertices(); i++)
+		//{
+		//	btVector3 vert;
+		//	physMesh->getVertex(i, vert);
+		//	cellOutputMesh->addVertex(ofVec3f(vert.getX(), vert.getY(), vert.getZ()));
+		//}
+
+		
+		//ofVec3f meshPosition = newShape->getCentroid();
+
+		
+
 		//newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
