@@ -663,10 +663,6 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			}
 			
 
-			
-			
-
-
 		    // store only the "inside" mesh of this slice, discarding the other.
 			if (sliced.size() > 0)
 			{
@@ -690,11 +686,13 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
 		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
 		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true); 
-		ofVec3f meshPosition = newShape->getCentroid();
+		//ofVec3f meshPosition = newShape->getCentroid();
+		ofVec3f meshPosition = cellOutputMesh->getCentroid();
 		float tmp = meshPosition.x;
 		meshPosition.x = meshPosition.z;
 		meshPosition.z = tmp;
-		ofVec3f newOffset = physicsObject->getPosition();//physicsObject->getPosition() + (meshPosition - physicsObject->getPosition());
+		ofVec3f distancer = (meshPosition - physicsObject->getPosition());
+		ofVec3f newOffset = physicsObject->getPosition() + distancer;
 		tmp = newOffset.x;
 		newOffset.x = newOffset.z;
 		newOffset.z = tmp;
@@ -704,7 +702,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		//newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
-
+		cout << "Cell Verts: " << cellOutputMesh->getNumVertices() << endl;
 		
 	}
 
