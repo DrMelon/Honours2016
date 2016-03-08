@@ -337,7 +337,12 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 		// Create a vertex at this position.
 		masterListVertices.push_back(averagePosition);
-		
+
+		// Keep shoving vertices on if not a power of 3 [hacky]
+		while (masterListVertices.size() % 3 != 0)
+		{
+			masterListVertices.push_back(averagePosition);
+		}
 
 		// Get the starting indices
 		int startInsideIndex = insideIndices.size();
@@ -486,6 +491,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	ofVec3f physObjTranslation = physicsObject->getPosition();
 	ofQuaternion physObjRotation = physicsObject->getRotationQuat();
 	
+	
 	btVector3 shapeVelocity = physicsObject->getRigidBody()->getLinearVelocity();
 
 	// Delete original object, if desired
@@ -521,6 +527,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 				continue;
 			}
 
+			// Offset the position of the new physics meshes so that they are separated along the cutting plane.
 			newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
 			ofVec3f meshPosition = cutMeshes.at(i)->getCentroid();
 			float tmp = meshPosition.x;
@@ -615,7 +622,22 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		cellMeshes.at(cellmesh).setupIndicesAuto();
 		
 		// Create the output mesh required, based on original physics mesh
-		std::pair<ofMesh*, ofxBulletCustomShape*> cellOutputMesh = std::make_pair(new ofMesh(*physicsObjectMesh), new ofxBulletCustomShape(*physicsObject));
+		ofMesh* cellOutputMesh = new ofMesh(*physicsObjectMesh);
+
+		// Prepare to slice mesh - transform it to the location of the physics object.
+
+		for (int v = 0; v < cellOutputMesh->getNumVertices(); v++)
+		{
+			ofVec3f currentVertex = cellOutputMesh->getVertex(v);
+
+			//Transform each vertex by the physics object's transformation matrix		
+			ofMatrix4x4 newTransform = physicsObject->getTransformationMatrix();
+
+			currentVertex = newTransform.transform3x3(currentVertex, newTransform);
+			currentVertex += physicsObject->getPosition();
+
+			cellOutputMesh->setVertex(v, currentVertex);
+		}
 
 
 		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
@@ -623,23 +645,24 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		{
 			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
 
-			if (cellOutputMesh.first->getNumVertices() <= 0 || cellOutputMesh.first->getNumIndices() <= 0)
+			if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 			{
 				continue;
 			}
 
 			// get center of face
 			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
-			std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> sliced;
+			std::vector<ofMesh*> sliced;
+
+			sliced = CutMeshWithPlane(centerOfFace, currentFace.getFaceNormal(), *cellOutputMesh);
+
 			// slice output mesh.
 			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
 			{
-				sliced = SlicePhysicsObject(physicsObject, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false, true);
+				// if it's the last face, we want to send back a physics object too
 			}
-			else
-			{
-				sliced = SlicePhysicsObject(physicsObject, cellOutputMesh.first, centerOfFace, currentFace.getFaceNormal(), theWorld, false, false);
-			}
+			
+
 			
 			
 
@@ -649,31 +672,46 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			{
 				if (sliced.size() > 1)
 				{
-					delete sliced.at(1).first;
-					sliced.at(1).second->remove();
-					delete sliced.at(1).second;
+					delete sliced.at(1);
 				}
 
-				// Iterating over this mesh
+				// Iterating over this mesh, so we store the "inside" mesh
 				cellOutputMesh = sliced.at(0);	
-				for (int vt = 0; vt < cellOutputMesh.first->getVertices().size(); vt++)
-				{
-					cellOutputMesh.first->getVertices().at(vt) -= physicsObject->getPosition();
-				}
+				//cellOutputMesh->setupIndicesAuto();
 				
 			}
 
 		}
 
 		// Now we add the output mesh to the list of output meshes
-		outputShapes.push_back(cellOutputMesh);
+		// We also need to create a physics mesh for it too.
+		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
+
+		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
+		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
+		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true); 
+		ofVec3f meshPosition = newShape->getCentroid();
+		float tmp = meshPosition.x;
+		meshPosition.x = meshPosition.z;
+		meshPosition.z = tmp;
+		ofVec3f newOffset = physicsObject->getPosition();//physicsObject->getPosition() + (meshPosition - physicsObject->getPosition());
+		tmp = newOffset.x;
+		newOffset.x = newOffset.z;
+		newOffset.z = tmp;
+		
+		newShape->create(theWorld->world, newOffset, 1.0f);
+		newShape->add();
+		//newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
+
+		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
 
 		
 	}
 
-	// We can safely now delete the original physics object.
+	// We can now remove the original object, if desired.
 
-	// do that now...
+
+
 
 	return outputShapes;
 }

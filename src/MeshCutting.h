@@ -30,5 +30,29 @@ ofVec3f LerpVec3(ofVec3f start, ofVec3f end, float amount);
 // This function slices a physics object into two new physics objects & meshes.
 std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofVec3f planePoint, ofVec3f planeNormalVector, ofxBulletWorldRigid* theWorld, bool deleteOriginal, bool addToWorld);
 
+
 // This function fractures a physics object using a 3D Voronoi Diagram.
 std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBulletCustomShape* physicsObject, ofMesh* physicsObjectMesh, ofxBulletWorldRigid* theWorld, int numCells, ofVec3f* impactPoint);
+
+
+/*
+// Extension to Voro++: 
+//
+// Voro++ allows "walls" to be defined within a container, that shape the resultant voronoi diagram.
+// However, it doesn't have a general case for a polygonal mesh.
+// The wall classes are extensible; however, they need two functions.
+// One, to tell if a point is within the wall, and two, a function that cuts a cell according to the wall's position.
+// 
+// Testing if a point exists within an ofMesh can be handled by another extension available from openFrameworks.
+// The cutting can be done using the CutMeshWithPlane function defined earlier.
+
+
+namespace voro
+{
+	struct ofmesh_wall : wall
+	{
+
+	};
+}
+*/
+
