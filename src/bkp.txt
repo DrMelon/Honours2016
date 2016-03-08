@@ -415,23 +415,11 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 
 	// If there are at least some vertices in each side, send them out of this function. Otherwise, delete them.
-	if (insideMesh->getNumVertices() > 0)
-	{
-		meshList.push_back(insideMesh);
-	}
-	else
-	{
-		delete insideMesh;
-	}
 
-	if (outsideMesh->getNumVertices() > 0)
-	{
+		meshList.push_back(insideMesh);
+
 		meshList.push_back(outsideMesh);
-	}
-	else
-	{
-		delete outsideMesh;
-	}
+
 
 	
 
@@ -579,6 +567,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
 	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 16, 16, 16, false, false, false, 8);
+	std::vector<ofVec3f> voroCellCentres;
+
 	
 	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
 	if (impactPoint != NULL)
@@ -590,8 +580,14 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// Randomized seeding
 		for (int cell = 0; cell < numCells; cell++)
 		{
-			addCellSeed(voroContainer, new ofPoint(ofRandom(boundsMin.getX(), boundsMax.getX()), ofRandom(boundsMin.getY(), boundsMax.getY()), ofRandom(boundsMin.getZ(), boundsMax.getZ())), cell, true);
+			voroCellCentres.push_back(ofVec3f(ofRandom(boundsMin.getX(), boundsMax.getX()), ofRandom(boundsMin.getY(), boundsMax.getY()), ofRandom(boundsMin.getZ(), boundsMax.getZ())));
 		}
+	}
+
+	// Now add seeds to container.
+	for (int centre = 0; centre < voroCellCentres.size(); centre++)
+	{
+		addCellSeed(voroContainer, voroCellCentres.at(centre), centre, false);
 	}
 
 	// TODO:
@@ -601,7 +597,23 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	// Now that the diagram is seeded, we can fetch all the cells' meshes.
 	std::vector<ofVboMesh> cellMeshes;
 	getCellsFromContainer(voroContainer, cellMeshes, false);
+	
+	
+	// Get cell information
+	std::vector<voro::voronoicell*> cellInfo;
+	
+	voro::c_loop_all voronoiLoop(voroContainer);
+	voronoiLoop.start();
+	do 
+	{
+		voro::voronoicell* thisCell = new voro::voronoicell();
+		voroContainer.compute_cell(*thisCell, voronoiLoop);
+		cellInfo.push_back(thisCell);
+	} while (voronoiLoop.inc());
 
+	
+
+	
 
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
 	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
@@ -611,7 +623,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputShapes;
 
 	// For each voronoi cell, we'll be creating an output mesh.
-	for (int cellmesh = 0; cellmesh < cellMeshes.size(); cellmesh++)
+	for (int cellmesh = 0; cellmesh < numCells; cellmesh++)
 	{
 		// Set up indices & faces
 		for (int i = 0; i < cellMeshes.at(cellmesh).getVertices().size(); i++)
@@ -627,6 +639,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		
 		// Create the output mesh required, based on original physics mesh
 		ofMesh* cellOutputMesh = new ofMesh(*physicsObjectMesh);
+
+
 
 		// Prepare to slice mesh - transform it to the location of the physics object.
 
@@ -645,21 +659,44 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 
 		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
-		for (int face = 0; face < cellMeshes.at(cellmesh).getUniqueFaces().size(); face++)
+	
+		
+
+		for (int face = 0; face < cellInfo.at(cellmesh)->number_of_faces(); face++)
 		{
-			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
+			
 
 			if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 			{
-				cout << "Made no slices, mesh was empty. " << endl;
+				cout << "Did not slice face " << face << " of cell " << cellmesh << "." << endl;
 				continue;
 			}
 
-			// get center of face
-			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
+			// get center of face & face normal
+			ofVec3f centerOfFace;
+			ofVec3f faceNormal;
+			std::vector<int> faceVerts;
+			std::vector<double> normals;
+			std::vector<double> vertices;
+
+			cellInfo.at(cellmesh)->normals(normals);
+			cellInfo.at(cellmesh)->vertices(vertices);
+			cellInfo.at(cellmesh)->face_vertices(faceVerts);
+
+			faceNormal.x = normals.at((face * 3) + 0);
+			faceNormal.y = normals.at((face * 3) + 1);
+			faceNormal.z = normals.at((face * 3) + 2);
+
+			for (int facevert = 0; facevert < faceVerts.size(); facevert++)
+			{
+				centerOfFace += physicsObject->getPosition() + ofVec3f(vertices.at(faceVerts.at(facevert)), vertices.at(faceVerts.at(facevert) + 1), vertices.at(faceVerts.at(facevert) + 2));
+			}
+			centerOfFace /= faceVerts.size();
+
+			// Prep for slicing
 			std::vector<ofMesh*> sliced;
 
-			sliced = CutMeshWithPlane(centerOfFace, currentFace.getFaceNormal(), *cellOutputMesh);
+			sliced = CutMeshWithPlane(centerOfFace, faceNormal, *cellOutputMesh);
 
 			// slice output mesh.
 			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
@@ -692,10 +729,9 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			continue;
 			cout << "Made no physics mesh, cell was empty." << endl;
 		}
-		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
-		
-		
+
+		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
 
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
@@ -733,7 +769,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// We can now remove the original object, if desired.
 
-	physicsObject->remove();
+	//physicsObject->remove();
 
 
 	return outputShapes;
