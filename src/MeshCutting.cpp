@@ -602,6 +602,19 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<ofVboMesh> cellMeshes;
 	getCellsFromContainer(voroContainer, cellMeshes, false);
 
+	// Get cell information
+	std::vector<voro::voronoicell*> cellInfo;
+
+
+	voro::c_loop_all voronoiLoop(voroContainer);
+	voronoiLoop.start();
+	do
+	{
+		voro::voronoicell* thisCell = new voro::voronoicell();
+		voroContainer.compute_cell(*thisCell, voronoiLoop);
+		cellInfo.push_back(thisCell);
+	} while (voronoiLoop.inc());
+
 
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
 	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
@@ -611,7 +624,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputShapes;
 
 	// For each voronoi cell, we'll be creating an output mesh.
-	for (int cellmesh = 0; cellmesh < cellMeshes.size(); cellmesh++)
+	for (int cellmesh = 0; cellmesh < numCells; cellmesh++)
 	{
 		// Set up indices & faces
 		for (int i = 0; i < cellMeshes.at(cellmesh).getVertices().size(); i++)
@@ -643,9 +656,10 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			cellOutputMesh->setVertex(v, currentVertex);
 		}
 
+		ofVec3f lastFaceNormal;
 
 		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
-		for (int face = 0; face < cellMeshes.at(cellmesh).getUniqueFaces().size(); face++)
+		for (int face = 0; face < cellInfo.at(cellmesh)->number_of_faces(); face++)
 		{
 			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
 
@@ -655,14 +669,47 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 				continue;
 			}
 
+			ofVec3f faceNormal;
+
+			std::vector<int> faceVerts;
+			std::vector<double> normals;
+			std::vector<double> vertices;
+
+			cellInfo.at(cellmesh)->normals(normals);
+			cellInfo.at(cellmesh)->vertices(vertices);
+			cellInfo.at(cellmesh)->face_vertices(faceVerts);
+
+			int cif = face;
+			if (cif >= cellInfo.at(cellmesh)->number_of_faces())
+			{
+				cif = cellInfo.at(cellmesh)->number_of_faces() - 1;
+			}
+			faceNormal.x = normals.at((cif * 3) + 0);
+			faceNormal.y = normals.at((cif * 3) + 1);
+			faceNormal.z = normals.at((cif * 3) + 2);
+			faceNormal.normalize();
+			faceNormal *= -1;
+
 			// get center of face
 			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
+			ofVec3f cellCenterOfFace;
+			for (int facevert = 0; facevert < faceVerts.size(); facevert++)
+			{
+				cellCenterOfFace += physicsObject->getPosition() + ofVec3f(vertices.at(faceVerts.at(facevert)), vertices.at(faceVerts.at(facevert) + 1), vertices.at(faceVerts.at(facevert) + 2));
+			}
+			cellCenterOfFace /= faceVerts.size();
+
 			std::vector<ofMesh*> sliced;
 
-			sliced = CutMeshWithPlane(centerOfFace, currentFace.getFaceNormal(), *cellOutputMesh);
+			if (currentFace.getFaceNormal() != lastFaceNormal)
+			{
+				sliced = CutMeshWithPlane(cellCenterOfFace, faceNormal, *cellOutputMesh);
+			}
+
+			lastFaceNormal = currentFace.getFaceNormal();
 
 			// slice output mesh.
-			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
+			if (face == cellInfo.at(cellmesh)->number_of_faces() - 1)
 			{
 				// if it's the last face, we want to send back a physics object too
 				cout << "Made " << face + 1 << " slices. ";
