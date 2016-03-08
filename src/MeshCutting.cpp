@@ -415,23 +415,15 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 
 	// If there are at least some vertices in each side, send them out of this function. Otherwise, delete them.
-	if (insideMesh->getNumVertices() > 0)
-	{
-		meshList.push_back(insideMesh);
-	}
-	else
-	{
-		delete insideMesh;
-	}
 
-	if (outsideMesh->getNumVertices() > 0)
-	{
+		meshList.push_back(insideMesh);
+
+		
+	
+
+
 		meshList.push_back(outsideMesh);
-	}
-	else
-	{
-		delete outsideMesh;
-	}
+
 
 	
 
@@ -626,6 +618,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	// For each voronoi cell, we'll be creating an output mesh.
 	for (int cellmesh = 0; cellmesh < numCells; cellmesh++)
 	{
+		cout << "[ CELL : " << cellmesh << "]" << endl;
 		// Set up indices & faces
 		for (int i = 0; i < cellMeshes.at(cellmesh).getVertices().size(); i++)
 		{
@@ -661,11 +654,12 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
 		for (int face = 0; face < cellInfo.at(cellmesh)->number_of_faces(); face++)
 		{
+			cout << "    [ FACE : " << face << "]" << endl;
 			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
 
 			if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 			{
-				cout << "Made no slices, mesh was empty. " << endl;
+				cout << "    Did not slice face " << face << "." << endl;
 				continue;
 			}
 
@@ -706,13 +700,13 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 				sliced = CutMeshWithPlane(cellCenterOfFace, faceNormal, *cellOutputMesh);
 			}
 
-			lastFaceNormal = currentFace.getFaceNormal();
+			lastFaceNormal = faceNormal;
 
 			// slice output mesh.
 			if (face == cellInfo.at(cellmesh)->number_of_faces() - 1)
 			{
 				// if it's the last face, we want to send back a physics object too
-				cout << "Made " << face + 1 << " slices. ";
+				cout << "    Made " << face + 1 << " slices. ";
 			}
 			
 
@@ -736,8 +730,9 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// We also need to create a physics mesh for it too.
 		if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 		{
-			continue;
 			cout << "Made no physics mesh, cell was empty." << endl;
+			continue;
+			
 		}
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
