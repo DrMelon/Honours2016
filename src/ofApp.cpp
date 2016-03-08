@@ -52,7 +52,7 @@ void ofApp::setup()
 	testSphere = new ofxBulletSphere();
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
 	
-	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 2, 2, 2);
+	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 1, 1, 1);
 
 	testBox = new ofxBulletCustomShape();
 	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);
@@ -312,7 +312,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 		// Do voronoi test
 
-		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 4, NULL);
+		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 3, NULL);
 
 		// Move meshes to new locations
 		/*

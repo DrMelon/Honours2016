@@ -500,31 +500,39 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	for (int i = 0; i < cutMeshes.size(); i++)
 	{
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
-		
-		// Don't try to add empty meshes
-		if (cutMeshes.at(i)->getVertices().size() <= 0)
-		{
-			continue;
-		}
-		if (cutMeshes.at(i)->getIndices().size() <= 0)
-		{
-			//cutMeshes.at(i)->setupIndicesAuto();
-			continue;
-		}
-
-		newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
-		ofVec3f meshPosition = cutMeshes.at(i)->getCentroid();
-		float tmp = meshPosition.x;
-		meshPosition.x = meshPosition.z;
-		meshPosition.z = tmp;
-		ofVec3f newOffset = physObjTranslation + (meshPosition - physObjTranslation);
-		tmp = newOffset.x;
-		newOffset.x = newOffset.z;
-		newOffset.z = tmp;
-		// Creating the object requires that we offset by the relative distance between the centroids.
-		newShape->create(theWorld->world, newOffset, 1.0f);
 		if (addToWorld)
 		{
+			// Don't try to add empty meshes
+			if (cutMeshes.at(i)->getVertices().size() <= 0)
+			{
+				continue;
+			}
+			if (cutMeshes.at(i)->getIndices().size() <= 0)
+			{
+				//cutMeshes.at(i)->setupIndicesAuto();
+				continue;
+			}
+			if (!std::isfinite(cutMeshes.at(i)->getVertex(0).x))
+			{
+				continue;
+			}
+			if (!std::isnormal(cutMeshes.at(i)->getVertex(0).x))
+			{
+				continue;
+			}
+
+			newShape->addMesh(*(cutMeshes.at(i)), ofVec3f(1, 1, 1), false);
+			ofVec3f meshPosition = cutMeshes.at(i)->getCentroid();
+			float tmp = meshPosition.x;
+			meshPosition.x = meshPosition.z;
+			meshPosition.z = tmp;
+			ofVec3f newOffset = physObjTranslation + (meshPosition - physObjTranslation);
+			tmp = newOffset.x;
+			newOffset.x = newOffset.z;
+			newOffset.z = tmp;
+			// Creating the object requires that we offset by the relative distance between the centroids.
+			newShape->create(theWorld->world, newOffset, 1.0f);
+
 			newShape->add();
 			newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 		}
@@ -556,6 +564,10 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	physicsObject->getRigidBody()->getMotionState()->getWorldTransform(objectTransform);
 	// Then fetching AABB from collision mesh.
 	physicsObject->getCollisionShape()->getAabb(objectTransform, boundsMin, boundsMax);
+
+	// Expand the boundaries a little
+	boundsMin.setValue(boundsMin.getX() - 1, boundsMin.getY() - 1, boundsMin.getZ() - 1);
+	boundsMax.setValue(boundsMax.getX() + 1, boundsMax.getY() + 1, boundsMax.getZ() + 1);
 
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
