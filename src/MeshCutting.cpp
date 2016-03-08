@@ -578,7 +578,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
-	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 1, 1, 1, false, false, false, 8);
+	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 16, 16, 16, false, false, false, 8);
 	
 	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
 	if (impactPoint != NULL)
@@ -600,7 +600,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// Now that the diagram is seeded, we can fetch all the cells' meshes.
 	std::vector<ofVboMesh> cellMeshes;
-	getCellsFromContainer(voroContainer, cellMeshes, false);
+	getCellsFromContainer(voroContainer, cellMeshes, true);
 
 
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
@@ -620,6 +620,10 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		}
 		cellMeshes.at(cellmesh).setMode(OF_PRIMITIVE_TRIANGLES);
 		cellMeshes.at(cellmesh).setupIndicesAuto();
+		while (cellMeshes.at(cellmesh).getNumIndices() % 3 != 0)
+		{
+			cellMeshes.at(cellmesh).addIndex(0);
+		}
 		
 		// Create the output mesh required, based on original physics mesh
 		ofMesh* cellOutputMesh = new ofMesh(*physicsObjectMesh);
@@ -647,6 +651,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 			if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 			{
+				cout << "Made no slices, mesh was empty. " << endl;
 				continue;
 			}
 
@@ -660,6 +665,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
 			{
 				// if it's the last face, we want to send back a physics object too
+				cout << "Made " << face + 1 << " slices. ";
 			}
 			
 
@@ -673,7 +679,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 				// Iterating over this mesh, so we store the "inside" mesh
 				cellOutputMesh = sliced.at(0);	
-				//cellOutputMesh->setupIndicesAuto();
+				
 				
 			}
 
@@ -681,10 +687,15 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 		// Now we add the output mesh to the list of output meshes
 		// We also need to create a physics mesh for it too.
+		if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
+		{
+			continue;
+			cout << "Made no physics mesh, cell was empty." << endl;
+		}
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
 		
-
+		
 
 
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
@@ -722,7 +733,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// We can now remove the original object, if desired.
 
-
+	physicsObject->remove();
 
 
 	return outputShapes;
