@@ -312,7 +312,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 		// Do voronoi test
 
-		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
+		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 4, NULL);
 
 		// Move meshes to new locations
 		/*

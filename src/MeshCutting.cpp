@@ -39,11 +39,11 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	ofMesh* insideMesh;
 	ofMesh* outsideMesh;
 
-	
+
 
 	// Loop through the faces of the mesh, finding which vertices are on the inside and outside of the mesh.
 	// Also, add the vertices where the faces intersect with the plane to both lists.
-	
+
 
 	// --------------------------------v try get num vertices?
 	for (int i = 0; i < meshToCut.getUniqueFaces().size(); i++)
@@ -54,12 +54,12 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 		ofVec3f vert0 = currentFace.getVertex(0);
 		ofVec3f vert1 = currentFace.getVertex(1);
 		ofVec3f vert2 = currentFace.getVertex(2);
-		
+
 		// Discover which case we're dealing with - no verts inside, all verts inside, two verts "inside" the plane, or only one inside
 		bool Vert0Inside = PointPlaneSide(planePoint, planeNormalVector, vert0) >= 0;
 		bool Vert1Inside = PointPlaneSide(planePoint, planeNormalVector, vert1) >= 0;
 		bool Vert2Inside = PointPlaneSide(planePoint, planeNormalVector, vert2) >= 0;
-		
+
 		int VerticesInside = 0;
 
 		if (Vert0Inside)
@@ -87,7 +87,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			outsideIndices.push_back(index0);
 			outsideIndices.push_back(index1);
 			outsideIndices.push_back(index2);
-			
+
 		}
 		if (VerticesInside == 3)
 		{
@@ -96,11 +96,11 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 			insideIndices.push_back(index1);
 			insideIndices.push_back(index2);
 		}
-		
+
 		// Now, the only remaining cases are:
 		// 1. There's two vertices outside, one inside
 		// 2. There's two vertices inside, one outside
-		
+
 		// Only one vertex inside
 		if (VerticesInside == 1)
 		{
@@ -113,7 +113,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 				intersectVert1 = LerpVec3(vert0, vert1, PlaneIntersectLine(planePoint, planeNormalVector, vert0, vert1));
 				intersectVert2 = LerpVec3(vert0, vert2, PlaneIntersectLine(planePoint, planeNormalVector, vert0, vert2));
 
-				
+
 
 				// Add these vertices to the masterlist.
 				masterListVertices.push_back(intersectVert1);
@@ -294,8 +294,8 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	// Now we need to cap the meshes; that is, we need to look at the vertices that were generated along the intersection points,
 	// find an average/center point of them all, and connect that point to all the interpolated points on both meshes to fill the hole left behind from slicing.
 
-	ofVec3f averagePosition(0,0,0);
-	
+	ofVec3f averagePosition(0, 0, 0);
+
 	int firstInterpVert = meshToCut.getNumVertices();
 	int lastInterpVert = masterListVertices.size() - 1;
 	int numNewVertices = lastInterpVert - firstInterpVert;
@@ -329,7 +329,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 		{
 			// Starting at the first intersected vertex, we build an average.
 			averagePosition += masterListVertices.at(i);
-			
+
 		}
 
 		// Average out the position.
@@ -349,12 +349,12 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 		int startOutsideIndex = outsideIndices.size();
 
 		// For each of the interpolated vertices, we need to add indices to link this last one to them.
-		
+
 		for (int i = firstInterpVert; i < lastInterpVert; i++)
 		{
 			insideIndices.push_back(newVertexNumber);
 			insideIndices.push_back(i);
-			
+
 			outsideIndices.push_back(newVertexNumber);
 			outsideIndices.push_back(i);
 
@@ -369,22 +369,22 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 				insideIndices.push_back(i + 1);
 				outsideIndices.push_back(i + 1);
 			}
-			
 
-			
+
+
 		}
 	}
 
 
 
-	
+
 	// Now that the lists of indices and vertices have been finalized, we can build the new meshes.
 
 	insideMesh = new ofMesh();
 	insideMesh->setMode(OF_PRIMITIVE_TRIANGLES);
 	//insideMesh->disableIndices();
 	//insideMesh->setupIndicesAuto();
-	
+
 	outsideMesh = new ofMesh();
 	outsideMesh->setMode(OF_PRIMITIVE_TRIANGLES);
 	//outsideMesh->disableIndices();
@@ -400,7 +400,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	for (int i = 0; i < insideIndices.size(); i++)
 	{
 		insideMesh->addIndex(insideIndices.at(i));
-		
+
 	}
 	for (int i = 0; i < masterListVertices.size(); i++)
 	{
@@ -410,22 +410,30 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	for (int i = 0; i < outsideIndices.size(); i++)
 	{
 		outsideMesh->addIndex(outsideIndices.at(i));
-		
+
 	}
 
 
 	// If there are at least some vertices in each side, send them out of this function. Otherwise, delete them.
-
+	if (insideMesh->getNumVertices() > 0)
+	{
 		meshList.push_back(insideMesh);
+	}
+	else
+	{
+		delete insideMesh;
+	}
 
-		
-	
-
-
+	if (outsideMesh->getNumVertices() > 0)
+	{
 		meshList.push_back(outsideMesh);
+	}
+	else
+	{
+		delete outsideMesh;
+	}
 
 
-	
 
 	return meshList;
 }
@@ -459,7 +467,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	// Create our output
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputList;
 
-	
+
 	// Prepare to slice mesh - transform it to the location of the physics object.
 	ofMesh sliceMesh;
 	sliceMesh = *physicsObjectMesh;
@@ -482,8 +490,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 	// Store translation & rotation of physics object
 	ofVec3f physObjTranslation = physicsObject->getPosition();
 	ofQuaternion physObjRotation = physicsObject->getRotationQuat();
-	
-	
+
+
 	btVector3 shapeVelocity = physicsObject->getRigidBody()->getLinearVelocity();
 
 	// Delete original object, if desired
@@ -544,7 +552,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> SlicePhysicsObject(ofxBul
 
 
 
-	
+
 
 	return outputList;
 }
@@ -570,8 +578,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	// Now, create the container.
 	// The container is not smoothed; we want simple plane divisions between the fragments.
-	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 16, 16, 16, false, false, false, 8);
-	
+	voro::container voroContainer = voro::container(boundsMin.getX(), boundsMax.getX(), boundsMin.getY(), boundsMax.getY(), boundsMin.getZ(), boundsMax.getZ(), 1, 1, 1, false, false, false, 8);
+
 	// We must next seed the container with points; this is done either randomly, or via inverse-square based on an impact point.
 	if (impactPoint != NULL)
 	{
@@ -594,19 +602,6 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<ofVboMesh> cellMeshes;
 	getCellsFromContainer(voroContainer, cellMeshes, false);
 
-	// Get cell information
-	std::vector<voro::voronoicell*> cellInfo;
-
-
-	voro::c_loop_all voronoiLoop(voroContainer);
-	voronoiLoop.start();
-	do
-	{
-		voro::voronoicell* thisCell = new voro::voronoicell();
-		voroContainer.compute_cell(*thisCell, voronoiLoop);
-		cellInfo.push_back(thisCell);
-	} while (voronoiLoop.inc());
-
 
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
 	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
@@ -616,9 +611,8 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> outputShapes;
 
 	// For each voronoi cell, we'll be creating an output mesh.
-	for (int cellmesh = 0; cellmesh < numCells; cellmesh++)
+	for (int cellmesh = 0; cellmesh < cellMeshes.size(); cellmesh++)
 	{
-		cout << "[ CELL : " << cellmesh << "]" << endl;
 		// Set up indices & faces
 		for (int i = 0; i < cellMeshes.at(cellmesh).getVertices().size(); i++)
 		{
@@ -626,11 +620,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		}
 		cellMeshes.at(cellmesh).setMode(OF_PRIMITIVE_TRIANGLES);
 		cellMeshes.at(cellmesh).setupIndicesAuto();
-		while (cellMeshes.at(cellmesh).getNumIndices() % 3 != 0)
-		{
-			cellMeshes.at(cellmesh).addIndex(0);
-		}
-		
+
 		// Create the output mesh required, based on original physics mesh
 		ofMesh* cellOutputMesh = new ofMesh(*physicsObjectMesh);
 
@@ -649,68 +639,31 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 			cellOutputMesh->setVertex(v, currentVertex);
 		}
 
-		ofVec3f lastFaceNormal;
 
 		// For each face (plane) in this cell, we'll slice off another part of the output mesh.
-		for (int face = 0; face < cellInfo.at(cellmesh)->number_of_faces(); face++)
+		for (int face = 0; face < cellMeshes.at(cellmesh).getUniqueFaces().size(); face++)
 		{
-			cout << "    [ FACE : " << face << "]" << endl;
 			ofMeshFace currentFace = cellMeshes.at(cellmesh).getUniqueFaces().at(face);
 
 			if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
 			{
-				cout << "    Did not slice face " << face << "." << endl;
 				continue;
 			}
 
-			ofVec3f faceNormal;
-
-			std::vector<int> faceVerts;
-			std::vector<double> normals;
-			std::vector<double> vertices;
-
-			cellInfo.at(cellmesh)->normals(normals);
-			cellInfo.at(cellmesh)->vertices(vertices);
-			cellInfo.at(cellmesh)->face_vertices(faceVerts);
-
-			int cif = face;
-			if (cif >= cellInfo.at(cellmesh)->number_of_faces())
-			{
-				cif = cellInfo.at(cellmesh)->number_of_faces() - 1;
-			}
-			faceNormal.x = normals.at((cif * 3) + 0);
-			faceNormal.y = normals.at((cif * 3) + 1);
-			faceNormal.z = normals.at((cif * 3) + 2);
-			faceNormal.normalize();
-			faceNormal *= -1;
-
 			// get center of face
 			ofVec3f centerOfFace = (currentFace.getVertex(0) + currentFace.getVertex(1) + currentFace.getVertex(2)) / 3.0f;
-			ofVec3f cellCenterOfFace;
-			for (int facevert = 0; facevert < faceVerts.size(); facevert++)
-			{
-				cellCenterOfFace += physicsObject->getPosition() + ofVec3f(vertices.at(faceVerts.at(facevert)), vertices.at(faceVerts.at(facevert) + 1), vertices.at(faceVerts.at(facevert) + 2));
-			}
-			cellCenterOfFace /= faceVerts.size();
-
 			std::vector<ofMesh*> sliced;
 
-			if (currentFace.getFaceNormal() != lastFaceNormal)
-			{
-				sliced = CutMeshWithPlane(cellCenterOfFace, faceNormal, *cellOutputMesh);
-			}
-
-			lastFaceNormal = faceNormal;
+			sliced = CutMeshWithPlane(centerOfFace, currentFace.getFaceNormal(), *cellOutputMesh);
 
 			// slice output mesh.
-			if (face == cellInfo.at(cellmesh)->number_of_faces() - 1)
+			if (face == cellMeshes.at(cellmesh).getUniqueFaces().size() - 1)
 			{
 				// if it's the last face, we want to send back a physics object too
-				cout << "    Made " << face + 1 << " slices. ";
 			}
-			
 
-		    // store only the "inside" mesh of this slice, discarding the other.
+
+			// store only the "inside" mesh of this slice, discarding the other.
 			if (sliced.size() > 0)
 			{
 				if (sliced.size() > 1)
@@ -719,41 +672,35 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 				}
 
 				// Iterating over this mesh, so we store the "inside" mesh
-				cellOutputMesh = sliced.at(0);	
-				
-				
+				cellOutputMesh = sliced.at(0);
+				//cellOutputMesh->setupIndicesAuto();
+
 			}
 
 		}
 
 		// Now we add the output mesh to the list of output meshes
 		// We also need to create a physics mesh for it too.
-		if (cellOutputMesh->getNumVertices() <= 0 || cellOutputMesh->getNumIndices() <= 0)
-		{
-			cout << "Made no physics mesh, cell was empty." << endl;
-			continue;
-			
-		}
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
-		
-		
+
+
 
 
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
 		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
-		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true); 
+		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true);
 		ofVec3f meshPosition = cellOutputMesh->getCentroid();
 		ofVec3f distancer = (meshPosition - physicsObject->getPosition());
 		ofVec3f newOffset = physicsObject->getPosition() + distancer;
 		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
-		
+
 
 		// Now simplify the render mesh to fit the physics mesh
 		//cellOutputMesh->clear();
 		//btConvexHullShape* physMesh = (btConvexHullShape*)newShape->shapes.at(0);
-		
+
 		//for (int i = 0; i < physMesh->getNumVertices(); i++)
 		//{
 		//	btVector3 vert;
@@ -761,21 +708,21 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		//	cellOutputMesh->addVertex(ofVec3f(vert.getX(), vert.getY(), vert.getZ()));
 		//}
 
-		
+
 		//ofVec3f meshPosition = newShape->getCentroid();
 
-		
+
 
 		//newShape->getRigidBody()->setLinearVelocity(shapeVelocity);
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
 		cout << "Cell Verts: " << cellOutputMesh->getNumVertices() << endl;
-		
+
 	}
 
 	// We can now remove the original object, if desired.
 
-	physicsObject->remove();
+
 
 
 	return outputShapes;
