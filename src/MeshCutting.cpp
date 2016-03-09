@@ -673,6 +673,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 				// Iterating over this mesh, so we store the "inside" mesh
 				cellOutputMesh = sliced.at(0);
+				cellOutputMesh->mergeDuplicateVertices(); // simplify mesh
 				//cellOutputMesh->setupIndicesAuto();
 
 			}
