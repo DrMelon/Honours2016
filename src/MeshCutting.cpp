@@ -831,7 +831,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	}
 
 	// We can now remove the original object, if desired.
-
+	physicsObject->remove();
 
 
 

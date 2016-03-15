@@ -315,6 +315,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 		// Do voronoi test
 
 		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
+		e.target->setName("Slice Done");
 
 		// Move meshes to new locations
 		/*
