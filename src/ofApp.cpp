@@ -30,6 +30,8 @@ void ofApp::setup()
 
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
+	theCamera->setNearClip(0.01f);
+	theCamera->setFarClip(1500.f);
 	
 	// Scalar value for shader to determine if we should use smoothed normals or not on the grid terrain.
 	GridExpensiveNormals = 0.0f;
@@ -312,7 +314,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 		// Do voronoi test
 
-		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 4, NULL);
+		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
 
 		// Move meshes to new locations
 		/*
