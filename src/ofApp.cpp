@@ -222,7 +222,7 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-
+	
 
 }
 
@@ -244,9 +244,20 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button)
 {
-	if (button == 2)
+	if (button == 2) // Right Mouse
 	{
 		theCamera->toggleControl();
+	}
+
+	if (button == 1) // Middle Mouse
+	{
+		// Trace a point on the terrain, add a csg sphere
+		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+		{
+
+			((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(ofVec3f(ofRandomf()*100, 50, ofRandomf()*100), 50);
+			std::cout << "Added CSG Sphere." << std::endl;
+		}
 	}
 	
 }

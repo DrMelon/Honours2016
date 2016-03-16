@@ -19,6 +19,7 @@
 // Paul Bourke's Triangle Table from his 1994 paper, Polygonizing A Scalar Field
 
 
+
 class TerrainGridMarchingCubes : public Terrain
 {
 	private:
@@ -32,6 +33,12 @@ class TerrainGridMarchingCubes : public Terrain
 		ofBufferObject* triangleBuffer;
 		ofTexture* triangleTable;
 		GLuint triTableTex;
+
+		// Store CSG operations as a texture
+		std::vector<GLfloat> csgOperations;
+		ofBufferObject* csgBuffer;
+		ofTexture* csgTable;
+		GLuint csgTableTex;
 
 		// For multipass
 		ofBufferObject* outputBuffer;
@@ -56,6 +63,7 @@ class TerrainGridMarchingCubes : public Terrain
 		virtual void Draw();
 		virtual void Rebuild(int newX = 16, int newY = 16, int newZ = 16, float newScale = 10.0f);
 		virtual void SetOffset(ofVec3f newOffset);
+		void CSGAddSphere(ofVec3f Position, float Radius);
 		
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;

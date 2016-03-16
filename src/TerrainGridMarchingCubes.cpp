@@ -33,6 +33,19 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	// Assign output buffer to feedback
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outputBuffer->getId());
 
+	// Create CSG operations buffer
+	csgOperations.clear();
+	CSGAddSphere(ofVec3f(0, 0, 0), 10);
+	
+
+	csgBuffer = new ofBufferObject();
+	csgBuffer->allocate();
+	csgBuffer->bind(GL_TEXTURE_BUFFER);
+	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
+
+	csgTable = new ofTexture();
+	csgTable->allocateAsBufferTexture(*csgBuffer, GL_R32F);
+	csgTable->setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 
 	// Create triangle table.
 	triangleBuffer = new ofBufferObject();
@@ -47,7 +60,10 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	
 	theShader->begin();
 	theShader->setUniformTexture("tritabletex", *triangleTable, 0);
+	theShader->setUniformTexture("csgtex", *csgTable, 1);
 	theShader->end();
+
+	
 	
 	glGenQueries(1, &feedbackQuery);
 
@@ -70,7 +86,16 @@ void TerrainGridMarchingCubes::Draw()
 	// The drawVertices function draws the vertices in order, and I'm rendering them as GL_POINT type.
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
 
+	// Update csg operations table
+	//csgBuffer->allocate();
+	//csgBuffer->bind(GL_TEXTURE_BUFFER);
+	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
 	
+	
+
+	//csgTable = new ofTexture();
+	//csgTable->allocateAsBufferTexture(*csgBuffer, GL_R32F);
+	//csgTable->setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 
 	// Draw using shader.
 	theShader->begin();
@@ -79,6 +104,8 @@ void TerrainGridMarchingCubes::Draw()
 		theShader->setUniform1f("isolevel", 0);
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 		theShader->setUniform1f("time", time);
+		theShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
+		theShader->setUniformTexture("csgtex", *csgTable, 1);
 
 		if (updatePhysicsMesh)
 		{
@@ -188,6 +215,25 @@ void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 		updatePhysicsMesh = true;
 	}
 	OffsetPosition = newOffset;
+}
+
+// CSG Operations on this kind of terrain work by filling a texture buffer.
+// The texture is 8 elements wide: 
+// First element: Add/Subtract operation, 0 or 1
+// Second: Shape to be defined. 0: Sphere, 1: Box,
+// For spheres, the next 4 elements define the position & radius of the sphere.
+// The remaining two are left blank
+
+void TerrainGridMarchingCubes::CSGAddSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
 }
 
 

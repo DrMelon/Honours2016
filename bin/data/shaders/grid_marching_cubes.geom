@@ -22,6 +22,8 @@ uniform mat4 projectionMatrix;
 uniform mat4 textureMatrix;
 uniform mat4 modelViewProjectionMatrix;
 uniform samplerBuffer tritabletex;
+uniform samplerBuffer csgtex;
+uniform float numberOfCSG;
 
 // This buffer is written about in more detail in the main application; 
 // its purpose is to transfer information about additions/removals to the terrain.
@@ -190,7 +192,16 @@ float CSG_Subtract( float density1, float density2 )
 	return min(density1, density2 - isolevel);
 }
 
+int triTable(int cube, int index)
+{
+	return int(texelFetch(tritabletex, (index + 16*cube)).r);
+}
 
+float csgTable(int x, int y)
+{
+	//return 0.0f;
+	return float(texelFetch(csgtex, (x + 8*y)).r);
+}
 
 
 // This is the density function that represents our entire terrain. 
@@ -209,6 +220,20 @@ float DensityFunction(vec3 worldspaceposition)
 	density += (noise_g(worldspaceposition / 40)) * 50.0f;
 
 	// Perform CSG functions here.
+
+	for(int i = 1; i < int(numberOfCSG); i++)
+	{
+
+		if(csgTable(0, i) == 0)
+		{
+			//Add mode
+			if(csgTable(1, i) == 0)
+			{
+				// Sphere mode
+				density = CSG_Union(density, CSG_Sphere( vec3(csgTable(2, i), csgTable(3, i), csgTable(4, i)), csgTable(5, i), worldspaceposition));
+			}
+		}
+	}
 	//density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
 	//density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));
 	//density = CSG_Union(density, CSG_RoundBox(vec3(0.0f, 50.0f, 130.0f), vec3(30.0f, 45.0f*sin(time)+45.0f, 30.0f*cos(time)+30.0f), worldspaceposition, 5.0f));
@@ -293,10 +318,7 @@ vec3 InterpolateVertex(vec3 point1, vec3 point2, float density1, float density2)
 
 }
 
-int triTable(int cube, int index)
-{
-	return int(texelFetch(tritabletex, (index + 16*cube)).r);
-}
+
 
 
 void main()
