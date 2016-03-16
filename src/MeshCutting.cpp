@@ -426,6 +426,23 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 
 	}
 
+	// Calculate normals
+	
+	for (int i = 0; i < insideMesh->getVertices().size(); i++)
+	{
+		insideMesh->addNormal( (insideMesh->getVertices().at(i) - insideMesh->getCentroid()).normalized() );
+	}
+
+	for (int i = 0; i < outsideMesh->getVertices().size(); i++)
+	{
+		outsideMesh->addNormal((outsideMesh->getVertices().at(i) - outsideMesh->getCentroid()).normalized());
+	}
+
+
+
+
+	
+
 
 	// If there are at least some vertices in each side, send them out of this function. Otherwise, delete them.
 

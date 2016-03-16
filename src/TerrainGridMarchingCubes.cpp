@@ -236,6 +236,18 @@ void TerrainGridMarchingCubes::CSGAddSphere(ofVec3f Position, float Radius)
 	csgOperations.push_back(0);
 }
 
+void TerrainGridMarchingCubes::CSGRemoveSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(1);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+}
+
 
 
 void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh)

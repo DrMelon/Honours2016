@@ -32,6 +32,10 @@ void ofApp::setup()
 	theCamera = new ofxFirstPersonCamera();
 	theCamera->setNearClip(0.01f);
 	theCamera->setFarClip(1500.f);
+
+	// Create lighting shader
+	lightShader = new ofShader();
+	lightShader->load("data/shaders/directional_light.vert", "data/shaders/directional_light.frag");
 	
 	// Scalar value for shader to determine if we should use smoothed normals or not on the grid terrain.
 	GridExpensiveNormals = 0.0f;
@@ -136,7 +140,7 @@ void ofApp::draw()
 		// Draw the terrain.
 		theTerrain->Draw();
 
-		// Debug: draw the physics mesh
+		// Debug: draw the physics mesh over the top
 		ofDisableDepthTest();
 		if (thePhysicsWorld->world->getDebugDrawer() != 0)
 		{
@@ -150,8 +154,12 @@ void ofApp::draw()
 		
 		
 		ofEnableDepthTest();
-		// Draw physics sphere
 
+
+		// Enable light shader
+		lightShader->begin();
+
+		// Draw physics objects.
 		testSphere->draw();
 
 		// Draw physics box
@@ -171,14 +179,7 @@ void ofApp::draw()
 			testBox->restoreTransformGL();
 		}
 		
-		// Draw voronoi
-		for (int i = 0; i < voronoiMeshes.size(); i++)
-		{
-			voronoiMeshes.at(i).drawWireframe();
-		}
-
-
-
+		// Draw sliced up objects
 		for (int i = 0; i < cutPhysicsObjects.size(); i++)
 		{
 			//cutPhysicsObjects.at(i).second->draw();
@@ -195,6 +196,9 @@ void ofApp::draw()
 			
 			cutPhysicsObjects.at(i).second->restoreTransformGL();
 		}
+
+		// stop using lights
+		lightShader->end();
 
 	theCamera->end(); // Cease drawing with the camera.
 
@@ -255,8 +259,8 @@ void ofApp::mousePressed(int x, int y, int button)
 		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 		{
 
-			((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(ofVec3f(ofRandomf()*100, 50, ofRandomf()*100), 50);
-			std::cout << "Added CSG Sphere." << std::endl;
+			((TerrainGridMarchingCubes*)theTerrain)->CSGRemoveSphere(ofVec3f(ofRandomf()*100, 50, ofRandomf()*100), 50);
+			std::cout << "Removed CSG Sphere." << std::endl;
 		}
 	}
 	

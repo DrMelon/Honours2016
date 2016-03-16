@@ -233,6 +233,15 @@ float DensityFunction(vec3 worldspaceposition)
 				density = CSG_Union(density, CSG_Sphere( vec3(csgTable(2, i), csgTable(3, i), csgTable(4, i)), csgTable(5, i), worldspaceposition));
 			}
 		}
+		if(csgTable(0, i) == 1)
+		{
+			//Subtract mode
+			if(csgTable(1, i) == 0)
+			{
+				// Sphere mode
+				density = CSG_Subtract(density, CSG_Sphere( vec3(csgTable(2, i), csgTable(3, i), csgTable(4, i)), csgTable(5, i), worldspaceposition));
+			}
+		}
 	}
 	//density = CSG_Union(density, CSG_Sphere(vec3(0.0f, 150.0f*sin(time), 0.0f), 25.0f, worldspaceposition));
 	//density = CSG_Subtract(density, CSG_Sphere(vec3(129.0f, 50.0f*sin(time), 0.0f), 50.0f, worldspaceposition));

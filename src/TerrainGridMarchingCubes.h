@@ -64,6 +64,7 @@ class TerrainGridMarchingCubes : public Terrain
 		virtual void Rebuild(int newX = 16, int newY = 16, int newZ = 16, float newScale = 10.0f);
 		virtual void SetOffset(ofVec3f newOffset);
 		void CSGAddSphere(ofVec3f Position, float Radius);
+		void CSGRemoveSphere(ofVec3f Position, float Radius);
 		
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;

@@ -61,6 +61,9 @@ class ofApp : public ofBaseApp{
 		Terrain* theTerrain;
 		TERRAIN_TYPE currentTerrainType;
 
+		// Lighting shader
+		ofShader* lightShader;
+
 		// Physics Stuff - Built from Vertices from the GPU.
 		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 		

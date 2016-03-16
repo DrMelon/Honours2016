@@ -315,6 +315,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\data\shaders\directional_light.frag" />
+    <None Include="bin\data\shaders\directional_light.vert" />
     <None Include="bin\data\shaders\grid_marching_cubes.frag" />
     <None Include="bin\data\shaders\grid_marching_cubes.geom" />
     <None Include="bin\data\shaders\grid_marching_cubes.vert" />
