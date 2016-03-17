@@ -8,6 +8,12 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theGrid->setUseVbo(true);
 
 	theShader = new ofShader();
+	densityFuncShader = new ofShader();
+	densityFuncShader->load("data/shaders/render_density.vert", "data/shaders/render_density.frag");
+	densityFuncFBO = new ofFbo();
+	densityFuncFBO->allocate(17 * 17, 17, GL_RGBA);
+	
+
 
 	// Load shader files
 	theShader->setGeometryInputType(GL_POINTS);
@@ -88,18 +94,33 @@ void TerrainGridMarchingCubes::Draw()
 	// Update csg operations table
 	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
 	
-	
+	// Draw density
+	densityFuncFBO->begin();
+	densityFuncShader->begin();
+		densityFuncShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
+		densityFuncShader->setUniform3f("gridRes", ofVec3f(16, 16, 16));
+		densityFuncShader->setUniform3f("gridOffset", OffsetPosition);
+		densityFuncShader->setUniform2f("screenResolution", ofVec2f(1280, 720));
+		densityFuncShader->setUniformTexture("csgtex", *csgTable, 1);
+		ofClear(255, 255, 255, 0);
+		ofSetColor(ofColor::red);
+		ofDrawRectangle(0, 0, 17*17, 17);
 
+	densityFuncShader->end();
+	densityFuncFBO->end();
+
+	
 
 	// Draw using shader.
 	theShader->begin();
 		theShader->setUniform1f("gridscale", PointScale);
 		theShader->setUniform3f("gridoffset", OffsetPosition);
-		theShader->setUniform1f("isolevel", 0);
+		theShader->setUniform1f("isolevel", 10.0f);
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 		theShader->setUniform1f("time", time);
 		theShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
 		theShader->setUniformTexture("csgtex", *csgTable, 1);
+		theShader->setUniformTexture("denstex", densityFuncFBO->getTexture(), 2);
 
 		if (updatePhysicsMesh)
 		{
@@ -107,6 +128,8 @@ void TerrainGridMarchingCubes::Draw()
 			glBeginTransformFeedback(GL_TRIANGLES);
 			
 			theGrid->draw();
+		
+			
 			glEndTransformFeedback();
 			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 		}
@@ -170,7 +193,18 @@ void TerrainGridMarchingCubes::Draw()
 		feedback = 0;
 	}
 
-	
+	// save fbo
+	ofPixels save;
+	densityFuncFBO->readToPixels(save);
+	ofImage saveImg(save);
+	saveImg.saveImage("bep.png");
+
+	ofDisableAlphaBlending();
+	ofDisableDepthTest();
+	densityFuncFBO->draw(0, 0);
+	ofEnableDepthTest();
+	ofEnableAlphaBlending();
+
 }
 
 void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newScale)

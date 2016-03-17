@@ -24,6 +24,7 @@ uniform mat4 modelViewProjectionMatrix;
 uniform samplerBuffer tritabletex;
 uniform samplerBuffer csgtex;
 uniform float numberOfCSG;
+uniform sampler3D denstex;
 
 // This buffer is written about in more detail in the main application; 
 // its purpose is to transfer information about additions/removals to the terrain.
@@ -213,11 +214,19 @@ float csgTable(int x, int y)
 //
 float DensityFunction(vec3 worldspaceposition)
 {
+
+	// get texture position from ws
+
+	//return texture(denstex, worldspaceposition).r;
+
 	float density = 0.0f;
 
 
 	// Set a floor at 0, 0, 0.
 	density = -worldspaceposition.y;
+
+	//return worldspaceposition.y;
+
 	
 	// Perturb the surface with noise.
 	density += (noise_g(worldspaceposition / 80)) * 50.0f;

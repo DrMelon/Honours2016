@@ -29,6 +29,10 @@ class TerrainGridMarchingCubes : public Terrain
 		// For rendering
 		ofShader* theShader;
 
+		// test
+		ofShader* densityFuncShader;
+		ofFbo* densityFuncFBO;
+
 		// For marching cubes, store the triangle table as a texture.
 		ofBufferObject* triangleBuffer;
 		ofTexture* triangleTable;

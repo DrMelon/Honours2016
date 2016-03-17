@@ -322,6 +322,8 @@
     <None Include="bin\data\shaders\grid_marching_cubes.vert" />
     <None Include="bin\data\shaders\passthrough.frag" />
     <None Include="bin\data\shaders\passthrough.vert" />
+    <None Include="bin\data\shaders\render_density.frag" />
+    <None Include="bin\data\shaders\render_density.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ProjectExtensions>

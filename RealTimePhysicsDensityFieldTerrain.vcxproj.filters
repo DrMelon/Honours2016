@@ -472,5 +472,11 @@
     <None Include="bin\data\shaders\directional_light.frag">
       <Filter>src\shaders</Filter>
     </None>
+    <None Include="bin\data\shaders\render_density.vert">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\render_density.frag">
+      <Filter>src\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

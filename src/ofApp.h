@@ -64,6 +64,8 @@ class ofApp : public ofBaseApp{
 		// Lighting shader
 		ofShader* lightShader;
 
+		
+
 		// Physics Stuff - Built from Vertices from the GPU.
 		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 		
