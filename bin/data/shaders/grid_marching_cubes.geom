@@ -44,6 +44,8 @@ in gl_PerVertex
 in vec4 worldspaceposition[];
 in float worldspacescale[];
 in vec3 gridoffset_g[];
+in mat3 norm_mat[];
+in vec3 lightdir[];
 
 out gl_PerVertex
 {
@@ -54,6 +56,8 @@ out gl_PerVertex
 
 out vec3 vertexPosition;
 out vec3 normalOfVertex;
+out vec3 lightvdir;
+out vec3 posnorm;
 
 //
 // Noise functions borrowed from: [SOURCE]
@@ -424,6 +428,8 @@ void main()
 						normalOfVertex = normalize(normalOfVertex);
 					}			
 					
+					posnorm = normalize(norm_mat[0] * normalOfVertex);
+					lightvdir = lightdir[0];
 					vertexPosition = vertex0;		
 					
 					EmitVertex();
@@ -437,6 +443,8 @@ void main()
 						normalOfVertex = normalize(normalOfVertex);
 					}	
 
+					posnorm = normalize(norm_mat[0] * normalOfVertex);
+					lightvdir = lightdir[0];
 					vertexPosition = vertex1;
 					
 					EmitVertex();
@@ -450,6 +458,8 @@ void main()
 						normalOfVertex = normalize(normalOfVertex);
 					}	
 
+					posnorm = normalize(norm_mat[0] * normalOfVertex);
+					lightvdir = lightdir[0];
 					vertexPosition = vertex2;
 					
 					EmitVertex();

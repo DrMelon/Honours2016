@@ -18,19 +18,19 @@ in vec4 color;
 in vec4 normal;
 in vec2 texcoord;
 
-out vec4 posnorm;
+out vec3 posnorm;
 out vec4 vertcol;
 out vec4 eye;
-out vec4 lightdir;
+out vec3 lightdir;
 
 void main()
 {
-	mat4 norm_mat = transpose(inverse(modelViewMatrix));
+	mat3 norm_mat = transpose(inverse(mat3(modelViewMatrix)));
 
 	mat4 modelMatrix = modelViewMatrix * inverse(viewMatrix);
 
-	lightdir = normalize(vec4(1.0, 0.0, 0.0, 0.0));
-	posnorm = normalize(normal);
+	lightdir = vec3(normalize((viewMatrix) * vec4(1.0, 1.0, 0.0, 0.0)));
+	posnorm = normalize(norm_mat * vec3(normal));
 	vertcol = color;
 	eye = -(modelViewMatrix * position);
 

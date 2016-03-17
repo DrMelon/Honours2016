@@ -15,11 +15,16 @@ out vec4 outcolour;
 
 
 in vec3 normalOfVertex;
+in vec3 lightvdir;
+in vec3 posnorm;
 
 void main()
 {
-	
-	outcolour = vec4(normalOfVertex.x, normalOfVertex.y, normalOfVertex.z, 1.0);
+	vec3 lightdir = vec3(1.0, 1.0, 0.0);
+	float lightIntensity = max(dot(normalize(normalOfVertex), normalize(lightdir)), 0.0);
+	vec4 lightCol = max(lightIntensity * vec4(1.0, 1.0, 1.0, 1.0), vec4(0.4, 0.4, 0.4, 1.0));
+
+	outcolour = vec4(0.2, 1.0, 0.05, 1.0) * lightCol;
 
 	//float fogAmt = ((gl_FragCoord.z / gl_FragCoord.w) / 128.0f);
 

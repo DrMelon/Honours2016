@@ -41,3 +41,8 @@ void Terrain::SetOffset(ofVec3f newOffset)
 
 	OffsetPosition = newOffset;
 }
+
+ofVec3f Terrain::GetOffset()
+{
+	return OffsetPosition;
+}

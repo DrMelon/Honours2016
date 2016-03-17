@@ -25,6 +25,6 @@ class Terrain
 		virtual void Draw();
 
 		virtual void SetOffset(ofVec3f newOffset);
-		
+		virtual ofVec3f GetOffset();
 		
 };

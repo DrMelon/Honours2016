@@ -258,9 +258,10 @@ void ofApp::mousePressed(int x, int y, int button)
 		// Trace a point on the terrain, add a csg sphere
 		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 		{
-
-			((TerrainGridMarchingCubes*)theTerrain)->CSGRemoveSphere(ofVec3f(ofRandomf()*100, 50, ofRandomf()*100), 50);
-			std::cout << "Removed CSG Sphere." << std::endl;
+			ofVec3f removePos = (theCamera->getPosition() + (theCamera->getPosition() - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()));
+			
+			((TerrainGridMarchingCubes*)theTerrain)->CSGRemoveSphere(removePos, 25);
+			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
 		}
 	}
 	

@@ -23,7 +23,7 @@
 class TerrainGridMarchingCubes : public Terrain
 {
 	private:
-		of3dPrimitive* theGrid;
+		
 		ofVec3f OffsetPosition;
 
 		// For rendering
@@ -48,6 +48,7 @@ class TerrainGridMarchingCubes : public Terrain
 
 	public:
 		// Fields
+		of3dPrimitive* theGrid;
 		int XDimension = 16;
 		int YDimension = 16;
 		int ZDimension = 16;
