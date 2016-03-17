@@ -22,7 +22,7 @@ void main()
 {
 	vec3 lightdir = vec3(1.0, 1.0, 0.0);
 	float lightIntensity = max(dot(normalize(normalOfVertex), normalize(lightdir)), 0.0);
-	vec4 lightCol = max(lightIntensity * vec4(1.0, 1.0, 1.0, 1.0), vec4(0.4, 0.4, 0.4, 1.0));
+	vec4 lightCol = max(lightIntensity * vec4(1.0, 1.0, 1.0, 1.0), vec4(0.25, 0.25, 0.25, 1.0));
 
 	outcolour = vec4(0.2, 1.0, 0.05, 1.0) * lightCol;
 

@@ -13,8 +13,7 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader->setGeometryInputType(GL_POINTS);
 	theShader->setGeometryOutputCount(16);
 	theShader->setGeometryOutputType(GL_TRIANGLE_STRIP);
-	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag", "data/shaders/grid_marching_cubes.geom");
-	//theShader->load("data/shaders/grid_marching_cubes.vert", "data/shaders/grid_marching_cubes.frag");
+
 	// Manual Shader Setup
 	theShader->setupShaderFromFile(GL_VERTEX_SHADER, "data/shaders/grid_marching_cubes.vert");
 	theShader->setupShaderFromFile(GL_GEOMETRY_SHADER, "data/shaders/grid_marching_cubes.geom");
@@ -87,15 +86,10 @@ void TerrainGridMarchingCubes::Draw()
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
 
 	// Update csg operations table
-	//csgBuffer->allocate();
-	//csgBuffer->bind(GL_TEXTURE_BUFFER);
 	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
 	
 	
 
-	//csgTable = new ofTexture();
-	//csgTable->allocateAsBufferTexture(*csgBuffer, GL_R32F);
-	//csgTable->setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 
 	// Draw using shader.
 	theShader->begin();

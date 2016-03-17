@@ -831,7 +831,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
 		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
-		cellOutputMesh->mergeDuplicateVertices(); // simplify mesh
+		//cellOutputMesh->mergeDuplicateVertices(); // simplify mesh
 		
 		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true);
 		ofVec3f meshPosition = cellOutputMesh->getCentroid();
@@ -839,9 +839,6 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		ofVec3f newOffset = physicsObject->getPosition() + distancer;
 		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
-
-		
-		
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
 		cout << "Cell Verts: " << cellOutputMesh->getNumVertices() << endl;
