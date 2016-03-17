@@ -58,7 +58,7 @@ void ofApp::setup()
 	testSphere = new ofxBulletSphere();
 	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
 	
-	testBoxMesh = new ofBoxPrimitive(5, 5, 5, 1, 1, 1);
+	testBoxMesh = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
 
 	testBox = new ofxBulletCustomShape();
 	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);

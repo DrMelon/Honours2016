@@ -427,18 +427,20 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 	}
 
 	// Calculate normals
+	ofVec3f centroidInside = insideMesh->getCentroid();
+	ofVec3f centroidOutside = outsideMesh->getCentroid();
 	
 	for (int i = 0; i < insideMesh->getVertices().size(); i++)
 	{
-		insideMesh->addNormal( (insideMesh->getVertices().at(i) - insideMesh->getCentroid()).normalized() );
+		insideMesh->addNormal( (insideMesh->getVertices().at(i) - centroidInside).normalized() );
 	}
 
 	for (int i = 0; i < outsideMesh->getVertices().size(); i++)
 	{
-		outsideMesh->addNormal((outsideMesh->getVertices().at(i) - outsideMesh->getCentroid()).normalized());
+		outsideMesh->addNormal((outsideMesh->getVertices().at(i) - centroidOutside).normalized());
 	}
 
-
+	
 
 
 	
@@ -823,14 +825,13 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		}
 
 
-
 		// Now we add the output mesh to the list of output meshes
 		// We also need to create a physics mesh for it too.
 		ofxBulletCustomShape* newShape = new ofxBulletCustomShape();
 
 		// When we generate the physics mesh, we use convex hull (delauney triangulation) built into bullet.
 		// This prevents physics meshes with large numbers of vertices from being created by the repeated slicing.
-		//cellOutputMesh->mergeDuplicateVertices(); // simplify mesh
+		cellOutputMesh->mergeDuplicateVertices(); // simplify mesh
 		
 		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true);
 		ofVec3f meshPosition = cellOutputMesh->getCentroid();
