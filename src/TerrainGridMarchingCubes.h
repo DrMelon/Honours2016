@@ -53,6 +53,8 @@ class TerrainGridMarchingCubes : public Terrain
 	public:
 		// Fields
 		of3dPrimitive* theGrid;
+		ofImage* noiseImage;
+
 		int XDimension = 16;
 		int YDimension = 16;
 		int ZDimension = 16;
@@ -73,6 +75,7 @@ class TerrainGridMarchingCubes : public Terrain
 		
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
+		ofMesh* test;
 
 		void UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 };

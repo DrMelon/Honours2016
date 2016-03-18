@@ -12,7 +12,7 @@ void ofApp::setup()
 {
 	// Set maximum framerate.
 	ofSetFrameRate(60);
-	ofSetBackgroundColor(ofColor(182, 227, 242));
+	ofSetBackgroundColor(ofColor(0,0,0));
 	ofSetVerticalSync(true);
 
 	// Set up z-buffer.

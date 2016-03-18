@@ -24,11 +24,11 @@ uniform mat4 modelViewProjectionMatrix;
 uniform samplerBuffer tritabletex;
 uniform samplerBuffer csgtex;
 uniform float numberOfCSG;
-uniform sampler3D denstex;
+uniform sampler2D denstex;
 
 // This buffer is written about in more detail in the main application; 
 // its purpose is to transfer information about additions/removals to the terrain.
-uniform samplerBuffer CSGOperations;
+
 
 uniform float isolevel;
 uniform float expensiveNormals;
@@ -67,7 +67,22 @@ float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
 
+vec4 texlook(sampler2D tex, vec3 p, float size)
+{
+	vec2 uv;
+	uv.x = p.x + (size * p.z);
+	uv.y = p.y;
+	
+
+	return texture(tex, uv);
+}
+
 float noise_g(vec3 p){
+
+	// noise lookup instead
+
+	return texlook(denstex, p, 1.0 / 128.0).r;
+
     vec3 a = floor(p);
     vec3 d = p - a;
     d = d * d * (3.0 - 2.0 * d);
@@ -216,8 +231,8 @@ float DensityFunction(vec3 worldspaceposition)
 {
 
 	// get texture position from ws
+	//return (texture(denstex, worldspaceposition).r - worldspaceposition.y) * 50.0f;
 
-	//return texture(denstex, worldspaceposition).r;
 
 	float density = 0.0f;
 
@@ -225,7 +240,6 @@ float DensityFunction(vec3 worldspaceposition)
 	// Set a floor at 0, 0, 0.
 	density = -worldspaceposition.y;
 
-	//return worldspaceposition.y;
 
 	
 	// Perturb the surface with noise.
@@ -410,7 +424,8 @@ void main()
 
 	
 			// Create the triangles, and set up per-vertex normals.			
-			for(int j = 0; triTable(cubeIndex, j) != -1; j += 3)
+			//for(int j = 0; triTable(cubeIndex, j) != -1; j += 3) //crash w/ texture mode?
+			for(int j = 0; j < 16; j += 3)
 			{
 				// For each triangle...
 				if(triTable(cubeIndex, j) != -1)

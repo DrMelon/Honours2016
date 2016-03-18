@@ -92,7 +92,7 @@ float DensityFunction(vec3 worldspaceposition)
 	// Set a floor at 0, 0, 0.
 	density = -worldspaceposition.y;
 
-	return density;
+	
 	
 	// Perturb the surface with noise.
 	density += (noise_g(worldspaceposition / 80.0)) * 50.0f;
@@ -150,11 +150,16 @@ void main()
 	}
 	float yCoord = screenResolution.y - uv.y;
 
+	// Adjust to center of grid
+	//xCoord -= gridRes.x / 2;
+	//yCoord -= gridRes.y / 2;
+	//zCoord -= gridRes.z / 2;
+
 	// Sample density at this point
 	float density = DensityFunction(vec3(xCoord,yCoord,zCoord) + gridOffset );
 
 	// Colour.R = sampled density.
 
-	finalColor = vec4(density, 0, 0, 1.0);
+	finalColor = vec4((density + (yCoord + gridOffset.y)) / 50.0f, 0, 0, 1.0);
 	
 }

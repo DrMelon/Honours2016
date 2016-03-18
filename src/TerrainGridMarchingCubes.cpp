@@ -7,12 +7,17 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theGrid = new of3dPrimitive();
 	theGrid->setUseVbo(true);
 
+	// Load noise
+	ofDisableArbTex();
+	noiseImage = new ofImage("data/noise.png");
+	
 	theShader = new ofShader();
 	densityFuncShader = new ofShader();
 	densityFuncShader->load("data/shaders/render_density.vert", "data/shaders/render_density.frag");
 	densityFuncFBO = new ofFbo();
 	densityFuncFBO->allocate(17 * 17, 17, GL_RGBA);
 	
+
 
 
 	// Load shader files
@@ -66,9 +71,10 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 	theShader->begin();
 	theShader->setUniformTexture("tritabletex", *triangleTable, 0);
 	theShader->setUniformTexture("csgtex", *csgTable, 1);
+	theShader->setUniformTexture("denstex", noiseImage->getTexture(), 2);
 	theShader->end();
 
-	
+	test = 0;
 	
 	glGenQueries(1, &feedbackQuery);
 
@@ -93,12 +99,19 @@ void TerrainGridMarchingCubes::Draw()
 
 	// Update csg operations table
 	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
+
+	// Before drawing density, disable colour clamping.
+	glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
+	glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
+	glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
+	
 	
 	// Draw density
 	densityFuncFBO->begin();
 	densityFuncShader->begin();
 		densityFuncShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
 		densityFuncShader->setUniform3f("gridRes", ofVec3f(16, 16, 16));
+		densityFuncShader->setUniform1f("isolevel", 0.1f);
 		densityFuncShader->setUniform3f("gridOffset", OffsetPosition);
 		densityFuncShader->setUniform2f("screenResolution", ofVec2f(1280, 720));
 		densityFuncShader->setUniformTexture("csgtex", *csgTable, 1);
@@ -115,12 +128,12 @@ void TerrainGridMarchingCubes::Draw()
 	theShader->begin();
 		theShader->setUniform1f("gridscale", PointScale);
 		theShader->setUniform3f("gridoffset", OffsetPosition);
-		theShader->setUniform1f("isolevel", 10.0f);
+		theShader->setUniform1f("isolevel", 0.1f);
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 		theShader->setUniform1f("time", time);
 		theShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
 		theShader->setUniformTexture("csgtex", *csgTable, 1);
-		theShader->setUniformTexture("denstex", densityFuncFBO->getTexture(), 2);
+		//theShader->setUniformTexture("denstex", densityFuncFBO->getTextureReference(0), 2);
 
 		if (updatePhysicsMesh)
 		{
@@ -145,6 +158,25 @@ void TerrainGridMarchingCubes::Draw()
 	theShader->end();
 
 	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, outputBuffer->getId());
+
+	// save fbo
+	ofPixels save;
+	densityFuncFBO->readToPixels(save);
+	ofImage saveImg(save);
+	saveImg.saveImage("bep.png");
+
+	
+	ofDisableAlphaBlending();
+	ofDisableDepthTest();
+	densityFuncFBO->draw(0, 0);
+	ofEnableDepthTest();
+	ofEnableAlphaBlending();
+
+	if (test != 0)
+	{
+		test->draw();
+	}
+	
 
 	// Check to see if we need to update the current mesh.
 	if (updatePhysicsMesh)
@@ -193,17 +225,7 @@ void TerrainGridMarchingCubes::Draw()
 		feedback = 0;
 	}
 
-	// save fbo
-	ofPixels save;
-	densityFuncFBO->readToPixels(save);
-	ofImage saveImg(save);
-	saveImg.saveImage("bep.png");
 
-	ofDisableAlphaBlending();
-	ofDisableDepthTest();
-	densityFuncFBO->draw(0, 0);
-	ofEnableDepthTest();
-	ofEnableAlphaBlending();
 
 }
 
@@ -283,8 +305,6 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 	if (thePhysicsMesh != 0)
 	{
 		thePhysicsMesh->remove();
-		//delete thePhysicsMesh;
-		//thePhysicsMesh = 0;
 	}
 	
 	if (thePhysicsMesh == 0)
@@ -297,7 +317,8 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 	thePhysicsMesh->enableKinematic();
 	
 	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);
-	//thePhysicsMesh->updateMesh(world->world, *theMesh);
+
+
 
 	updatePhysicsMesh = false;
 }
