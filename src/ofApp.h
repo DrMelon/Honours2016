@@ -13,6 +13,7 @@
 
 #include "Terrain.h"
 #include "TerrainGridMarchingCubes.h"
+#include "TerrainDistanceRaymarch.h"
 #include "ofxBullet.h"
 #include "ofxDatGui.h"
 #include "ofxVoro.h"
@@ -22,7 +23,7 @@ class ofApp : public ofBaseApp{
 
 	public:
 
-		enum TERRAIN_TYPE{ TERRAIN_GRID_MC, TERRAIN_PS_DIST };
+		enum TERRAIN_TYPE{ TERRAIN_GRID_MC, TERRAIN_RAY_DIST };
 
 		// openFrameworks Template Stuff
 		void setup();

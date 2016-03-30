@@ -148,6 +148,7 @@
     <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\wall.cc">
       <Filter>addons\ofxVoro\libs\voro++</Filter>
     </ClCompile>
+    <ClCompile Include="src\TerrainDistanceRaymarch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -446,6 +447,7 @@
     <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\worklist.hh">
       <Filter>addons\ofxVoro\libs\voro++</Filter>
     </ClInclude>
+    <ClInclude Include="src\TerrainDistanceRaymarch.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
@@ -476,6 +478,12 @@
       <Filter>src\shaders</Filter>
     </None>
     <None Include="bin\data\shaders\render_density.frag">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\raymarch.frag">
+      <Filter>src\shaders</Filter>
+    </None>
+    <None Include="bin\data\shaders\raymarch.vert">
       <Filter>src\shaders</Filter>
     </None>
   </ItemGroup>

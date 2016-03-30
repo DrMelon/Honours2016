@@ -220,6 +220,7 @@
     <ClCompile Include="src\ofxFirstPersonCamera.cpp" />
     <ClCompile Include="src\tables.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
+    <ClCompile Include="src\TerrainDistanceRaymarch.cpp" />
     <ClCompile Include="src\TerrainGridMarchingCubes.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +301,7 @@
     <ClInclude Include="src\ofxFirstPersonCamera.h" />
     <ClInclude Include="src\tables.h" />
     <ClInclude Include="src\Terrain.h" />
+    <ClInclude Include="src\TerrainDistanceRaymarch.h" />
     <ClInclude Include="src\TerrainGridMarchingCubes.h" />
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +324,8 @@
     <None Include="bin\data\shaders\grid_marching_cubes.vert" />
     <None Include="bin\data\shaders\passthrough.frag" />
     <None Include="bin\data\shaders\passthrough.vert" />
+    <None Include="bin\data\shaders\raymarch.frag" />
+    <None Include="bin\data\shaders\raymarch.vert" />
     <None Include="bin\data\shaders\render_density.frag" />
     <None Include="bin\data\shaders\render_density.vert" />
   </ItemGroup>

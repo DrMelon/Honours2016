@@ -41,9 +41,12 @@ void ofApp::setup()
 	GridExpensiveNormals = 0.0f;
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
-	theTerrain = new TerrainGridMarchingCubes();
-	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
-	currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
+	//theTerrain = new TerrainGridMarchingCubes();
+	//((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	theTerrain = new TerrainDistanceRaymarch();
+	((TerrainDistanceRaymarch*)theTerrain)->Rebuild(1280, 720);
+	((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
+	currentTerrainType = TERRAIN_TYPE::TERRAIN_RAY_DIST;
 
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
@@ -135,10 +138,24 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+
+
 	theCamera->begin(); // Begin drawing with this camera.
 
-		// Draw the terrain.
-		theTerrain->Draw();
+		// Draw the terrain without using the camera, if it's raymarched.
+		if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+		{
+			theCamera->end();
+
+			theTerrain->Draw();
+
+			theCamera->begin();
+		}
+		else
+		{
+			theTerrain->Draw();
+		}
+		
 
 		// Debug: draw the physics mesh over the top
 		ofDisableDepthTest();
@@ -404,6 +421,19 @@ void ofApp::buildGUI()
 
 		auto gridNormalsToggle = terrainFolder->addToggle("Smooth Normals", false);
 		
+
+		terrainFolder->addButton("Rebuild Terrain");
+	}
+	else if (currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+	{
+		auto terrainResSizeX = terrainFolder->addSlider("Render Resolution X", 32, 1280, 320);
+		terrainResSizeX->setPrecision(0);
+
+		auto terrainResSizeY = terrainFolder->addSlider("Render Resolution Y", 24, 720, 240);
+		terrainResSizeY->setPrecision(0);
+
+		auto terrainStepAmt = terrainFolder->addSlider("Max Steps", 16, 1024, 256);
+		terrainStepAmt->setPrecision(0);
 
 		terrainFolder->addButton("Rebuild Terrain");
 	}
