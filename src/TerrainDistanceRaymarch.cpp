@@ -52,6 +52,8 @@ void TerrainDistanceRaymarch::Draw()
 	if (CurrentCamera != 0)
 	{
 		RaymarchShader->setUniform2f("screenResolution", ofVec2f(RaymarchResX, RaymarchResY));
+		RaymarchShader->setUniform1i("numIterations", numIterations);
+		RaymarchShader->setUniform1f("maximumDepth", maximumDepth);
 		RaymarchShader->setUniform3f("cameraPosition", CurrentCamera->getPosition());
 		RaymarchShader->setUniform3f("cameraUpVector", CurrentCamera->getUpDir());
 		RaymarchShader->setUniform3f("cameraLookTarget", CurrentCamera->getPosition() + (CurrentCamera->getLookAtDir() * 5.0f));
@@ -67,7 +69,7 @@ void TerrainDistanceRaymarch::Draw()
 
 	// Now draw the terrain.
 	ofDisableDepthTest();
-	RaymarchFramebuffer->draw(ofPoint(0, 0), 1280, 720);
+	RaymarchFramebuffer->draw(ofPoint(0, 0), ofGetWindowWidth(), ofGetWindowHeight());
 	ofEnableDepthTest();
 
 }

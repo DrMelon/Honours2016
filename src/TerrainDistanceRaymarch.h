@@ -19,8 +19,10 @@ class TerrainDistanceRaymarch : public Terrain
 	public:
 
 		// Resolution of texture
-		int RaymarchResX = 320;
-		int RaymarchResY = 240;
+		int RaymarchResX = 1280;
+		int RaymarchResY = 720;
+		float maximumDepth = 1500.0f;
+		int numIterations = 256;
 
 		// Framebuffer to store texture
 		ofFbo* RaymarchFramebuffer;

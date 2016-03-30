@@ -25,8 +25,7 @@ void ofApp::setup()
 	// Disable the GUI's own automatic rendering, as we're doing shader passes and things.
 	theGUI->setAutoDraw(false);
 
-	// Add elements to GUI.
-	buildGUI();
+
 
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
@@ -91,7 +90,8 @@ void ofApp::setup()
 
 	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 
-	
+	// Add elements to GUI.
+	buildGUI();
 	
 }
 
@@ -119,6 +119,13 @@ void ofApp::update()
 		//((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = physicsNeedsRebuilding;
 		((TerrainGridMarchingCubes*)theTerrain)->thePhysicsWorld = thePhysicsWorld;
 		((TerrainGridMarchingCubes*)theTerrain)->thePhysicsMesh = thePhysicsMesh;
+	}
+	else if (currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+	{
+		((TerrainDistanceRaymarch*)theTerrain)->numIterations = RayTerrainIterations;
+		((TerrainDistanceRaymarch*)theTerrain)->maximumDepth = RayTerrainDrawDistance;
+		((TerrainDistanceRaymarch*)theTerrain)->RaymarchResX = RayTerrainResolutionX;
+		((TerrainDistanceRaymarch*)theTerrain)->RaymarchResY = RayTerrainResolutionY;
 	}
 
 	
@@ -326,6 +333,10 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
 	}
+	if (e.target->getName() == "Rebuild Terrain" && currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+	{
+		((TerrainDistanceRaymarch*)theTerrain)->Rebuild(RayTerrainResolutionX, RayTerrainResolutionY);
+	}
 	if (e.target->getName() == "Smooth Normals" && currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
 		GridExpensiveNormals = e.enabled;
@@ -426,14 +437,21 @@ void ofApp::buildGUI()
 	}
 	else if (currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
 	{
-		auto terrainResSizeX = terrainFolder->addSlider("Render Resolution X", 32, 1280, 320);
+		auto terrainResSizeX = terrainFolder->addSlider("Render Resolution X", 32, 1280, 1280);
 		terrainResSizeX->setPrecision(0);
+		terrainResSizeX->bind(RayTerrainResolutionX);
 
-		auto terrainResSizeY = terrainFolder->addSlider("Render Resolution Y", 24, 720, 240);
+		auto terrainResSizeY = terrainFolder->addSlider("Render Resolution Y", 24, 720, 720);
 		terrainResSizeY->setPrecision(0);
+		terrainResSizeY->bind(RayTerrainResolutionY);
 
 		auto terrainStepAmt = terrainFolder->addSlider("Max Steps", 16, 1024, 256);
 		terrainStepAmt->setPrecision(0);
+		terrainStepAmt->bind(RayTerrainIterations);
+
+		auto terrainDistance = terrainFolder->addSlider("Max Distance", 64, 16000, 1500);
+		terrainDistance->setPrecision(2);
+		terrainDistance->bind(RayTerrainDrawDistance);
 
 		terrainFolder->addButton("Rebuild Terrain");
 	}

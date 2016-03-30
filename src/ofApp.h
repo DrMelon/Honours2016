@@ -86,6 +86,11 @@ class ofApp : public ofBaseApp{
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
+		float RayTerrainResolutionX = 1280;
+		float RayTerrainResolutionY = 720;
+		float RayTerrainDrawDistance = 1500.0f;
+		int RayTerrainIterations = 256;
+
 		// Physics stuff
 
 		bool PhysicsEnabled = false;
