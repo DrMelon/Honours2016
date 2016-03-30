@@ -16,6 +16,7 @@ TerrainDistanceRaymarch::TerrainDistanceRaymarch()
 	// Set up framebuffer
 	RaymarchFramebuffer = new ofFbo();
 	
+	
 	// Set up shader
 	RaymarchShader = new ofShader();
 

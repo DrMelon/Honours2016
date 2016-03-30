@@ -6,6 +6,7 @@ uniform vec3 cameraUpVector = vec3(0,1,0);
 uniform vec3 cameraLookTarget = vec3(0,0,0);
 uniform int numIterations = 256;
 uniform float maximumDepth = 1500.0f;
+uniform vec4 skyColour = vec4(0.8f,0.8f,1.0f,1);
 
 in vec2 texCoord;
 out vec4 finalColor;
@@ -56,11 +57,11 @@ vec2 ShapeFlatFloor(vec3 worldPosition)
 
 vec2 CSG_Sphere( vec3 position, float size, vec3 worldPosition)
 {
-	return vec2(length(worldPosition - position) - size, 0.0f);
+	return vec2(length(worldPosition - position) - size, 1.0f);
 }
 
 // The CSG functions are simple to calculate;
-// Anything that is closer to the camera than the other will be shown instead.
+// In Union, Anything that is closer to the camera than the other will be shown instead.
 vec2 CSG_Union(vec2 density1, vec2 density2)
 {
 	if(density1.x < density2.x)
@@ -73,6 +74,20 @@ vec2 CSG_Union(vec2 density1, vec2 density2)
 	}
 }
 
+vec2 CSG_Subtract(vec2 density1, vec2 density2)
+{
+	if(density1.x < -density2.x)
+	{
+		density2.y = -2.0f;
+		return -density2;
+	}
+	else
+	{
+		return density1;
+	}
+	
+}
+
 // This function calculates the density/distance field.
 vec2 DistanceField(vec3 worldPosition)
 {
@@ -81,11 +96,11 @@ vec2 DistanceField(vec3 worldPosition)
 
 	Density = ShapeFlatFloor(worldPosition);
 
-	Density += (noise_g(worldPosition / 80)) * 50.0f;
-	Density += (noise_g(worldPosition / 40)) * 50.0f;
+	Density.x += (noise_g(worldPosition / 80)) * 50.0f;
+	Density.x += (noise_g(worldPosition / 40)) * 50.0f;
 
 	Density = CSG_Union(Density, CSG_Sphere(vec3(0,0,-50), 20, worldPosition));
-
+	Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
 
 
 	return Density;
@@ -93,6 +108,22 @@ vec2 DistanceField(vec3 worldPosition)
 
 // Lighting functions
 
+float softShadow(vec3 rayOrigin, vec3 rayDirection, float minimumDistance, float maximumDistance, float coefficient)
+{
+	float shadowResult = 1.0f;
+	for(float t = minimumDistance; t < maximumDistance;)
+	{
+		float shadowDistance = DistanceField(rayOrigin + (rayDirection*t)).x;
+		if(shadowDistance < 0.001)
+		{
+			return 0.0f;
+		}
+		shadowResult = min(shadowResult, coefficient * (shadowDistance/t));
+		t += shadowDistance;
+	}
+
+	return shadowResult;
+}
 
 vec4 Lambertian(vec3 worldPosition, vec3 currentNormal)
 {
@@ -124,12 +155,12 @@ void main()
 	vec3 cameraLowerBound = cross(cameraDirection, cameraRight);
 	vec3 cameraStep = cameraPosition + cameraDirection;
 	
-	vec3 screenCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * 0.8) + (screenPositionOffset.y * cameraLowerBound * 0.8);
+	vec3 screenCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * (screenResolution.x / screenResolution.y) * 0.55) + (screenPositionOffset.y * cameraLowerBound * 0.55);
 	vec3 eyeCoordinate = normalize(screenCoordinate - cameraPosition);
 
 	// Now, do raymarching.
 	vec3 minDistance = vec3(0.02, 0, 0);
-	// This is the limit on how far the ray can go before deciding there's nothing there.
+
 
 
 	vec2 currentDistance = minDistance.xy;
@@ -159,6 +190,15 @@ void main()
 	if(rayDistanceTravelled < maximumDepth)
 	{
 		currentColour = vec3(0.1f, 0.85f, 0.1f);
+		if(currentDistance.y > 0)
+		{	
+			currentColour = vec3(1.0f, 0.0f, 0.1f);
+			if(currentDistance.y > 1)
+			{
+				currentColour = vec3(0.6f, 0.3f, 0.1f);
+			}
+		}
+		
 
 		// Calculate hit normal
 		vec3 normalCalc = vec3(currentDistance.x - DistanceField((currentHitPosition - minDistance.xyy)).x,
@@ -169,23 +209,44 @@ void main()
 
 		
 
-		// extremely simple light, light pos = cam pos
-		float lightIntensity = dot(currentHitNormal, normalize(vec3(25,5,30) - currentHitPosition));
+		// Lighting calculations
+		vec4 ambientCol = vec4(0.0f, 0.0f, 0.1f, 1.0f);
 
-		// phong calc
-		vec4 ambientCol = vec4(0.2f, 0.2f, 0.4f, 1.0f) * vec4(currentColour, 1.0f);
-		vec4 lightCol = ambientCol + vec4((lightIntensity * currentColour + pow(lightIntensity, 16.0f)) * (1.0 - length(vec3(25,-300,30) - currentHitPosition) * 1.0f/maximumDepth), 1.0f);
 
-		float travellingLightIntensity = dot(currentHitNormal, normalize(cameraPosition - currentHitPosition));
-		vec4 travellingLight = ambientCol + vec4((travellingLightIntensity * currentColour + pow(travellingLightIntensity, 16.0f)) * (1.0 - rayDistanceTravelled * (1.0f/maximumDepth)), 1.0f);
+		finalColor = (vec4(currentColour, 1.0f) * Lambertian(currentHitPosition, currentHitNormal));
 
-		finalColor = ambientCol + (vec4(currentColour, 1.0f) * Lambertian(currentHitPosition, currentHitNormal));// travellingLight; //lightCol;
+		finalColor.rgb *= softShadow(currentHitPosition, normalize(vec3(1.0, 1.0, 0.0)), 1.0f, 1500.0f, 40);
+
+		finalColor += ambientCol;
+
+		// Fog Pass
+		float fogCoefficient = 0.0f;
+
+		// Fog depends on view distance
+		fogCoefficient = (length(currentHitPosition - cameraPosition) / maximumDepth);
+
+		float sunAmount = max( dot(normalize(currentHitPosition - cameraPosition), normalize(vec3(1.0, 1.0, 0.0))), 0.0f);
+
+		vec4 fogColour = mix(skyColour, vec4(1.0f, 1.0f, 0.9f, 1.0f), pow(sunAmount, 8.0f));
+
+		//gl_FragDepth?
+
+		finalColor = mix(finalColor, fogColour, fogCoefficient);
 
 	}
 	else
 	{
 		// Ray didn't hit, return sky
-		finalColor = vec4(0.6f,0.6f,1.0f,1);
+
+
+
+		float sunAmount = max( dot(normalize(currentHitPosition - cameraPosition), normalize(vec3(1.0, 1.0, 0.0))), 0.0f);
+
+		vec4 fogColour = mix(skyColour, vec4(1.0f, 1.0f, 0.9f, 1.0f), pow(sunAmount, 8.0f));
+
+		
+
+		finalColor = fogColour;
 	}
 
 

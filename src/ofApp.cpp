@@ -181,7 +181,7 @@ void ofApp::draw()
 
 
 		// Enable light shader
-		lightShader->begin();
+		//lightShader->begin();
 
 		// Draw physics objects.
 		testSphere->draw();
@@ -222,7 +222,7 @@ void ofApp::draw()
 		}
 
 		// stop using lights
-		lightShader->end();
+		//lightShader->end();
 
 	theCamera->end(); // Cease drawing with the camera.
 
