@@ -32,7 +32,13 @@ class TerrainDistanceRaymarch : public Terrain
 		// Shader 
 		ofShader* RaymarchShader;
 
+		// Noise Texture
+		ofImage* noiseTex;
+
+		// Camera Ref
 		ofCamera* CurrentCamera;
+
+
 
 
 		TerrainDistanceRaymarch();

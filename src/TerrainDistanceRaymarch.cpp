@@ -22,6 +22,18 @@ TerrainDistanceRaymarch::TerrainDistanceRaymarch()
 
 	RaymarchShader->load("data/shaders/raymarch.vert", "data/shaders/raymarch.frag");
 
+	// Load noise texture
+	ofDisableArbTex();
+	ofSetTextureWrap(GL_REPEAT, GL_REPEAT);
+	noiseTex = new ofImage("data/shaders/noise.png");
+	noiseTex->getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+	noiseTex->getTexture().enableMipmap();
+	noiseTex->getTexture().generateMipmap();
+
+	RaymarchShader->begin();
+		RaymarchShader->setUniformTexture("noisetex", noiseTex->getTexture(), 1);
+	RaymarchShader->end();
+
 	CurrentCamera = 0;
 
 	accum = 0;
@@ -45,6 +57,8 @@ void TerrainDistanceRaymarch::Rebuild(int newX, int newY)
 void TerrainDistanceRaymarch::Draw()
 {
 	// First, enable framebuffer.
+	ofDisableArbTex();
+	ofSetTextureWrap(GL_REPEAT, GL_REPEAT);
 	RaymarchFramebuffer->begin();
 	ofClear(ofColor::black);
 
@@ -63,6 +77,7 @@ void TerrainDistanceRaymarch::Draw()
 		RaymarchShader->setUniform3f("cameraUpVector", CurrentCamera->getUpDir());
 		RaymarchShader->setUniform3f("cameraLookTarget", CurrentCamera->getPosition() + (CurrentCamera->getLookAtDir() * 5.0f));
 		RaymarchShader->setUniform1f("time", accum);
+		
 
 	}
 
@@ -77,7 +92,7 @@ void TerrainDistanceRaymarch::Draw()
 	ofDisableDepthTest();
 	RaymarchFramebuffer->draw(ofPoint(0, 0), ofGetWindowWidth(), ofGetWindowHeight());
 	ofEnableDepthTest();
-
+	ofEnableArbTex();
 }
 
 

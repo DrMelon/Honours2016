@@ -8,6 +8,7 @@ uniform int numIterations = 256;
 uniform float maximumDepth = 1500.0f;
 uniform vec4 skyColour = vec4(0.8f,0.8f,1.0f,1);
 uniform float time;
+uniform sampler2D noisetex;
 
 in vec2 texCoord;
 out vec4 finalColor;
@@ -17,24 +18,27 @@ precision highp float;
 // Raymarching Shader
 
 // Noise
-float hash(float n) { return fract(sin(n) * 1e4); }
-float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
-float noise_g(vec3 x) {
-    const vec3 step = vec3(110, 241, 171);
 
-    vec3 i = floor(x);
-    vec3 f = fract(x);
 
-    // For performance, compute the base input to a 1D hash from the integer part of the argument and the 
-    // incremental change to the 1D based on the 3D -> 1D wrapping
-    float n = dot(i, step);
+float noise3D(vec3 p)
+{
+    p.z = fract(p.z)*2048.0;
+    float iz = floor(p.z);
+    float fz = fract(p.z);
+    vec2 a_off = vec2(23.0, 29.0)*(iz)/2048.0;
+    vec2 b_off = vec2(23.0, 29.0)*(iz+1.0)/2048.0;
+    float a = texture(noisetex, p.xy + a_off, -999.0).r;
+    float b = texture(noisetex, p.xy + b_off, -999.0).r;
+    return mix(a, b, fz) - 0.5;
+}
 
-    vec3 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
-                   mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
-               mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
-                   mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
+float noise_g(vec3 p)
+{
+    float v = 0.0;
+    for (float i = 0.0; i < 5.0; i += 1.0)
+        v += noise3D(p * pow(2.0, i)) * pow(0.6, i);
+    return v;
 }
 
 //// Raymarching + CSG Functions
@@ -89,8 +93,8 @@ vec2 DistanceField(vec3 worldPosition)
 	Density = ShapeFlatFloor(worldPosition);
 
 	// Then add some hills to the plane.
-	Density.x += (noise_g(worldPosition * 0.005f)) * 100.0f;
-	Density.x += (noise_g(worldPosition * 0.01f)) * 100.0f;
+	Density.x += (noise_g(worldPosition * 0.0001f)) * 10.0f;
+	Density.x += (noise_g(worldPosition * 0.0001f)) * 10.0f;
 	
 	
 	
@@ -141,6 +145,7 @@ void main()
 	// [link]
 
 	vec2 screenPosition = gl_FragCoord.xy / screenResolution;
+	
 	screenPosition.y = 1.0f - screenPosition.y;
 	screenPosition.x = 1.0f - screenPosition.x;
 	vec2 screenPositionOffset = -1.0f + 2.0f * screenPosition;
@@ -175,7 +180,7 @@ void main()
 	for(i = 0; i < numIterations; i++)
 	{
 		// If the ray hasn't hit anything yet, or if the step size becomes too small, stop here.
-		if((abs(currentDistance.x) < 0.0001) || (rayDistanceTravelled > maximumDepth))
+		if((abs(currentDistance.x) < 0.01) || (rayDistanceTravelled > maximumDepth))
 		{
 			break;
 		}
@@ -257,7 +262,7 @@ void main()
 	}
 
 
-
+	//finalColor = texture(noisetex, screenPosition);
 
 
 
