@@ -43,11 +43,6 @@ float noise_g(vec3 p){
 
 //// Raymarching + CSG Functions
 
-// Raymarch Advance Function; very simple, steps a ray along in a direction.
-vec3 AdvanceRay(vec3 startPoint, vec3 startDirection, float advanceAmt)
-{
-	return startPoint + advanceAmt * startDirection;
-}
 
 // Set of functions for representing distance-fields for shapes.
 // The Y-Coordinate here is used for material/texturing information.
@@ -92,16 +87,22 @@ vec2 CSG_Subtract(vec2 density1, vec2 density2)
 // This function calculates the density/distance field.
 vec2 DistanceField(vec3 worldPosition)
 {
-	// for now, just display a flat plane
+	// First, start with a flat plane
 	vec2 Density;
 
 	Density = ShapeFlatFloor(worldPosition);
 
+	// Then add some hills to the plane.
 	Density.x += (noise_g(worldPosition / 80)) * 50.0f;
-	Density.x += (noise_g(worldPosition / 40)) * 50.0f;
-
+	Density.x += (noise_g(vec3(worldPosition.x / 40, 0, worldPosition.z / 40))) * 50.0f;
+	
+	
+	
+	
+	// Add some objects.
 	Density = CSG_Union(Density, CSG_Sphere(vec3(0,cos(time*0.01f)*5,-50), 20, worldPosition));
 	Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
+
 
 
 	return Density;
@@ -172,19 +173,25 @@ void main()
 
 	float rayDistanceTravelled = 1.0f;
 
-	// Evalute distance field, 256 steps
+	// Evaluate distance field
 	int i = 0;
 	for(i = 0; i < numIterations; i++)
 	{
-		if((abs(currentDistance.x) < 0.001) || (rayDistanceTravelled > maximumDepth))
+		// If the ray hasn't hit anything yet, or if the step size becomes too small, stop here.
+		if((abs(currentDistance.x) < 0.0001) || (rayDistanceTravelled > maximumDepth))
 		{
 			break;
 		}
 
 		// Advance ray forwards.
-		rayDistanceTravelled += currentDistance.x;
+		rayDistanceTravelled += (currentDistance.x * 0.5f);
+
+		// Update contact position
 		currentHitPosition = cameraPosition + (eyeCoordinate * rayDistanceTravelled);
 		currentDistance = DistanceField(currentHitPosition);
+
+
+
 	}
 
 	// If the ray hit something
