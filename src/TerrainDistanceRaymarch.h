@@ -24,6 +24,8 @@ class TerrainDistanceRaymarch : public Terrain
 		float maximumDepth = 1500.0f;
 		int numIterations = 256;
 
+		float accum;
+
 		// Framebuffer to store texture
 		ofFbo* RaymarchFramebuffer;
 

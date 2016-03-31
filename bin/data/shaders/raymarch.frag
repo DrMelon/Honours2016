@@ -7,6 +7,7 @@ uniform vec3 cameraLookTarget = vec3(0,0,0);
 uniform int numIterations = 256;
 uniform float maximumDepth = 1500.0f;
 uniform vec4 skyColour = vec4(0.8f,0.8f,1.0f,1);
+uniform float time;
 
 in vec2 texCoord;
 out vec4 finalColor;
@@ -99,7 +100,7 @@ vec2 DistanceField(vec3 worldPosition)
 	Density.x += (noise_g(worldPosition / 80)) * 50.0f;
 	Density.x += (noise_g(worldPosition / 40)) * 50.0f;
 
-	Density = CSG_Union(Density, CSG_Sphere(vec3(0,0,-50), 20, worldPosition));
+	Density = CSG_Union(Density, CSG_Sphere(vec3(0,cos(time*0.01f)*5,-50), 20, worldPosition));
 	Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
 
 

@@ -24,6 +24,8 @@ TerrainDistanceRaymarch::TerrainDistanceRaymarch()
 
 	CurrentCamera = 0;
 
+	accum = 0;
+
 	Rebuild(320, 240);
 }
 
@@ -49,6 +51,8 @@ void TerrainDistanceRaymarch::Draw()
 	// Enable shader
 	RaymarchShader->begin();
 
+	accum += 1;
+
 	// Update camera information.
 	if (CurrentCamera != 0)
 	{
@@ -58,6 +62,7 @@ void TerrainDistanceRaymarch::Draw()
 		RaymarchShader->setUniform3f("cameraPosition", CurrentCamera->getPosition());
 		RaymarchShader->setUniform3f("cameraUpVector", CurrentCamera->getUpDir());
 		RaymarchShader->setUniform3f("cameraLookTarget", CurrentCamera->getPosition() + (CurrentCamera->getLookAtDir() * 5.0f));
+		RaymarchShader->setUniform1f("time", accum);
 
 	}
 

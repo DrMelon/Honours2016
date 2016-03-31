@@ -155,7 +155,7 @@ void ofApp::draw()
 			theCamera->end();
 
 			theTerrain->Draw();
-
+			return;
 			theCamera->begin();
 		}
 		else
