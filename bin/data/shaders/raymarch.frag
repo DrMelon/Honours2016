@@ -1,6 +1,6 @@
 #version 330
 
-uniform vec2 screenResolution = vec2(320, 240);
+uniform vec2 screenResolution = vec2(400, 240);
 uniform vec3 cameraPosition = vec3(0,0,-5);
 uniform vec3 cameraUpVector = vec3(0,1,0);
 uniform vec3 cameraLookTarget = vec3(0,0,0);
@@ -8,7 +8,7 @@ uniform int numIterations = 256;
 uniform float maximumDepth = 1500.0f;
 uniform vec4 skyColour = vec4(0.8f,0.8f,1.0f,1);
 uniform float time;
-uniform sampler2D noisetex;
+uniform sampler3D noisetex;
 
 in vec2 texCoord;
 out vec4 finalColor;
@@ -21,25 +21,30 @@ precision highp float;
 
 
 
-float noise3D(vec3 p)
-{
-    p.z = fract(p.z)*2048.0;
-    float iz = floor(p.z);
-    float fz = fract(p.z);
-    vec2 a_off = vec2(23.0, 29.0)*(iz)/2048.0;
-    vec2 b_off = vec2(23.0, 29.0)*(iz+1.0)/2048.0;
-    float a = texture(noisetex, p.xy + a_off, -999.0).r;
-    float b = texture(noisetex, p.xy + b_off, -999.0).r;
-    return mix(a, b, fz) - 0.5;
+//  Classic Perlin 3D Noise 
+//  by Stefan Gustavson
+//
+// Noise
+float hash(float n) { return fract(sin(n) * 1e4); }
+float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+
+float noise_g(vec3 x) {
+    const vec3 step = vec3(110, 241, 171);
+
+    vec3 i = floor(x);
+    vec3 f = fract(x);
+
+    // For performance, compute the base input to a 1D hash from the integer part of the argument and the 
+    // incremental change to the 1D based on the 3D -> 1D wrapping
+    float n = dot(i, step);
+
+    vec3 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
+               mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
 }
 
-float noise_g(vec3 p)
-{
-    float v = 0.0;
-    for (float i = 0.0; i < 5.0; i += 1.0)
-        v += noise3D(p * pow(2.0, i)) * pow(0.6, i);
-    return v;
-}
 
 //// Raymarching + CSG Functions
 
@@ -91,10 +96,11 @@ vec2 DistanceField(vec3 worldPosition)
 	vec2 Density;
 
 	Density = ShapeFlatFloor(worldPosition);
-
-	// Then add some hills to the plane.
-	Density.x += (noise_g(worldPosition * 0.0001f)) * 10.0f;
-	Density.x += (noise_g(worldPosition * 0.0001f)) * 10.0f;
+	
+	// Then add some hills to the plane, perturbing them so that they are bumpy.
+	Density.x += (noise_g(worldPosition * 0.01f) * 70.0f);
+	Density.x += (noise_g(worldPosition * 0.05f) * 10.0f);
+	//Density.x += (noise_g(worldPosition * 1.0f) * 0.5f);
 	
 	
 	
@@ -103,7 +109,7 @@ vec2 DistanceField(vec3 worldPosition)
 	Density = CSG_Union(Density, CSG_Sphere(vec3(0,cos(time*0.01f)*5,-50), 20, worldPosition));
 	Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
 
-
+	
 
 	return Density;
 }
@@ -158,8 +164,8 @@ void main()
 	vec3 cameraLowerBound = cross(cameraDirection, cameraRight);
 	vec3 cameraStep = cameraPosition + cameraDirection;
 	
-	vec3 screenCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * (screenResolution.x / screenResolution.y) * 0.55) + (screenPositionOffset.y * cameraLowerBound * 0.55);
-	vec3 eyeCoordinate = normalize(screenCoordinate - cameraPosition);
+	vec3 eyeCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * (screenResolution.x / screenResolution.y) * 0.55) + (screenPositionOffset.y * cameraLowerBound * 0.55);
+	vec3 rayDirection = normalize(eyeCoordinate - cameraPosition);
 
 	// Now, do raymarching.
 	vec3 minDistance = vec3(0.2, 0, 0);
@@ -167,39 +173,57 @@ void main()
 
 
 	vec2 currentDistance = minDistance.xy;
-	currentDistance.x = 0.02;
+	currentDistance.x = 1.0f;
 
 	vec3 currentColour;
 	vec3 currentHitPosition;
 	vec3 currentHitNormal;
 
-	float rayDistanceTravelled = 1.0f;
+	float rayDistanceTravelled = 0.1f;
 
 	// Evaluate distance field
 	int i = 0;
-	for(i = 0; i < numIterations; i++)
+	//for(rayDistanceTravelled = 1.0f; rayDistanceTravelled < 1500.0f;)
+	
+	for(i = 0; i < numIterations; ++i)
 	{
-		// If the ray hasn't hit anything yet, or if the step size becomes too small, stop here.
-		if((abs(currentDistance.x) < 0.01) || (rayDistanceTravelled > maximumDepth))
-		{
-			break;
-		}
-
-		// Advance ray forwards.
-		rayDistanceTravelled += currentDistance.x;
 
 		// Update contact position
-		currentHitPosition = cameraPosition + (eyeCoordinate * rayDistanceTravelled);
+		currentHitPosition = cameraPosition + (rayDirection * rayDistanceTravelled);
 
 		// Check distance
 		currentDistance = DistanceField(currentHitPosition);
 
+		// If the ray hasn't hit anything yet, or if the step size becomes too small, stop here.
+		if(abs(currentDistance.x) < (0.001f * rayDistanceTravelled) || (rayDistanceTravelled > maximumDepth))
+		{
+			break;
+		}
 
+
+
+
+
+
+		// Advance ray forwards by current step size.
+		rayDistanceTravelled += (currentDistance.x * 0.5f);
+
+
+		
 
 	}
 
+	if(rayDistanceTravelled > maximumDepth)
+	{
+		rayDistanceTravelled -= 1.0f;
+	}
+
+
+
+	currentHitPosition = cameraPosition + (rayDirection * rayDistanceTravelled);
+
 	// If the ray hit something
-	if(rayDistanceTravelled < maximumDepth)
+	if(rayDistanceTravelled < maximumDepth && rayDistanceTravelled > 0)
 	{
 		currentColour = vec3(0.1f, 0.85f, 0.1f);
 		if(currentDistance.y > 0)
@@ -217,6 +241,8 @@ void main()
 							   currentDistance.x - DistanceField((currentHitPosition - minDistance.yxy)).x, 
 							   currentDistance.x - DistanceField((currentHitPosition - minDistance.yyx)).x);
 
+		
+
 		currentHitNormal = normalize(normalCalc);
 
 		
@@ -227,7 +253,7 @@ void main()
 
 		finalColor = (vec4(currentColour, 1.0f) * Lambertian(currentHitPosition, currentHitNormal));
 
-		finalColor.rgb *= softShadow(currentHitPosition, normalize(vec3(1.0, 1.0, 0.0)), 1.0f, 1500.0f, 40);
+		finalColor.rgb *= softShadow(currentHitPosition, normalize(vec3(1.0, 1.0, 0.0)), 1.0f, 150.0f, 40);
 
 		finalColor += ambientCol;
 
@@ -242,8 +268,9 @@ void main()
 		vec4 fogColour = mix(skyColour, vec4(1.0f, 1.0f, 0.9f, 1.0f), pow(sunAmount, 8.0f));
 
 		//gl_FragDepth?
-
+		//finalColor = mix(finalColor, texture(noisetex, currentHitPosition*0.01f), 0.5f);
 		finalColor = mix(finalColor, fogColour, fogCoefficient);
+		
 
 	}
 	else
@@ -264,7 +291,7 @@ void main()
 
 	//finalColor = texture(noisetex, screenPosition);
 
-
+	//finalColor = vec4(pow(float(i) / float(numIterations), 2.0f), float(i) / float(numIterations) * 0.5f, 0.0f, 1.0f);
 
 }
 

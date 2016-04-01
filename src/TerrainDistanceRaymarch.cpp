@@ -48,7 +48,7 @@ void TerrainDistanceRaymarch::Rebuild(int newX, int newY)
 
 	RaymarchFramebuffer->allocate(RaymarchResX, RaymarchResY, GL_RGBA, 0);
 	
-
+	RaymarchFramebuffer->getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 	
 
 

@@ -148,7 +148,9 @@
     <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\wall.cc">
       <Filter>addons\ofxVoro\libs\voro++</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainDistanceRaymarch.cpp" />
+    <ClCompile Include="src\TerrainDistanceRaymarch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -447,7 +449,9 @@
     <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\worklist.hh">
       <Filter>addons\ofxVoro\libs\voro++</Filter>
     </ClInclude>
-    <ClInclude Include="src\TerrainDistanceRaymarch.h" />
+    <ClInclude Include="src\TerrainDistanceRaymarch.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
