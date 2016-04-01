@@ -100,7 +100,7 @@ vec2 DistanceField(vec3 worldPosition)
 	// Then add some hills to the plane, perturbing them so that they are bumpy.
 	Density.x += (noise_g(worldPosition * 0.01f) * 70.0f);
 	Density.x += (noise_g(worldPosition * 0.05f) * 10.0f);
-	//Density.x += (noise_g(worldPosition * 1.0f) * 0.5f);
+	Density.x += (noise_g(worldPosition * 10.0f) * 0.05f);
 	
 	
 	

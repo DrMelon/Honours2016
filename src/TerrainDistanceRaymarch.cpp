@@ -51,7 +51,6 @@ void TerrainDistanceRaymarch::Rebuild(int newX, int newY)
 	RaymarchFramebuffer->getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
 	
 
-
 }
 
 void TerrainDistanceRaymarch::Draw()
@@ -60,8 +59,9 @@ void TerrainDistanceRaymarch::Draw()
 	ofDisableArbTex();
 	ofSetTextureWrap(GL_REPEAT, GL_REPEAT);
 	RaymarchFramebuffer->begin();
+	
 	ofClear(ofColor::black);
-
+	
 	// Enable shader
 	RaymarchShader->begin();
 
