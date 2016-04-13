@@ -30,8 +30,23 @@ TerrainDistanceRaymarch::TerrainDistanceRaymarch()
 	noiseTex->getTexture().enableMipmap();
 	noiseTex->getTexture().generateMipmap();
 
+	// Create CSG operations buffer
+	csgOperations.clear();
+	CSGAddSphere(ofVec3f(0, 0, 0), 10);
+
+
+	csgBuffer = new ofBufferObject();
+	csgBuffer->allocate();
+	csgBuffer->bind(GL_TEXTURE_BUFFER);
+	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
+
+	csgTable = new ofTexture();
+	csgTable->allocateAsBufferTexture(*csgBuffer, GL_R32F);
+	csgTable->setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+
 	RaymarchShader->begin();
-		RaymarchShader->setUniformTexture("noisetex", noiseTex->getTexture(), 1);
+		//RaymarchShader->setUniformTexture("noisetex", noiseTex->getTexture(), 0);
+		RaymarchShader->setUniformTexture("csgtex", *csgTable, 1);
 	RaymarchShader->end();
 
 	CurrentCamera = 0;
@@ -62,10 +77,14 @@ void TerrainDistanceRaymarch::Draw()
 	
 	ofClear(ofColor::black);
 	
+	// Update csg operations table
+	csgBuffer->setData(csgOperations, GL_STREAM_DRAW);
+	
 	// Enable shader
 	RaymarchShader->begin();
 
 	accum += 1;
+
 
 	// Update camera information.
 	if (CurrentCamera != 0)
@@ -76,8 +95,9 @@ void TerrainDistanceRaymarch::Draw()
 		RaymarchShader->setUniform3f("cameraPosition", CurrentCamera->getPosition());
 		RaymarchShader->setUniform3f("cameraUpVector", CurrentCamera->getUpDir());
 		RaymarchShader->setUniform3f("cameraLookTarget", CurrentCamera->getPosition() + (CurrentCamera->getLookAtDir() * 5.0f));
+		RaymarchShader->setUniform1f("numberOfCSG", csgOperations.size() / 8);
 		RaymarchShader->setUniform1f("time", accum);
-		
+		RaymarchShader->setUniformTexture("csgtex", *csgTable, 1);
 
 	}
 
@@ -93,6 +113,37 @@ void TerrainDistanceRaymarch::Draw()
 	RaymarchFramebuffer->draw(ofPoint(0, 0), ofGetWindowWidth(), ofGetWindowHeight());
 	ofEnableDepthTest();
 	ofEnableArbTex();
+}
+
+// CSG Operations on this kind of terrain work by filling a texture buffer.
+// The texture is 8 elements wide: 
+// First element: Add/Subtract operation, 0 or 1
+// Second: Shape to be defined. 0: Sphere, 1: Box,
+// For spheres, the next 4 elements define the position & radius of the sphere.
+// The remaining two are left blank
+
+void TerrainDistanceRaymarch::CSGAddSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+}
+
+void TerrainDistanceRaymarch::CSGRemoveSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(1);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
 }
 
 

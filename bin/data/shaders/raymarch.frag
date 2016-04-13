@@ -8,7 +8,12 @@ uniform int numIterations = 256;
 uniform float maximumDepth = 1500.0f;
 uniform vec4 skyColour = vec4(0.8f,0.8f,1.0f,1);
 uniform float time;
+uniform float numberOfCSG;
 uniform sampler3D noisetex;
+
+
+uniform samplerBuffer csgtex;
+
 
 in vec2 texCoord;
 out vec4 finalColor;
@@ -89,6 +94,14 @@ vec2 CSG_Subtract(vec2 density1, vec2 density2)
 	
 }
 
+// CSG Table Lookup
+float csgTable(int x, int y)
+{
+	return float(texelFetch(csgtex, (x + 8*y)).r);
+}
+
+
+
 // This function calculates the density/distance field.
 vec2 DistanceField(vec3 worldPosition)
 {
@@ -100,14 +113,40 @@ vec2 DistanceField(vec3 worldPosition)
 	// Then add some hills to the plane, perturbing them so that they are bumpy.
 	Density.x += (noise_g(worldPosition * 0.01f) * 70.0f);
 	Density.x += (noise_g(worldPosition * 0.05f) * 10.0f);
-	Density.x += (noise_g(worldPosition * 10.0f) * 0.05f);
 	
+	
+	// Perform CSG functions here.
+	
+
+	for(int i = 1; i < int(numberOfCSG); i++)
+	{
+
+		if(csgTable(0, i) == 0)
+		{
+			//Add mode
+			if(csgTable(1, i) == 0)
+			{
+				// Sphere mode
+				Density = CSG_Union(Density, CSG_Sphere( vec3(csgTable(2, i), csgTable(3, i), csgTable(4, i)), csgTable(5, i), worldPosition));
+				
+			}
+		}
+		if(csgTable(0, i) == 1)
+		{
+			//Subtract mode
+			if(csgTable(1, i) == 0)
+			{
+				// Sphere mode
+				Density = CSG_Subtract(Density, CSG_Sphere( vec3(csgTable(2, i), csgTable(3, i), csgTable(4, i)), csgTable(5, i), worldPosition));
+			}
+		}
+	}
 	
 	
 	
 	// Add some objects.
-	Density = CSG_Union(Density, CSG_Sphere(vec3(0,cos(time*0.01f)*5,-50), 20, worldPosition));
-	Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
+	//Density = CSG_Union(Density, CSG_Sphere(vec3(0,cos(time*0.01f)*5,-50), 20, worldPosition));
+	//Density = CSG_Subtract(Density, CSG_Sphere(vec3(0,-60,50), 20, worldPosition));
 
 	
 
@@ -292,6 +331,8 @@ void main()
 	//finalColor = texture(noisetex, screenPosition);
 
 	//finalColor = vec4(pow(float(i) / float(numIterations), 2.0f), float(i) / float(numIterations) * 0.5f, 0.0f, 1.0f);
+
+	
 
 }
 

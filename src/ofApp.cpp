@@ -14,6 +14,7 @@ void ofApp::setup()
 	ofSetFrameRate(60);
 	ofSetBackgroundColor(ofColor(182, 227, 242));
 	ofSetVerticalSync(true);
+	ofDisableArbTex();
 
 	// Set up z-buffer.
 	ofEnableDepthTest();
@@ -282,9 +283,17 @@ void ofApp::mousePressed(int x, int y, int button)
 		// Trace a point on the terrain, add a csg sphere
 		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 		{
-			ofVec3f removePos = (theCamera->getPosition() + (theCamera->getPosition() - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()));
+			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition() + (theCamera->getPosition() - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()));
 			
 			((TerrainGridMarchingCubes*)theTerrain)->CSGRemoveSphere(removePos, 25);
+			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
+		}
+
+		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+		{
+			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition());
+
+			((TerrainDistanceRaymarch*)theTerrain)->CSGRemoveSphere(removePos, 25);
 			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
 		}
 	}
