@@ -262,9 +262,10 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 	
 	thePhysicsMesh->create(world->world, *theMesh, theGrid->getPosition() - OffsetPosition, 10000.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
 	thePhysicsMesh->add();
+	
 	thePhysicsMesh->enableKinematic();
 	
-	thePhysicsMesh->setActivationState(DISABLE_DEACTIVATION);
+	thePhysicsMesh->setActivationState(DISABLE_SIMULATION);
 	//thePhysicsMesh->updateMesh(world->world, *theMesh);
 
 	updatePhysicsMesh = false;

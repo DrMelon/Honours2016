@@ -518,7 +518,9 @@ void ofApp::CheckBodiesAtRest()
 	// Loop through list and find physics objects that are considered "at rest".
 	for (auto iter = cutPhysicsObjects.begin(); iter != cutPhysicsObjects.end(); ++iter)
 	{
-		if (iter->second->getActivationState() != OFX_BT_ACTIVATION_STATE_ACTIVE)
+		iter->second->getRigidBody()->updateDeactivation(ofGetLastFrameTime() * PhysicsTimescale);
+		std::cout << iter->second->getRigidBody()->getDeactivationTime() << std::endl;
+		if (iter->second->getActivationState() == ISLAND_SLEEPING)
 		{
 			// Object is asleep; convert it to a density object and remove it from the simulation.
 			ConvertMeshToDensity(iter->first, ofVec3f(iter->second->getPosition().x, iter->second->getPosition().y, iter->second->getPosition().z));
