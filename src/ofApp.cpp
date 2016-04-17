@@ -56,6 +56,7 @@ void ofApp::setup()
 	thePhysicsWorld->setGravity(ofVec3f(0, -9.81f, 0));
 	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
+	
 
 	// Create the physics sphere
 	testSphere = new ofxBulletSphere();
@@ -137,9 +138,15 @@ void ofApp::update()
 	if (PhysicsEnabled)
 	{
 		thePhysicsWorld->update(deltaTime * (PhysicsTimescale*2), 0);
+
+		// every half-second check for resting bodies
+		//if (ofGetElapsedTimeMillis() % 30 == 0)
+		//{
+			CheckBodiesAtRest();
+		//}
 	}
 
-
+	
 	
 }
 
@@ -524,6 +531,10 @@ void ofApp::CheckBodiesAtRest()
 
 			// Erase from list.
 			iter = cutPhysicsObjects.erase(iter);
+			if (iter == cutPhysicsObjects.end())
+			{
+				break;
+			}
 		}
 	}
 
@@ -555,12 +566,12 @@ void ofApp::ConvertMeshToDensity(ofMesh* theMesh, ofVec3f position)
 		}
 	}
 
-	float radius = (maxVert - minVert).length() / 2;
+	float radius = (maxVert - minVert).length();
 
 	// Create sphere of that radius, at the provided position.
 	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
-		((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(position, radius);
+		((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(position + (position - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()), radius);
 	}
 	else if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
 	{

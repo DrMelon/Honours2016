@@ -839,6 +839,15 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		ofVec3f newOffset = physicsObject->getPosition() + distancer;
 		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
+		
+		newShape->activate();
+		// Bullet physics objects have thresholds at which the object is considered at rest.
+		// Because of the uneven nature of the terrain, they don't come to rest as fast as required for the proof of concept in this
+		// application.
+		// The new values below are much higher than the default Linear and Angular velocity thresholds, which are 0.8 and 1.0 respectively.
+		newShape->getRigidBody()->setSleepingThresholds(5, 5);
+
+
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
 		cout << "Cell Verts: " << cellOutputMesh->getNumVertices() << endl;

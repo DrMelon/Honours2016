@@ -63,30 +63,24 @@ out vec3 posnorm;
 //
 // Noise functions borrowed from: [SOURCE]
 //
-float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 mod289(vec4 x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
-vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+float hash(float n) { return fract(sin(n) * 1e4); }
+float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
-float noise_g(vec3 p){
-    vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
+float noise_g(vec3 x) {
+    const vec3 step = vec3(110, 241, 171);
 
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
+    vec3 i = floor(x);
+    vec3 f = fract(x);
 
-    vec4 c = k2 + a.zzzz;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
+    // For performance, compute the base input to a 1D hash from the integer part of the argument and the 
+    // incremental change to the 1D based on the 3D -> 1D wrapping
+    float n = dot(i, step);
 
-    vec4 o1 = fract(k3 * (1.0 / 41.0));
-    vec4 o2 = fract(k4 * (1.0 / 41.0));
-
-    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
-
-    return o4.y * d.y + o4.x * (1.0 - d.y);
+    vec3 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
+               mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
 }
 
 
@@ -229,8 +223,8 @@ float DensityFunction(vec3 worldspaceposition)
 
 	
 	// Perturb the surface with noise.
-	density += (noise_g(worldspaceposition / 80)) * 50.0f;
-	density += (noise_g(worldspaceposition / 40)) * 50.0f;
+	density += (noise_g(worldspaceposition * 0.01f) * 70.0f);
+	density += (noise_g(worldspaceposition * 0.05f) * 10.0f);
 
 	// Perform CSG functions here.
 
