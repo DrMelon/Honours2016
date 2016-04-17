@@ -69,6 +69,7 @@ class TerrainGridMarchingCubes : public Terrain
 		
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
+		ofVec3f physOffset;
 
 		void UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
 };

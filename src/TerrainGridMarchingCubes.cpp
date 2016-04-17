@@ -9,6 +9,8 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 
 	theShader = new ofShader();
 
+	physOffset = ofVec3f(0, 0, 0);
+
 	// Load shader files
 	theShader->setGeometryInputType(GL_POINTS);
 	theShader->setGeometryOutputCount(16);
@@ -202,9 +204,11 @@ void TerrainGridMarchingCubes::Rebuild(int newX, int newY, int newZ, float newSc
 
 void TerrainGridMarchingCubes::SetOffset(ofVec3f newOffset)
 {
-	if (OffsetPosition != newOffset)
+	// Only update physics terrain if new position is a significant distance from the old one
+	if (OffsetPosition != newOffset && (physOffset - newOffset).length() > 10.0f)
 	{
 		updatePhysicsMesh = true;
+		physOffset = newOffset;
 	}
 	OffsetPosition = newOffset;
 }

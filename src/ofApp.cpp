@@ -41,12 +41,12 @@ void ofApp::setup()
 	GridExpensiveNormals = 0.0f;
 	
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
-	//theTerrain = new TerrainGridMarchingCubes();
-	//((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
-	theTerrain = new TerrainDistanceRaymarch();
-	((TerrainDistanceRaymarch*)theTerrain)->Rebuild(1280, 720);
-	((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
-	currentTerrainType = TERRAIN_TYPE::TERRAIN_RAY_DIST;
+	theTerrain = new TerrainGridMarchingCubes();
+	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+	//theTerrain = new TerrainDistanceRaymarch();
+	//((TerrainDistanceRaymarch*)theTerrain)->Rebuild(1280, 720);
+	//((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
+	currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
 
 	// Make the physics world.
 	thePhysicsWorld = new ofxBulletWorldRigid();
@@ -330,6 +330,32 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }
 
+void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
+{
+	auto selectedItem = e.target->getSelected();
+	if (selectedItem->getName() == "Grid-Based Naive Marching Cubes" && currentTerrainType != TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		// delete terrain, remake as grid
+		delete theTerrain;
+		theTerrain = new TerrainGridMarchingCubes();
+		((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+
+		currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
+
+		buildGUI();
+	}
+	if (selectedItem->getName() == "Raymarched Distance Field" && currentTerrainType != TERRAIN_TYPE::TERRAIN_RAY_DIST)
+	{
+		theTerrain = new TerrainDistanceRaymarch();
+		((TerrainDistanceRaymarch*)theTerrain)->Rebuild(320, 240);
+		((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
+
+		currentTerrainType = TERRAIN_TYPE::TERRAIN_RAY_DIST;
+
+		buildGUI();
+	}
+}
+
 void ofApp::onSliderChanged(ofxDatGuiSliderEvent e)
 {
 	
@@ -361,27 +387,10 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	if (e.target->getName() == "Slice")
 	{
 
-
-		//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, sliceMesh);
-		//cutPhysicsObjects = SlicePhysicsObject(testBox, testBoxMesh->getMeshPtr(), planePoint + testBox->getPosition(), planeNormal, thePhysicsWorld, true);
-
-		// Do voronoi test
-
-		cutPhysicsObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
+		//Slice objects with voronoi fracturing, add to list of active sliced objects.
+		std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> newObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
+		cutPhysicsObjects.insert(cutPhysicsObjects.end(), newObjects.begin(), newObjects.end());
 		e.target->setName("Slice Done");
-
-		// Move meshes to new locations
-		/*
-		for (int mesh = 0; mesh < voronoiMeshes.size(); mesh++)
-		{
-			for (int i = 0; i < voronoiMeshes.at(mesh).getVertices().size(); i++)
-			{
-				voronoiMeshes.at(mesh).getVertices().at(i) += origin;
-			}
-		}*/
-		
-		// Cut object by planes
-
 
 
 	}
@@ -401,6 +410,7 @@ void ofApp::buildGUI()
 		theGUI->setAutoDraw(false);
 		theGUI->onButtonEvent(this, &ofApp::onButtonChanged);
 		theGUI->onSliderEvent(this, &ofApp::onSliderChanged);
+		theGUI->onDropdownEvent(this, &ofApp::onDropdownEvent);
 		theGUI->setWidth(500);
 	}
 
@@ -423,9 +433,8 @@ void ofApp::buildGUI()
 
 	theGUI->addBreak()->setHeight(2.0f);
 
-	theGUI->addLabel("Terrain Type: ");
-	vector<string> terrainOptions = { "Grid-Based Naive Marching Cubes", "Grid-Based Optimised Marching Cubes", "Raymarched Distance Field" };
-	theGUI->addDropdown("Grid-Based Naive Marching Cubes",terrainOptions);
+	vector<string> terrainOptions = { "Grid-Based Naive Marching Cubes", "Raymarched Distance Field" };
+	theGUI->addDropdown("Select Terrain Type",terrainOptions);
 	theGUI->addBreak()->setHeight(2.0f);
 
 	ofxDatGuiFolder* terrainFolder = theGUI->addFolder("Terrain Controls", ofColor::darkCyan);
@@ -491,8 +500,71 @@ ofxBulletTriMeshShape* ofApp::CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMe
 	newShape->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f);
 	newShape->add();
 	newShape->enableKinematic();
-	newShape->setActivationState(DISABLE_DEACTIVATION);
+	newShape->activate();
 
 
 	return newShape;
+}
+
+void ofApp::CheckBodiesAtRest()
+{
+	// Loop through list and find physics objects that are considered "at rest".
+	for (auto iter = cutPhysicsObjects.begin(); iter != cutPhysicsObjects.end(); ++iter)
+	{
+		if (iter->second->getActivationState() != OFX_BT_ACTIVATION_STATE_ACTIVE)
+		{
+			// Object is asleep; convert it to a density object and remove it from the simulation.
+			ConvertMeshToDensity(iter->first, ofVec3f(iter->second->getPosition().x, iter->second->getPosition().y, iter->second->getPosition().z));
+
+			// Remove from simulation
+			iter->second->remove();
+
+			// Kill mesh
+			//delete iter->first;
+
+			// Erase from list.
+			iter = cutPhysicsObjects.erase(iter);
+		}
+	}
+
+	
+
+}
+
+void ofApp::ConvertMeshToDensity(ofMesh* theMesh, ofVec3f position)
+{
+	// NOTE: Due to time constraints, this function does not use a scan algorithm to recreate the mesh in density-field form properly.
+	// Ordinarily this function would render the mesh in its own projection space and use a raytrace-type shader to fill a 3d texture with
+	// density information. This would give us a texture that we could pass into the terrain renderers to recreate the shape exactly.
+	// However, the project has run into time constraint problems, and so instead the function simply adds a sphere to the terrain
+	// where the mesh is located, at a radius consistent with the maximal size of the object.
+
+	// Get Max, Min vertices for sizing
+	ofVec3f minVert, maxVert;
+	minVert.set(0, 0, 0);
+	maxVert.set(0, 0, 0);
+	for (auto iter = theMesh->getVertices().begin(); iter != theMesh->getVertices().end(); ++iter)
+	{
+		if (iter->x < minVert.x && iter->y < minVert.y && iter->z < minVert.z)
+		{
+			minVert.set(iter->x, iter->y, iter->z);
+		}
+		if (iter->x > maxVert.x && iter->y > maxVert.y && iter->z > maxVert.z)
+		{
+			maxVert.set(iter->x, iter->y, iter->z);
+		}
+	}
+
+	float radius = (maxVert - minVert).length() / 2;
+
+	// Create sphere of that radius, at the provided position.
+	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	{
+		((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(position, radius);
+	}
+	else if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+	{
+		((TerrainDistanceRaymarch*)theTerrain)->CSGAddSphere(position, radius);
+	}
+
 }

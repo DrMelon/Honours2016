@@ -40,10 +40,12 @@ class ofApp : public ofBaseApp{
 		void mouseExited(int x, int y);
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
+		
 		void gotMessage(ofMessage msg);
 		void buildGUI();
 
 		// Gui event handlers
+		void onDropdownEvent(ofxDatGuiDropdownEvent e);
 		void onButtonChanged(ofxDatGuiButtonEvent e);
 		void onSliderChanged(ofxDatGuiSliderEvent e);
 
@@ -69,6 +71,10 @@ class ofApp : public ofBaseApp{
 
 		// Physics Stuff - Built from Vertices from the GPU.
 		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
+
+		void CheckBodiesAtRest();
+		void ConvertMeshToDensity(ofMesh * theMesh, ofVec3f position);
+		
 		
 		// Physics objects
 		ofxBulletWorldRigid* thePhysicsWorld;
@@ -86,8 +92,8 @@ class ofApp : public ofBaseApp{
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
-		float RayTerrainResolutionX = 1280;
-		float RayTerrainResolutionY = 720;
+		float RayTerrainResolutionX = 320;
+		float RayTerrainResolutionY = 240;
 		float RayTerrainDrawDistance = 1500.0f;
 		int RayTerrainIterations = 256;
 
