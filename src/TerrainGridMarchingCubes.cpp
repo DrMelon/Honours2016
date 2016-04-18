@@ -93,7 +93,7 @@ void TerrainGridMarchingCubes::Draw()
 	// Draw using shader.
 	theShader->begin();
 		theShader->setUniform1f("gridscale", PointScale);
-		theShader->setUniform3f("gridoffset", OffsetPosition);
+		theShader->setUniform3f("gridoffset", (theGrid->getPosition()));
 		theShader->setUniform1f("isolevel", 0.1f);
 		theShader->setUniform1f("expensiveNormals", expensiveNormals);
 		theShader->setUniform1f("time", time);
@@ -260,7 +260,8 @@ void TerrainGridMarchingCubes::UpdatePhysicsMesh(ofxBulletWorldRigid* world, ofM
 		thePhysicsMesh = new ofxBulletTriMeshShape();
 	}
 	
-	thePhysicsMesh->create(world->world, *theMesh, theGrid->getPosition() - OffsetPosition, 10000.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
+	thePhysicsMesh->create(world->world, *theMesh, theGrid->getPosition() - (OffsetPosition), 10000.0f, ofVec3f(-10000, -10000, -10000), ofVec3f(10000, 10000, 10000));
+	// Create the physics mesh as a static object. This saves processing time & allows objects to "sleep" on the terrain.
 	thePhysicsMesh->getRigidBody()->setCollisionFlags(thePhysicsMesh->getRigidBody()->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 	//thePhysicsMesh->activate();
 	thePhysicsMesh->add();

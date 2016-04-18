@@ -34,11 +34,7 @@ class TerrainGridMarchingCubes : public Terrain
 		ofTexture* triangleTable;
 		GLuint triTableTex;
 
-		// Store CSG operations as a texture
-		std::vector<GLfloat> csgOperations;
-		ofBufferObject* csgBuffer;
-		ofTexture* csgTable;
-		GLuint csgTableTex;
+
 
 		// For multipass
 		ofBufferObject* outputBuffer;

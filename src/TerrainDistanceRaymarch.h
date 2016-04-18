@@ -35,11 +35,6 @@ class TerrainDistanceRaymarch : public Terrain
 		// Noise Texture
 		ofImage* noiseTex;
 
-		// Store CSG operations as a texture
-		std::vector<GLfloat> csgOperations;
-		ofBufferObject* csgBuffer;
-		ofTexture* csgTable;
-		GLuint csgTableTex;
 
 		// Camera Ref
 		ofCamera* CurrentCamera;

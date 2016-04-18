@@ -10,6 +10,10 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	// Instrumentation
+	theStopwatch.StartTiming();
+
+
 	// Set maximum framerate.
 	ofSetFrameRate(60);
 	ofSetBackgroundColor(ofColor(182, 227, 242));
@@ -56,6 +60,9 @@ void ofApp::setup()
 	thePhysicsWorld->setGravity(ofVec3f(0, -9.81f, 0));
 	thePhysicsWorld->enableGrabbing();
 	thePhysicsWorld->setCamera(theCamera);
+
+	// Create "dummy" element in the csgOperations buffer. This is necessary for it to work properly as a texture buffer for the terrains.
+	CSGAddSphere(ofVec3f(0,0,0), 0);
 	
 
 	// Create the physics sphere
@@ -71,7 +78,7 @@ void ofApp::setup()
 	testSphere->add();
 	testBox->add();
 
-	// Create a blank mesh
+	// Create a blank mesh for the physics terrain
 	ofMesh singleTriangle;
 	singleTriangle.addVertex(ofVec3f(0, 0, 0));
 	singleTriangle.addVertex(ofVec3f(1, 0, 0));
@@ -82,6 +89,8 @@ void ofApp::setup()
 	thePhysicsMesh = CreatePhysicsMesh(thePhysicsWorld, &singleTriangle);
 
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
+	
+	theTerrain->csgOperations = csgOperations;
 
 	// Test mesh cutting
 	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
@@ -94,6 +103,9 @@ void ofApp::setup()
 
 	// Add elements to GUI.
 	buildGUI();
+
+
+	theStopwatch.StopTiming("Startup Complete.");
 	
 }
 
@@ -257,7 +269,11 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-	
+	if (key == OF_KEY_BACKSPACE)
+	{
+		//undo csg
+		CSGUndo();
+	}
 
 }
 
@@ -287,11 +303,12 @@ void ofApp::mousePressed(int x, int y, int button)
 	if (button == 1) // Middle Mouse
 	{
 		// Trace a point on the terrain, add a csg sphere
+		/*/
 		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 		{
 			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition() + (theCamera->getPosition() - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()));
 			
-			((TerrainGridMarchingCubes*)theTerrain)->CSGRemoveSphere(removePos, 25);
+			CSGRemoveSphere(removePos, 25);
 			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
 		}
 
@@ -299,9 +316,15 @@ void ofApp::mousePressed(int x, int y, int button)
 		{
 			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition());
 
-			((TerrainDistanceRaymarch*)theTerrain)->CSGRemoveSphere(removePos, 25);
+			CSGRemoveSphere(removePos, 25);
 			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
-		}
+		}*/
+
+		ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition());
+
+		CSGRemoveSphere(removePos, 25);
+		std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
+
 	}
 	
 }
@@ -348,6 +371,8 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 
 		currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
 
+		theTerrain->csgOperations = csgOperations;
+
 		buildGUI();
 	}
 	if (selectedItem->getName() == "Raymarched Distance Field" && currentTerrainType != TERRAIN_TYPE::TERRAIN_RAY_DIST)
@@ -357,6 +382,8 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 		((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
 
 		currentTerrainType = TERRAIN_TYPE::TERRAIN_RAY_DIST;
+
+		theTerrain->csgOperations = csgOperations;
 
 		buildGUI();
 	}
@@ -517,9 +544,9 @@ void ofApp::CheckBodiesAtRest()
 	// Loop through list and find physics objects that are considered "at rest".
 	for (auto iter = cutPhysicsObjects.begin(); iter != cutPhysicsObjects.end(); ++iter)
 	{
-		iter->second->getRigidBody()->updateDeactivation(0.1f);
+		iter->second->getRigidBody()->updateDeactivation(0.016f);
 
-		if (iter->second->getRigidBody()->wantsSleeping())
+		if (iter->second->getRigidBody()->getActivationState() == OFX_BT_ACTIVATION_STATE_ISLAND_SLEEPING)
 		{
 			// Object is asleep; convert it to a density object and remove it from the simulation.
 			ConvertMeshToDensity(iter->first, ofVec3f(iter->second->getPosition().x, iter->second->getPosition().y, iter->second->getPosition().z));
@@ -567,16 +594,77 @@ void ofApp::ConvertMeshToDensity(ofMesh* theMesh, ofVec3f position)
 		}
 	}
 
-	float radius = (maxVert - minVert).length();
+	float radius = (maxVert - minVert).length() / 2.0f;
 
 	// Create sphere of that radius, at the provided position.
-	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+	/*if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
-		((TerrainGridMarchingCubes*)theTerrain)->CSGAddSphere(position + (position - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()), radius);
+		CSGAddSphere(position + (position - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()), radius);
 	}
 	else if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
 	{
-		((TerrainDistanceRaymarch*)theTerrain)->CSGAddSphere(position, radius);
+		CSGAddSphere(position, radius);
+	}*/
+
+	CSGAddSphere(position, radius);
+
+}
+
+// CSG Operations work by filling a texture buffer.
+// The texture is 8 elements wide: 
+// First element: Add/Subtract operation, 0 or 1
+// Second: Shape to be defined. 0: Sphere, 1: Box,
+// For spheres, the next 4 elements define the position & radius of the sphere.
+// The remaining two are left blank
+
+void ofApp::CSGAddSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+
+
+	// keep terrain parity
+	if (theTerrain)
+	{
+		theTerrain->csgOperations = csgOperations;
+	}
+}
+
+void ofApp::CSGRemoveSphere(ofVec3f Position, float Radius)
+{
+	csgOperations.push_back(1);
+	csgOperations.push_back(0);
+	csgOperations.push_back(Position.x);
+	csgOperations.push_back(Position.y);
+	csgOperations.push_back(Position.z);
+	csgOperations.push_back(Radius);
+	csgOperations.push_back(0);
+	csgOperations.push_back(0);
+
+	// keep terrain parity
+	if (theTerrain)
+	{
+		theTerrain->csgOperations = csgOperations;
+	}
+}
+
+void ofApp::CSGUndo()
+{
+	// We want the first "dummy" element to remain, always.
+	if (csgOperations.size() > 1)
+	{
+		csgOperations.pop_back();
 	}
 
+	// keep terrain parity
+	if (theTerrain)
+	{
+		theTerrain->csgOperations = csgOperations;
+	}
 }

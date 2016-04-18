@@ -181,12 +181,12 @@ float CSG_RoundBox(vec3 position, vec3 bounds, vec3 worldspace, float roundness)
 
 // And these functions are used to combine shapes and fields together.
 
-float CSG_Union( float density1, float density2 )
+float CSG_Subtract( float density1, float density2 )
 {
 	return max(density1, isolevel - density2);
 }
 
-float CSG_Subtract( float density1, float density2 )
+float CSG_Union( float density1, float density2 )
 {
 	return min(density1, density2 - isolevel);
 }
@@ -217,7 +217,7 @@ float DensityFunction(vec3 worldspaceposition)
 
 
 	// Set a floor at 0, 0, 0.
-	density = -worldspaceposition.y;
+	density = worldspaceposition.y + 10;
 
 	//return worldspaceposition.y;
 
@@ -356,14 +356,14 @@ void main()
 		int cubeIndex = 0;
 		// Using what is known about each point being inside or outside of the terrain's surface (the isosurface, given by the isolevel here), we can build
 		// a 8-bit integer bitwise, and this will be used to select the specific case.
-		if(DensityFunction(cubeVertex0.xyz) < isolevel) cubeIndex |= 1;
-		if(DensityFunction(cubeVertex1.xyz) < isolevel) cubeIndex |= 2;
-		if(DensityFunction(cubeVertex2.xyz) < isolevel) cubeIndex |= 4;
-		if(DensityFunction(cubeVertex3.xyz) < isolevel) cubeIndex |= 8;
-		if(DensityFunction(cubeVertex4.xyz) < isolevel) cubeIndex |= 16;
-		if(DensityFunction(cubeVertex5.xyz) < isolevel) cubeIndex |= 32;
-		if(DensityFunction(cubeVertex6.xyz) < isolevel) cubeIndex |= 64;
-		if(DensityFunction(cubeVertex7.xyz) < isolevel) cubeIndex |= 128;
+		if(DensityFunction(cubeVertex0.xyz) > isolevel) cubeIndex |= 1;
+		if(DensityFunction(cubeVertex1.xyz) > isolevel) cubeIndex |= 2;
+		if(DensityFunction(cubeVertex2.xyz) > isolevel) cubeIndex |= 4;
+		if(DensityFunction(cubeVertex3.xyz) > isolevel) cubeIndex |= 8;
+		if(DensityFunction(cubeVertex4.xyz) > isolevel) cubeIndex |= 16;
+		if(DensityFunction(cubeVertex5.xyz) > isolevel) cubeIndex |= 32;
+		if(DensityFunction(cubeVertex6.xyz) > isolevel) cubeIndex |= 64;
+		if(DensityFunction(cubeVertex7.xyz) > isolevel) cubeIndex |= 128;
 
 		
 		

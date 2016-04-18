@@ -845,7 +845,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		// Because of the uneven nature of the terrain, they don't come to rest as fast as required for the proof of concept in this
 		// application.
 		// The new values below are much higher than the default Linear and Angular velocity thresholds, which are 0.8 and 1.0 respectively.
-		newShape->getRigidBody()->setSleepingThresholds(0.5, 3.0);
+		//newShape->getRigidBody()->setSleepingThresholds(0.5, 3.0);
 
 
 

@@ -218,6 +218,7 @@
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxBaseGui.cpp" />
     <ClCompile Include="..\..\..\addons\ofxGui\src\ofxPanel.cpp" />
     <ClCompile Include="src\ofxFirstPersonCamera.cpp" />
+    <ClCompile Include="src\Stopwatch.cpp" />
     <ClCompile Include="src\tables.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\TerrainDistanceRaymarch.cpp" />
@@ -299,6 +300,7 @@
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxButton.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxLabel.h" />
     <ClInclude Include="src\ofxFirstPersonCamera.h" />
+    <ClInclude Include="src\Stopwatch.h" />
     <ClInclude Include="src\tables.h" />
     <ClInclude Include="src\Terrain.h" />
     <ClInclude Include="src\TerrainDistanceRaymarch.h" />

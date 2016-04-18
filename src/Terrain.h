@@ -17,7 +17,11 @@ class Terrain
 		Terrain();
 		~Terrain();
 
-		
+		// Store CSG operations as a texture
+		std::vector<GLfloat> csgOperations;
+		ofBufferObject* csgBuffer;
+		ofTexture* csgTable;
+		GLuint csgTableTex;
 
 		// Overrideable Techniques
 		virtual void Rebuild();

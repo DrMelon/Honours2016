@@ -17,6 +17,7 @@
 #include "ofxBullet.h"
 #include "ofxDatGui.h"
 #include "ofxVoro.h"
+#include "Stopwatch.h"
 
 
 class ofApp : public ofBaseApp{
@@ -103,6 +104,12 @@ class ofApp : public ofBaseApp{
 		float PhysicsTimescale = 1.0f;
 		bool PhysicsWireframe = false;
 
+		// Terrain modification buffer
+		std::vector<GLfloat> csgOperations;
+		void CSGAddSphere(ofVec3f Position, float Radius);
+		void CSGRemoveSphere(ofVec3f Position, float Radius);
+		void CSGUndo();
+
 
 		// Mesh Cutting Test
 		ofBoxPrimitive*  testBoxMesh;
@@ -116,4 +123,8 @@ class ofApp : public ofBaseApp{
 		voro::container* voronoiContainer;
 		std::vector<ofPoint> voronoiCentres;
 		std::vector<ofVboMesh> voronoiMeshes;
+
+
+		// Analysis/Instrumentation
+		Stopwatch theStopwatch;
 };
