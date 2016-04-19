@@ -36,6 +36,7 @@ void ofApp::setup()
 	theCamera = new ofxFirstPersonCamera();
 	theCamera->setNearClip(0.01f);
 	theCamera->setFarClip(1500.f);
+	theCamera->setFov(59);
 
 	// Create lighting shader
 	lightShader = new ofShader();

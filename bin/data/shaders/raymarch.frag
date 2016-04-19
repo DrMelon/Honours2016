@@ -200,8 +200,12 @@ void main()
 	vec3 cameraRight = normalize(cross(cameraUpVector, cameraDirection));
 	vec3 cameraLowerBound = cross(cameraDirection, cameraRight);
 	vec3 cameraStep = cameraPosition + cameraDirection;
+
+	// .75 is fine for movement?
+	float FOVCalcX = 0.75f;
+	float FOVCalcY = 0.57f;
 	
-	vec3 eyeCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * (screenResolution.x / screenResolution.y) * 0.55) + (screenPositionOffset.y * cameraLowerBound * 0.55);
+	vec3 eyeCoordinate = cameraStep + (screenPositionOffset.x * cameraRight * (screenResolution.x / screenResolution.y) * FOVCalcX) + (screenPositionOffset.y * cameraLowerBound * FOVCalcY);
 	vec3 rayDirection = normalize(eyeCoordinate - cameraPosition);
 
 	// Now, do raymarching.
