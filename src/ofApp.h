@@ -62,6 +62,7 @@ class ofApp : public ofBaseApp{
 
 		// Fields/Members
 		ofxFirstPersonCamera* theCamera;
+		ofVec3f camDelta;
 		Terrain* theTerrain;
 		TERRAIN_TYPE currentTerrainType;
 

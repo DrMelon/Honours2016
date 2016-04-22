@@ -74,6 +74,12 @@ TerrainGridMarchingCubes::TerrainGridMarchingCubes()
 
 TerrainGridMarchingCubes::~TerrainGridMarchingCubes()
 {
+	// Clean up various things
+	delete theGrid;
+	delete theShader;
+	delete triangleBuffer;
+	delete csgBuffer;
+	delete outputBuffer;
 }
 
 void TerrainGridMarchingCubes::Update()
@@ -84,6 +90,15 @@ void TerrainGridMarchingCubes::Update()
 
 void TerrainGridMarchingCubes::Draw()
 {
+
+	if (PhysicsOnly)
+	{
+		glEnable(GL_RASTERIZER_DISCARD);
+	}
+	else
+	{
+		glDisable(GL_RASTERIZER_DISCARD);
+	}
 	// The drawVertices function draws the vertices in order, and I'm rendering them as GL_POINT type.
 	theGrid->getMeshPtr()->setMode(OF_PRIMITIVE_POINTS);
 
@@ -135,6 +150,7 @@ void TerrainGridMarchingCubes::Draw()
 		
 		if (numTriangles < 1)
 		{
+			glDisable(GL_RASTERIZER_DISCARD);
 			return;
 		}
 
@@ -169,7 +185,10 @@ void TerrainGridMarchingCubes::Draw()
 		// Cleanup.
 		delete[] feedback;
 		feedback = 0;
+
+		
 	}
+	glDisable(GL_RASTERIZER_DISCARD);
 
 }
 

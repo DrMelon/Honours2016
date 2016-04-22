@@ -52,12 +52,14 @@ class TerrainGridMarchingCubes : public Terrain
 		float expensiveNormals = 0.0f;
 		float time = 0.0f;
 		bool updatePhysicsMesh = false;
-
+		bool PhysicsOnly = false;
 		// Methods
 		TerrainGridMarchingCubes();
-		~TerrainGridMarchingCubes();
+		virtual ~TerrainGridMarchingCubes();
 		virtual void Update();
 		virtual void Draw();
+		
+		
 		virtual void Rebuild(int newX = 16, int newY = 16, int newZ = 16, float newScale = 10.0f);
 		virtual void SetOffset(ofVec3f newOffset);
 		void CSGAddSphere(ofVec3f Position, float Radius);

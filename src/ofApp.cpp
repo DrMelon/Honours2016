@@ -127,6 +127,7 @@ void ofApp::update()
 	// Update camera offset for terrain.
 	theTerrain->SetOffset(theCamera->getPosition());
 
+
 	// Set terrain variables.
 	if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
 	{
@@ -260,6 +261,31 @@ void ofApp::draw()
 			physicsNeedsRebuilding = false;
 		}
 
+	}
+
+	if (theCamera->getPosition() != camDelta && (theCamera->getPosition() - camDelta).length() > 40.0f)
+	{
+		camDelta = theCamera->getPosition();
+
+		if ((currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST))
+		{
+			// Quickly create and render a grid terrain.
+			TerrainGridMarchingCubes* newTerrain = new TerrainGridMarchingCubes();
+			newTerrain->updatePhysicsMesh = true;
+			newTerrain->PhysicsOnly = true;
+			newTerrain->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
+			newTerrain->thePhysicsWorld = thePhysicsWorld;
+			newTerrain->thePhysicsMesh = thePhysicsMesh;
+			newTerrain->expensiveNormals = GridExpensiveNormals;
+			newTerrain->SetOffset(theCamera->getPosition());
+			newTerrain->Update();
+			newTerrain->csgOperations = csgOperations;
+			newTerrain->Draw();
+
+			delete newTerrain;
+
+			physicsNeedsRebuilding = false;
+		}
 	}
 
 	
