@@ -18,6 +18,7 @@
 #include "ofxDatGui.h"
 #include "ofxVoro.h"
 #include "Stopwatch.h"
+#include "GNUPlotData.h"
 
 
 class ofApp : public ofBaseApp{
@@ -128,4 +129,8 @@ class ofApp : public ofBaseApp{
 
 		// Analysis/Instrumentation
 		Stopwatch theStopwatch;
+		 
+		// Graphing Data Storage
+		GNUPlotData<int> gnpDrawPerformance;
+		GNUPlotData<int> gnpUpdatePerformance;
 };

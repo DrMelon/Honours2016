@@ -64,7 +64,18 @@ void ofApp::setup()
 
 	// Create "dummy" element in the csgOperations buffer. This is necessary for it to work properly as a texture buffer for the terrains.
 	CSGAddSphere(ofVec3f(0,0,0), 0);
-	
+
+	// Set up analytics
+	gnpUpdatePerformance.Column1Name = "Application Running Time (s)";
+	gnpUpdatePerformance.Column2Name = "Frame-Time (ms)";
+	gnpUpdatePerformance.XAxisName = "Application Running Time (s)";
+	gnpUpdatePerformance.YAxisName = "Frame-Time (ms)";
+	gnpUpdatePerformance.DataColumns = 2;
+	gnpUpdatePerformance.HexColour = "0000aa";
+	gnpUpdatePerformance.LineThickness = 2;
+	gnpUpdatePerformance.DotSize = 1;
+	gnpUpdatePerformance.DotType = 7;
+	gnpUpdatePerformance.GraphStyle = 1;
 
 	// Create the physics sphere
 	testSphere = new ofxBulletSphere();
@@ -113,6 +124,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+	theStopwatch.StartTiming();
 	float deltaTime = ofGetLastFrameTime();
 	
 	// Update GUI
@@ -159,14 +171,14 @@ void ofApp::update()
 		//}
 	}
 
-	
-	
+	//gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
+	//gnpUpdatePerformance.Column2.push_back(theStopwatch.StopTiming("Update Completed."));
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-
+	theStopwatch.StartTiming();
 
 	theCamera->begin(); // Begin drawing with this camera.
 
@@ -288,8 +300,9 @@ void ofApp::draw()
 		}
 	}
 
-	
-	
+	// Update analytics
+	gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
+	gnpUpdatePerformance.Column2.push_back(theStopwatch.StopTiming("Draw Completed."));
 
 }
 
@@ -352,6 +365,15 @@ void ofApp::mousePressed(int x, int y, int button)
 		CSGRemoveSphere(removePos, 25);
 		std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
 
+
+		// Raise GNUPlot event
+		GNUPlotEvent newEvent;
+		newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+		newEvent.xRange = 10;
+		newEvent.boxColour = "ffffcc";
+		newEvent.labelName = "Carve";
+		gnpUpdatePerformance.Events.push_back(newEvent);
+
 	}
 	
 }
@@ -401,6 +423,15 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 		theTerrain->csgOperations = csgOperations;
 
 		buildGUI();
+
+		// Raise GNUPlot event
+		GNUPlotEvent newEvent;
+		newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+		newEvent.xRange = 10;
+		newEvent.boxColour = "ffccff";
+		newEvent.labelName = "Switched to Grid";
+		gnpUpdatePerformance.Events.push_back(newEvent);
+
 	}
 	if (selectedItem->getName() == "Raymarched Distance Field" && currentTerrainType != TERRAIN_TYPE::TERRAIN_RAY_DIST)
 	{
@@ -413,6 +444,15 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 		theTerrain->csgOperations = csgOperations;
 
 		buildGUI();
+
+		// Raise GNUPlot event
+		GNUPlotEvent newEvent;
+		newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+		newEvent.xRange = 10;
+		newEvent.boxColour = "ccffff";
+		newEvent.labelName = "Switched to Raycast";
+		gnpUpdatePerformance.Events.push_back(newEvent);
+
 	}
 }
 
@@ -454,12 +494,19 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 
 
 	}
+	if (e.target->getName() == "Output Logs")
+	{
+		GNUPlotDataManager plotMan;
+		plotMan.WriteGraphDataFile(gnpUpdatePerformance, "update_performance.dat");
+	}
 
 }
 
 // Build GUI
 void ofApp::buildGUI()
 {
+	Stopwatch newWatch;
+	newWatch.StartTiming();
 	if (theGUI != 0)
 	{
 		delete theGUI;
@@ -545,24 +592,27 @@ void ofApp::buildGUI()
 	
 	auto sliceButton = physicsFolder->addButton("Slice");
 
-
+	auto logButton = theGUI->addButton("Output Logs");
 	
 
 	auto footerGUI = theGUI->addFooter();
 	footerGUI->setLabelWhenCollapsed(":: SHOW TOOLS ::");
 	footerGUI->setLabelWhenExpanded(":: HIDE TOOLS ::");
 
+	newWatch.StopTiming("GUI Updated.");
 }
 
 ofxBulletTriMeshShape* ofApp::CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh)
 {
+	Stopwatch newWatch;
+	newWatch.StartTiming();
 	ofxBulletTriMeshShape* newShape = new ofxBulletTriMeshShape();
 	newShape->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f);
 	newShape->add();
 	newShape->enableKinematic();
 	newShape->activate();
 
-
+	newWatch.StopTiming("CreatePhysicsMesh Called.");
 	return newShape;
 }
 
@@ -694,4 +744,5 @@ void ofApp::CSGUndo()
 	{
 		theTerrain->csgOperations = csgOperations;
 	}
+
 }

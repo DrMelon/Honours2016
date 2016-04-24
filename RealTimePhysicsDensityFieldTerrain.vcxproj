@@ -206,6 +206,7 @@
     <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\v_compute.cc" />
     <ClCompile Include="..\..\..\addons\ofxVoro\libs\voro++\wall.cc" />
     <ClCompile Include="..\..\..\addons\ofxVoro\src\ofxVoro.cpp" />
+    <ClCompile Include="src\GNUPlotData.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MeshCutting.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
@@ -288,6 +289,7 @@
     <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\wall.hh" />
     <ClInclude Include="..\..\..\addons\ofxVoro\libs\voro++\worklist.hh" />
     <ClInclude Include="..\..\..\addons\ofxVoro\src\ofxVoro.h" />
+    <ClInclude Include="src\GNUPlotData.h" />
     <ClInclude Include="src\MeshCutting.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
