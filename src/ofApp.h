@@ -88,6 +88,7 @@ class ofApp : public ofBaseApp{
 
 		// GUI stuff
 		ofxDatGui* theGUI;
+		bool GuiNeedsRebuilt;
 
 		// Terrain stuff
 

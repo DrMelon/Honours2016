@@ -128,6 +128,11 @@ void ofApp::update()
 	float deltaTime = ofGetLastFrameTime();
 	
 	// Update GUI
+	if (GuiNeedsRebuilt)
+	{
+		buildGUI();
+	}
+
 	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
 	frametimeGUI->setText(std::to_string(deltaTime) + " ms");
 	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
@@ -422,7 +427,7 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 
 		theTerrain->csgOperations = csgOperations;
 
-		buildGUI();
+		GuiNeedsRebuilt = true;
 
 		// Raise GNUPlot event
 		GNUPlotEvent newEvent;
@@ -443,7 +448,7 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 
 		theTerrain->csgOperations = csgOperations;
 
-		buildGUI();
+		GuiNeedsRebuilt = true;
 
 		// Raise GNUPlot event
 		GNUPlotEvent newEvent;
@@ -507,6 +512,7 @@ void ofApp::buildGUI()
 {
 	Stopwatch newWatch;
 	newWatch.StartTiming();
+	GuiNeedsRebuilt = false;
 	if (theGUI != 0)
 	{
 		delete theGUI;
@@ -621,9 +627,10 @@ void ofApp::CheckBodiesAtRest()
 	// Loop through list and find physics objects that are considered "at rest".
 	for (auto iter = cutPhysicsObjects.begin(); iter != cutPhysicsObjects.end(); ++iter)
 	{
-		iter->second->getRigidBody()->updateDeactivation(0.016f);
 
-		if (iter->second->getRigidBody()->getActivationState() == OFX_BT_ACTIVATION_STATE_ISLAND_SLEEPING)
+
+
+		if (iter->second->getRigidBody()->getLinearVelocity().length2() < 0.8 && iter->second->getRigidBody()->getAngularVelocity().length2() < 1.0)
 		{
 			// Object is asleep; convert it to a density object and remove it from the simulation.
 			ConvertMeshToDensity(iter->first, ofVec3f(iter->second->getPosition().x, iter->second->getPosition().y, iter->second->getPosition().z));
