@@ -42,6 +42,7 @@ class ofApp : public ofBaseApp{
 		void mouseExited(int x, int y);
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
+		void exit();
 		
 		void gotMessage(ofMessage msg);
 		void buildGUI();
@@ -82,22 +83,28 @@ class ofApp : public ofBaseApp{
 		// Physics objects
 		ofxBulletWorldRigid* thePhysicsWorld;
 		ofxBulletTriMeshShape* thePhysicsMesh;
-		ofxBulletSphere* testSphere;
-		ofxBulletCustomShape* testBox;
+
+		// These lists are for user-interaction; when carving out terrain, one could produce a physics object sphere & shatter it if the shift key is held.
+		std::vector<ofxBulletSphere*> createdTerrainSpheres;
+
+		// If ctrl is held instead, boxes will be flung at the terrain, which will shatter on impact.
+		std::vector<ofxBulletCustomShape*> createdShatterBoxes;
 	
 
 		// GUI stuff
 		ofxDatGui* theGUI;
+		bool ShiftHeld;
+		bool CtrlHeld;
 		bool GuiNeedsRebuilt;
 
 		// Terrain stuff
 
-		int GridTerrainResolution = 16;
+		int GridTerrainResolution = 1;
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
-		float RayTerrainResolutionX = 320;
-		float RayTerrainResolutionY = 240;
+		float RayTerrainResolutionX = 256;
+		float RayTerrainResolutionY = 144;
 		float RayTerrainDrawDistance = 1500.0f;
 		int RayTerrainIterations = 256;
 
@@ -129,7 +136,8 @@ class ofApp : public ofBaseApp{
 
 
 		// Analysis/Instrumentation
-		Stopwatch theStopwatch;
+		Stopwatch updateStopwatch;
+		Stopwatch drawStopwatch;
 		 
 		// Graphing Data Storage
 		GNUPlotData<int> gnpDrawPerformance;

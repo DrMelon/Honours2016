@@ -737,6 +737,10 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	//physicsObject->getRigidBody()->getMotionState()->getWorldTransform(objectTransform);
 	// Then fetching AABB from collision mesh.
 	physicsObject->getCollisionShape()->getAabb(objectTransform, boundsMin, boundsMax);
+	ofVec3f physicsObjectPosition = physicsObject->getPosition();
+
+	// We can now remove the original object, if desired.
+	physicsObject->remove();
 
 	// Expand the boundaries a little
 	boundsMin.setValue(boundsMin.getX() - 1, boundsMin.getY() - 1, boundsMin.getZ() - 1);
@@ -768,7 +772,7 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 	std::vector<ofVboMesh> cellMeshes;
 	getCellsFromContainer(voroContainer, cellMeshes, false);
 
-	std::vector<std::pair<int, MeshCutting::Plane>> ContainerPlanes = VoronoiPlanesFromContainer(voroContainer, physicsObject->getPosition());
+	std::vector<std::pair<int, MeshCutting::Plane>> ContainerPlanes = VoronoiPlanesFromContainer(voroContainer, physicsObjectPosition);
 
 	// Note: we can't just use these meshes as the fracture result - this is because we won't always be dealing with a cubic mesh aligned perfectly with the AABB.
 	// Instead, we loop through the faces of each cell-mesh and cut the physics object mesh repeatedly by each face; each result cut by the cell-mesh will then be stored for output.
@@ -835,12 +839,11 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 		
 		newShape->addMesh(*cellOutputMesh, ofVec3f(1, 1, 1), true);
 		ofVec3f meshPosition = cellOutputMesh->getCentroid();
-		ofVec3f distancer = (meshPosition);
-		ofVec3f newOffset = physicsObject->getPosition() + distancer;
+		ofVec3f distancer = (physicsObjectMesh->getCentroid() - cellOutputMesh->getCentroid());
+		ofVec3f newOffset = physicsObjectPosition + (distancer * distancer.length());
 		newShape->create(theWorld->world, newOffset, 1.0f);
 		newShape->add();
 		newShape->setActivationState(OFX_BT_ACTIVATION_STATE_DISABLE_DEACTIVATION);
-		
 		newShape->activate();
 
 		outputShapes.push_back(std::make_pair(cellOutputMesh, newShape));
@@ -848,8 +851,6 @@ std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> VoronoiFracture(ofxBullet
 
 	}
 
-	// We can now remove the original object, if desired.
-	physicsObject->remove();
 
 
 

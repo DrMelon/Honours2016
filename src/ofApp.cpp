@@ -11,9 +11,10 @@
 void ofApp::setup()
 {
 	// Instrumentation
-	theStopwatch.StartTiming();
-
-
+	updateStopwatch.filename = "main_update.log";
+	drawStopwatch.filename = "draw_update.log";
+	updateStopwatch.StartTiming();
+	
 	// Set maximum framerate.
 	ofSetFrameRate(60);
 	ofSetBackgroundColor(ofColor(182, 227, 242));
@@ -29,8 +30,6 @@ void ofApp::setup()
 	
 	// Disable the GUI's own automatic rendering, as we're doing shader passes and things.
 	theGUI->setAutoDraw(false);
-
-
 
 	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
@@ -48,9 +47,6 @@ void ofApp::setup()
 	// Make the terrain, starting off with using the GridMarchingCubes implementation.
 	theTerrain = new TerrainGridMarchingCubes();
 	((TerrainGridMarchingCubes*)theTerrain)->Rebuild(GridTerrainResolution, GridTerrainResolution, GridTerrainResolution, GridTerrainSize);
-	//theTerrain = new TerrainDistanceRaymarch();
-	//((TerrainDistanceRaymarch*)theTerrain)->Rebuild(1280, 720);
-	//((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
 	currentTerrainType = TERRAIN_TYPE::TERRAIN_GRID_MC;
 
 	// Make the physics world.
@@ -66,29 +62,30 @@ void ofApp::setup()
 	CSGAddSphere(ofVec3f(0,0,0), 0);
 
 	// Set up analytics
-	gnpUpdatePerformance.Column1Name = "Application Running Time (s)";
+	gnpUpdatePerformance.Column1Name = "Frame No.";
 	gnpUpdatePerformance.Column2Name = "Frame-Time (ms)";
-	gnpUpdatePerformance.XAxisName = "Application Running Time (s)";
+	gnpUpdatePerformance.XAxisName = "Frame No.";
 	gnpUpdatePerformance.YAxisName = "Frame-Time (ms)";
 	gnpUpdatePerformance.DataColumns = 2;
-	gnpUpdatePerformance.HexColour = "0000aa";
-	gnpUpdatePerformance.LineThickness = 2;
+	gnpUpdatePerformance.HexColour = "aa0000";
+	gnpUpdatePerformance.LineThickness = 1;
 	gnpUpdatePerformance.DotSize = 1;
 	gnpUpdatePerformance.DotType = 7;
 	gnpUpdatePerformance.GraphStyle = 1;
 
-	// Create the physics sphere
-	testSphere = new ofxBulletSphere();
-	testSphere->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 20, 1.0, 2.0);
-	
-	testBoxMesh = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
+	gnpDrawPerformance.Column1Name = "Frame No.";
+	gnpDrawPerformance.Column2Name = "Frame-Time (ms)";
+	gnpDrawPerformance.XAxisName = "Frame No.";
+	gnpDrawPerformance.YAxisName = "Frame-Time (ms)";
+	gnpDrawPerformance.DataColumns = 2;
+	gnpDrawPerformance.HexColour = "0000aa";
+	gnpDrawPerformance.LineThickness = 1;
+	gnpDrawPerformance.DotSize = 1;
+	gnpDrawPerformance.DotType = 7;
+	gnpDrawPerformance.GraphStyle = 1;
 
-	testBox = new ofxBulletCustomShape();
-	testBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), false);
-	testBox->create(thePhysicsWorld->world, theCamera->getPosition() + theCamera->upvector * 35, 1.0f);
-	
-	testSphere->add();
-	testBox->add();
+	// Create mesh template for physics boxes.	
+	testBoxMesh = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
 
 	// Create a blank mesh for the physics terrain
 	ofMesh singleTriangle;
@@ -102,29 +99,21 @@ void ofApp::setup()
 
 	((TerrainGridMarchingCubes*)theTerrain)->updatePhysicsMesh = true;
 	
+	// Assign CSG operations buffer
 	theTerrain->csgOperations = csgOperations;
-
-	// Test mesh cutting
-	planeNormal = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	planeNormal.normalize();
-	planePoint = ofVec3f(ofRandomf(), ofRandomf(), ofRandomf());
-	//planeNormal = ofVec3f(0.5, 0.5, 0);
-	//planePoint = ofVec3f(0, 1, 2);
-
-	//cutMeshes = CutMeshWithPlane(planePoint, planeNormal, testBox->getMesh());
 
 	// Add elements to GUI.
 	buildGUI();
 
-
-	theStopwatch.StopTiming("Startup Complete.");
+	// Stop timing
+	updateStopwatch.StopTiming("Startup Complete.");
 	
 }
 
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	theStopwatch.StartTiming();
+	updateStopwatch.StartTiming();
 	float deltaTime = ofGetLastFrameTime();
 	
 	// Update GUI
@@ -168,22 +157,22 @@ void ofApp::update()
 	// Update physics
 	if (PhysicsEnabled)
 	{
-		thePhysicsWorld->update(deltaTime * (PhysicsTimescale*2), 0);
+		thePhysicsWorld->update(0.016f * (PhysicsTimescale*2), 0);
 		// every half-second check for resting bodies
-		//if (ofGetElapsedTimeMillis() % 30 == 0)
-		//{
+		if (ofGetElapsedTimeMillis() % 60 == 0)
+		{
 			CheckBodiesAtRest();
-		//}
+		}
 	}
 
-	//gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
-	//gnpUpdatePerformance.Column2.push_back(theStopwatch.StopTiming("Update Completed."));
+	gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
+	gnpUpdatePerformance.Column2.push_back(updateStopwatch.StopTiming("Update Completed."));
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	theStopwatch.StartTiming();
+	drawStopwatch.StartTiming();
 
 	theCamera->begin(); // Begin drawing with this camera.
 
@@ -219,32 +208,14 @@ void ofApp::draw()
 
 
 		// Enable light shader
-		//lightShader->begin();
+		lightShader->begin();
 
 		// Draw physics objects.
-		testSphere->draw();
 
-		// Draw physics box
-		if (testBox->getCollisionShape() != NULL)
-		{
-			
-			testBox->transformGL();
-			if (!PhysicsWireframe)
-			{
-				testBoxMesh->draw();
-			}
-			else
-			{
-				testBoxMesh->drawWireframe();
-			}
-			
-			testBox->restoreTransformGL();
-		}
 		
 		// Draw sliced up objects
 		for (int i = 0; i < cutPhysicsObjects.size(); i++)
 		{
-			//cutPhysicsObjects.at(i).second->draw();
 			cutPhysicsObjects.at(i).second->transformGL();
 			
 			if (PhysicsWireframe)
@@ -260,7 +231,7 @@ void ofApp::draw()
 		}
 
 		// stop using lights
-		//lightShader->end();
+		lightShader->end();
 
 	theCamera->end(); // Cease drawing with the camera.
 
@@ -306,8 +277,8 @@ void ofApp::draw()
 	}
 
 	// Update analytics
-	gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
-	gnpUpdatePerformance.Column2.push_back(theStopwatch.StopTiming("Draw Completed."));
+	gnpDrawPerformance.Column1.push_back(gnpDrawPerformance.Column1.size());
+	gnpDrawPerformance.Column2.push_back(drawStopwatch.StopTiming("Draw Completed."));
 
 }
 
@@ -320,16 +291,38 @@ void ofApp::keyPressed(int key)
 		CSGUndo();
 	}
 
+	if (key == OF_KEY_SHIFT)
+	{
+		ShiftHeld = true;
+	}
+
+	if (key == OF_KEY_CONTROL)
+	{
+		CtrlHeld = true;
+	}
+
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
+void ofApp::keyReleased(int key)
+{
+	if (key == OF_KEY_SHIFT)
+	{
+		ShiftHeld = false;
+	}
+
+	if (key == OF_KEY_CONTROL)
+	{
+		CtrlHeld = false;
+	}
+
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
+void ofApp::mouseMoved(int x, int y )
+{
+	
 }
 
 //--------------------------------------------------------------
@@ -347,37 +340,84 @@ void ofApp::mousePressed(int x, int y, int button)
 
 	if (button == 1) // Middle Mouse
 	{
-		// Trace a point on the terrain, add a csg sphere
-		/*/
-		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+		// Carve a segment of terrain out of the world.
+		if (!ShiftHeld && !CtrlHeld)
 		{
-			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition() + (theCamera->getPosition() - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()));
-			
+			ofVec3f removePos = (theCamera->getLookAtDir() * 50.0f) + (theCamera->getPosition());
+
 			CSGRemoveSphere(removePos, 25);
 			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
+
+			physicsNeedsRebuilding = true;
+
+			// Raise GNUPlot event
+			GNUPlotEvent newEvent;
+			newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+			newEvent.xRange = 10;
+			newEvent.boxColour = "ffffcc";
+			newEvent.labelName = "Carve (No Object)";
+			gnpUpdatePerformance.Events.push_back(newEvent);
+			gnpDrawPerformance.Events.push_back(newEvent);
 		}
 
-		if (currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
+		// Carve a segment of terrain out of the world, with residual sphere slice.
+		if (ShiftHeld)// && PhysicsEnabled)
 		{
-			ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition());
+			ofVec3f removePos = (theCamera->getLookAtDir() * 50.0f) + (theCamera->getPosition());
+
+			physicsNeedsRebuilding = true;
+
+			// Create Physics Sphere Object
+			ofxBulletCustomShape newSphereShape;
+			newSphereShape.create(thePhysicsWorld->getWorld(), removePos, 1.0f);
+			
+
+			ofSpherePrimitive newSphere;
+			newSphere.setRadius(12.5f);
+
+			newSphereShape.addMesh(newSphere.getMesh(), ofVec3f(1, 1, 1), true);
+			newSphereShape.add();
+			
+
+			// Slice up that object
+			std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> newObjects = VoronoiFracture(&newSphereShape, newSphere.getMeshPtr(), thePhysicsWorld, 16, NULL);
+			cutPhysicsObjects.insert(cutPhysicsObjects.end(), newObjects.begin(), newObjects.end());
 
 			CSGRemoveSphere(removePos, 25);
-			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
-		}*/
+			std::cout << "Removed CSG Sphere w/ Object, at " << removePos << "." << std::endl;
 
-		ofVec3f removePos = (theCamera->getLookAtDir() * 5.0f) + (theCamera->getPosition());
+			
 
-		CSGRemoveSphere(removePos, 25);
-		std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
+			// Raise GNUPlot event
+			GNUPlotEvent newEvent;
+			newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+			newEvent.xRange = 10;
+			newEvent.boxColour = "ffeecc";
+			newEvent.labelName = "Carve (Object)";
+			gnpUpdatePerformance.Events.push_back(newEvent);
+			gnpDrawPerformance.Events.push_back(newEvent);
+		}
 
+		if (CtrlHeld && PhysicsEnabled)
+		{
+			ofxBulletCustomShape* newThrownBox = new ofxBulletCustomShape();
+			newThrownBox->create(thePhysicsWorld->getWorld(), theCamera->getPosition(), 1.0f);
+			newThrownBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), true);
+			newThrownBox->add();
+			newThrownBox->applyCentralForce(theCamera->getLookAtDir() * 10.0f);
 
-		// Raise GNUPlot event
-		GNUPlotEvent newEvent;
-		newEvent.xPosition = gnpUpdatePerformance.Column1.size();
-		newEvent.xRange = 10;
-		newEvent.boxColour = "ffffcc";
-		newEvent.labelName = "Carve";
-		gnpUpdatePerformance.Events.push_back(newEvent);
+			createdShatterBoxes.push_back(newThrownBox);
+
+			// Raise GNUPlot event
+			GNUPlotEvent newEvent;
+			newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+			newEvent.xRange = 10;
+			newEvent.boxColour = "eeffcc";
+			newEvent.labelName = "Box Thrown";
+			gnpUpdatePerformance.Events.push_back(newEvent);
+			gnpDrawPerformance.Events.push_back(newEvent);
+		}
+
 
 	}
 	
@@ -441,7 +481,7 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 	if (selectedItem->getName() == "Raymarched Distance Field" && currentTerrainType != TERRAIN_TYPE::TERRAIN_RAY_DIST)
 	{
 		theTerrain = new TerrainDistanceRaymarch();
-		((TerrainDistanceRaymarch*)theTerrain)->Rebuild(320, 240);
+		((TerrainDistanceRaymarch*)theTerrain)->Rebuild(RayTerrainResolutionX, RayTerrainResolutionY);
 		((TerrainDistanceRaymarch*)theTerrain)->CurrentCamera = theCamera;
 
 		currentTerrainType = TERRAIN_TYPE::TERRAIN_RAY_DIST;
@@ -493,16 +533,18 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 
 		//Slice objects with voronoi fracturing, add to list of active sliced objects.
-		std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> newObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
-		cutPhysicsObjects.insert(cutPhysicsObjects.end(), newObjects.begin(), newObjects.end());
-		e.target->setName("Slice Done");
-
+		//std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> newObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
+		//cutPhysicsObjects.insert(cutPhysicsObjects.end(), newObjects.begin(), newObjects.end());
+		updateStopwatch.ClearLogs();
+		drawStopwatch.ClearLogs();
+		
 
 	}
 	if (e.target->getName() == "Output Logs")
 	{
 		GNUPlotDataManager plotMan;
 		plotMan.WriteGraphDataFile(gnpUpdatePerformance, "update_performance.dat");
+		plotMan.WriteGraphDataFile(gnpDrawPerformance, "draw_performance.dat");
 	}
 
 }
@@ -510,7 +552,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 // Build GUI
 void ofApp::buildGUI()
 {
-	Stopwatch newWatch;
+	Stopwatch newWatch("guitime.log");
 	newWatch.StartTiming();
 	GuiNeedsRebuilt = false;
 	if (theGUI != 0)
@@ -557,12 +599,7 @@ void ofApp::buildGUI()
 		gridResolutionSlider->setPrecision(0);
 		gridResolutionSlider->bind(GridTerrainResolution);
 
-		auto gridScaleSlider = terrainFolder->addSlider("Grid Zoom", 1, 20, 5);
-		gridScaleSlider->setPrecision(1);
-		gridScaleSlider->bind(GridTerrainSize);
-
-		auto gridNormalsToggle = terrainFolder->addToggle("Smooth Normals", false);
-		
+	
 
 		terrainFolder->addButton("Rebuild Terrain");
 	}
@@ -610,7 +647,7 @@ void ofApp::buildGUI()
 
 ofxBulletTriMeshShape* ofApp::CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh)
 {
-	Stopwatch newWatch;
+	Stopwatch newWatch("physicsmesh.log");
 	newWatch.StartTiming();
 	ofxBulletTriMeshShape* newShape = new ofxBulletTriMeshShape();
 	newShape->create(world->world, *theMesh, ofVec3f(0, 0, 0), 1.0f);
@@ -680,18 +717,16 @@ void ofApp::ConvertMeshToDensity(ofMesh* theMesh, ofVec3f position)
 
 	float radius = (maxVert - minVert).length() / 2.0f;
 
-	// Create sphere of that radius, at the provided position.
-	/*if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
-	{
-		CSGAddSphere(position + (position - ((TerrainGridMarchingCubes*)theTerrain)->theGrid->getPosition()), radius);
-	}
-	else if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
-	{
-		CSGAddSphere(position, radius);
-	}*/
-
 	CSGAddSphere(position, radius);
 
+	// Raise GNUPlot event
+	GNUPlotEvent newEvent;
+	newEvent.xPosition = gnpUpdatePerformance.Column1.size();
+	newEvent.xRange = 5;
+	newEvent.boxColour = "ccffcc";
+	newEvent.labelName = "Mesh->Density";
+	gnpUpdatePerformance.Events.push_back(newEvent);
+	gnpDrawPerformance.Events.push_back(newEvent);
 }
 
 // CSG Operations work by filling a texture buffer.
@@ -751,5 +786,16 @@ void ofApp::CSGUndo()
 	{
 		theTerrain->csgOperations = csgOperations;
 	}
+
+}
+
+void ofApp::exit()
+{
+	// Last-minute logging write-outs.
+	GNUPlotDataManager plotMan;
+	plotMan.WriteGraphDataFile(gnpUpdatePerformance, "update_performance.dat");
+	plotMan.WriteGraphDataFile(gnpDrawPerformance, "draw_performance.dat");
+
+	
 
 }

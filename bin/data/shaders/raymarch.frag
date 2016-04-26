@@ -267,10 +267,10 @@ void main()
 	if(rayDistanceTravelled < maximumDepth && rayDistanceTravelled > 0)
 	{
 		currentColour = vec3(0.1f, 0.85f, 0.1f);
-		if(currentDistance.y > 0)
+		if(currentDistance.y > 0) // created object found
 		{	
-			currentColour = vec3(1.0f, 0.0f, 0.1f);
-			if(currentDistance.y > 1)
+			currentColour = vec3(0.2f, 0.85f, 0.1f);
+			if(currentDistance.y > 1) // carved out object found
 			{
 				currentColour = vec3(0.6f, 0.3f, 0.1f);
 			}

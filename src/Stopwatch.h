@@ -1,4 +1,9 @@
 #pragma once
+#include <vector>
+#include <string.h>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 
 //Filename: Stopwatch.h
 //Version: 1.0
@@ -15,10 +20,16 @@ class Stopwatch
 	private:
 		int startTimeStampMillis;
 		int endTimeStampMillis;
+		std::vector<std::string> log;
+		std::vector<int> timelog;
 	public:
 		void StartTiming();
 		int StopTiming(std::string eventName);
+		float GetAverage();
+		void ClearLogs();
+		std::string filename;
 		Stopwatch();
+		Stopwatch(std::string newfilename);
 		~Stopwatch();
 };
 
