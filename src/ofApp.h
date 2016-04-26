@@ -99,12 +99,12 @@ class ofApp : public ofBaseApp{
 
 		// Terrain stuff
 
-		int GridTerrainResolution = 1;
+		int GridTerrainResolution = 32;
 		float GridTerrainSize = 5;
 		float GridExpensiveNormals = 0;
 
-		float RayTerrainResolutionX = 256;
-		float RayTerrainResolutionY = 144;
+		float RayTerrainResolutionX = 1280;
+		float RayTerrainResolutionY = 720;
 		float RayTerrainDrawDistance = 1500.0f;
 		int RayTerrainIterations = 256;
 
@@ -142,4 +142,5 @@ class ofApp : public ofBaseApp{
 		// Graphing Data Storage
 		GNUPlotData<int> gnpDrawPerformance;
 		GNUPlotData<int> gnpUpdatePerformance;
+		GNUPlotData<float> gnpLastFrameTime;
 };

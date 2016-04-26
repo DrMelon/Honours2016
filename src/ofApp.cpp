@@ -84,6 +84,17 @@ void ofApp::setup()
 	gnpDrawPerformance.DotType = 7;
 	gnpDrawPerformance.GraphStyle = 1;
 
+	gnpLastFrameTime.Column1Name = "Frame No.";
+	gnpLastFrameTime.Column2Name = "Frame-Time (ms)";
+	gnpLastFrameTime.XAxisName = "Frame No.";
+	gnpLastFrameTime.YAxisName = "Frame-Time (ms)";
+	gnpLastFrameTime.DataColumns = 2;
+	gnpLastFrameTime.HexColour = "00aa00";
+	gnpLastFrameTime.LineThickness = 1;
+	gnpLastFrameTime.DotSize = 1;
+	gnpLastFrameTime.DotType = 7;
+	gnpLastFrameTime.GraphStyle = 1;
+
 	// Create mesh template for physics boxes.	
 	testBoxMesh = new ofBoxPrimitive(10, 10, 10, 1, 1, 1);
 
@@ -123,7 +134,7 @@ void ofApp::update()
 	}
 
 	auto frametimeGUI = theGUI->getTextInput("Frame-Time", "Diagnostics");
-	frametimeGUI->setText(std::to_string(deltaTime) + " ms");
+	frametimeGUI->setText(std::to_string(deltaTime) + " s");
 	auto frametimePlot = theGUI->getValuePlotter("FT", "Diagnostics");
 	frametimePlot->setValue(deltaTime);
 	//frametimePlot->setSpeed(0.1f);
@@ -167,6 +178,9 @@ void ofApp::update()
 
 	gnpUpdatePerformance.Column1.push_back(gnpUpdatePerformance.Column1.size());
 	gnpUpdatePerformance.Column2.push_back(updateStopwatch.StopTiming("Update Completed."));
+
+	gnpLastFrameTime.Column1.push_back(gnpLastFrameTime.Column1.size());
+	gnpLastFrameTime.Column2.push_back(ofGetLastFrameTime() * 1000.0f);
 }
 
 //--------------------------------------------------------------
@@ -187,6 +201,21 @@ void ofApp::draw()
 		}
 		else
 		{
+			if (currentTerrainType == TERRAIN_TYPE::TERRAIN_GRID_MC)
+			{
+				if (((TerrainGridMarchingCubes*)(theTerrain))->updatePhysicsMesh)
+				{
+					// Raise GNUPlot event
+					GNUPlotEvent newEvent;
+					newEvent.xPosition = gnpUpdatePerformance.Column1.size() + 1;
+					newEvent.xRange = 3;
+					newEvent.boxColour = "ffcccc";
+					newEvent.labelName = "Phys";
+					gnpUpdatePerformance.Events.push_back(newEvent);
+					gnpDrawPerformance.Events.push_back(newEvent);
+					gnpLastFrameTime.Events.push_back(newEvent);
+				}
+			}
 			theTerrain->Draw();
 		}
 		
@@ -251,6 +280,8 @@ void ofApp::draw()
 
 	}
 
+	
+
 	if (theCamera->getPosition() != camDelta && (theCamera->getPosition() - camDelta).length() > 40.0f)
 	{
 		camDelta = theCamera->getPosition();
@@ -273,6 +304,17 @@ void ofApp::draw()
 			delete newTerrain;
 
 			physicsNeedsRebuilding = false;
+
+			// Raise GNUPlot event
+			GNUPlotEvent newEvent;
+			newEvent.xPosition = gnpUpdatePerformance.Column1.size() + 1;
+			newEvent.xRange = 3;
+			newEvent.boxColour = "ffcccc";
+			newEvent.labelName = "Phys";
+			gnpUpdatePerformance.Events.push_back(newEvent);
+			gnpDrawPerformance.Events.push_back(newEvent);
+			gnpLastFrameTime.Events.push_back(newEvent);
+
 		}
 	}
 
@@ -358,6 +400,7 @@ void ofApp::mousePressed(int x, int y, int button)
 			newEvent.labelName = "Carve (No Object)";
 			gnpUpdatePerformance.Events.push_back(newEvent);
 			gnpDrawPerformance.Events.push_back(newEvent);
+			gnpLastFrameTime.Events.push_back(newEvent);
 		}
 
 		// Carve a segment of terrain out of the world, with residual sphere slice.
@@ -396,28 +439,8 @@ void ofApp::mousePressed(int x, int y, int button)
 			newEvent.labelName = "Carve (Object)";
 			gnpUpdatePerformance.Events.push_back(newEvent);
 			gnpDrawPerformance.Events.push_back(newEvent);
+			gnpLastFrameTime.Events.push_back(newEvent);
 		}
-
-		if (CtrlHeld && PhysicsEnabled)
-		{
-			ofxBulletCustomShape* newThrownBox = new ofxBulletCustomShape();
-			newThrownBox->create(thePhysicsWorld->getWorld(), theCamera->getPosition(), 1.0f);
-			newThrownBox->addMesh(testBoxMesh->getMesh(), ofVec3f(1, 1, 1), true);
-			newThrownBox->add();
-			newThrownBox->applyCentralForce(theCamera->getLookAtDir() * 10.0f);
-
-			createdShatterBoxes.push_back(newThrownBox);
-
-			// Raise GNUPlot event
-			GNUPlotEvent newEvent;
-			newEvent.xPosition = gnpUpdatePerformance.Column1.size();
-			newEvent.xRange = 10;
-			newEvent.boxColour = "eeffcc";
-			newEvent.labelName = "Box Thrown";
-			gnpUpdatePerformance.Events.push_back(newEvent);
-			gnpDrawPerformance.Events.push_back(newEvent);
-		}
-
 
 	}
 	
@@ -476,6 +499,8 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 		newEvent.boxColour = "ffccff";
 		newEvent.labelName = "Switched to Grid";
 		gnpUpdatePerformance.Events.push_back(newEvent);
+		gnpDrawPerformance.Events.push_back(newEvent);
+		gnpLastFrameTime.Events.push_back(newEvent);
 
 	}
 	if (selectedItem->getName() == "Raymarched Distance Field" && currentTerrainType != TERRAIN_TYPE::TERRAIN_RAY_DIST)
@@ -497,6 +522,8 @@ void ofApp::onDropdownEvent(ofxDatGuiDropdownEvent e)
 		newEvent.boxColour = "ccffff";
 		newEvent.labelName = "Switched to Raycast";
 		gnpUpdatePerformance.Events.push_back(newEvent);
+		gnpDrawPerformance.Events.push_back(newEvent);
+		gnpLastFrameTime.Events.push_back(newEvent);
 
 	}
 }
@@ -545,6 +572,7 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 		GNUPlotDataManager plotMan;
 		plotMan.WriteGraphDataFile(gnpUpdatePerformance, "update_performance.dat");
 		plotMan.WriteGraphDataFile(gnpDrawPerformance, "draw_performance.dat");
+		plotMan.WriteGraphDataFile(gnpLastFrameTime, "lastft.dat");
 	}
 
 }
@@ -727,6 +755,7 @@ void ofApp::ConvertMeshToDensity(ofMesh* theMesh, ofVec3f position)
 	newEvent.labelName = "Mesh->Density";
 	gnpUpdatePerformance.Events.push_back(newEvent);
 	gnpDrawPerformance.Events.push_back(newEvent);
+	gnpLastFrameTime.Events.push_back(newEvent);
 }
 
 // CSG Operations work by filling a texture buffer.
@@ -795,7 +824,7 @@ void ofApp::exit()
 	GNUPlotDataManager plotMan;
 	plotMan.WriteGraphDataFile(gnpUpdatePerformance, "update_performance.dat");
 	plotMan.WriteGraphDataFile(gnpDrawPerformance, "draw_performance.dat");
-
+	plotMan.WriteGraphDataFile(gnpLastFrameTime, "lastft.dat");
 	
 
 }
