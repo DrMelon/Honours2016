@@ -343,7 +343,7 @@ std::vector<ofMesh*> CutMeshWithPlane(ofVec3f planePoint, ofVec3f planeNormalVec
 		// Create a vertex at this position.
 		masterListVertices.push_back(averagePosition);
 
-		// Keep shoving vertices on if not a power of 3 [hacky]
+		// Keep shoving vertices on if not a power of 3 
 		while (masterListVertices.size() % 3 != 0)
 		{
 			masterListVertices.push_back(averagePosition);

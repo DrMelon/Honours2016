@@ -40,6 +40,7 @@ class ofApp : public ofBaseApp{
 		void mouseReleased(int x, int y, int button);
 		void mouseEntered(int x, int y);
 		void mouseExited(int x, int y);
+		void mouseScrolled(int x, int y, float scrollx, float scrolly);
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void exit();
@@ -55,11 +56,7 @@ class ofApp : public ofBaseApp{
 		// Flag to tell physics engine that something has changed
 		bool physicsNeedsRebuilding = true;
 
-		// Operations to change terrain via Constructive Solid Geometry (adding/removing regions of terrain via primitives)
-		// std::vector<CSGOperation*> csgOperations;
-		// CSGOperation will include type, parameters, serialization for buffer.
-		// Buffer will have a line of 8 floats: type, x, y, z - then remaining 4 are optionals - bounding, radius etc
-		// will need separate list for n-sided polygonals, which will evaluate their density function once and pass in as number; only calculated once
+
 
 
 		// Fields/Members
@@ -71,7 +68,9 @@ class ofApp : public ofBaseApp{
 		// Lighting shader
 		ofShader* lightShader;
 
-		
+		// Preview Toggle
+		bool PreviewToggle;
+		float CarveDistance = 50.0f;
 
 		// Physics Stuff - Built from Vertices from the GPU.
 		ofxBulletTriMeshShape* CreatePhysicsMesh(ofxBulletWorldRigid* world, ofMesh* theMesh);
@@ -115,6 +114,9 @@ class ofApp : public ofBaseApp{
 		bool PhysicsWireframe = false;
 
 		// Terrain modification buffer
+		// Operations to change terrain via Constructive Solid Geometry (adding/removing regions of terrain via primitives)
+		// Buffer will have a line of 8 floats: type, x, y, z - then remaining 4 are optionals - bounding, radius etc
+		
 		std::vector<GLfloat> csgOperations;
 		void CSGAddSphere(ofVec3f Position, float Radius);
 		void CSGRemoveSphere(ofVec3f Position, float Radius);

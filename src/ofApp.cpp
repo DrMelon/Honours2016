@@ -31,7 +31,7 @@ void ofApp::setup()
 	// Disable the GUI's own automatic rendering, as we're doing shader passes and things.
 	theGUI->setAutoDraw(false);
 
-	// Create the camera, using OpenFrameworks' ofEasyCam class. This gives us a simple control system.
+	// Create the camera, using OpenFrameworks' First Person Camera class. This gives us a simple control system.
 	theCamera = new ofxFirstPersonCamera();
 	theCamera->setNearClip(0.01f);
 	theCamera->setFarClip(1500.f);
@@ -194,7 +194,7 @@ void ofApp::draw()
 		if(currentTerrainType == TERRAIN_TYPE::TERRAIN_RAY_DIST)
 		{
 			theCamera->end();
-
+			ofSetColor(ofColor::white);
 			theTerrain->Draw();
 			
 			theCamera->begin();
@@ -219,6 +219,7 @@ void ofApp::draw()
 			theTerrain->Draw();
 		}
 		
+
 
 		// Debug: draw the physics mesh over the top
 		ofDisableDepthTest();
@@ -261,6 +262,15 @@ void ofApp::draw()
 
 		// stop using lights
 		lightShader->end();
+
+		// Draw a transparent sphere where the user will carve the terrain, toggled with the Alt key
+		if (PreviewToggle)
+		{
+			ofSetColor(ofColor(255, 60, 60, 40));
+			glEnable(GL_BLEND);
+			ofDrawSphere((theCamera->getPosition() + (theCamera->getLookAtDir() * CarveDistance)), 25.0f);
+			glDisable(GL_BLEND);
+		}
 
 	theCamera->end(); // Cease drawing with the camera.
 
@@ -343,6 +353,13 @@ void ofApp::keyPressed(int key)
 		CtrlHeld = true;
 	}
 
+	if (key == OF_KEY_ALT)
+	{
+		PreviewToggle = !PreviewToggle;
+	}
+
+	
+
 }
 
 //--------------------------------------------------------------
@@ -368,7 +385,8 @@ void ofApp::mouseMoved(int x, int y )
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button)
+{
 
 }
 
@@ -380,12 +398,14 @@ void ofApp::mousePressed(int x, int y, int button)
 		theCamera->toggleControl();
 	}
 
+
+
 	if (button == 1) // Middle Mouse
 	{
 		// Carve a segment of terrain out of the world.
 		if (!ShiftHeld && !CtrlHeld)
 		{
-			ofVec3f removePos = (theCamera->getLookAtDir() * 50.0f) + (theCamera->getPosition());
+			ofVec3f removePos = (theCamera->getLookAtDir() * CarveDistance) + (theCamera->getPosition());
 
 			CSGRemoveSphere(removePos, 25);
 			std::cout << "Removed CSG Sphere, at " << removePos << "." << std::endl;
@@ -404,9 +424,9 @@ void ofApp::mousePressed(int x, int y, int button)
 		}
 
 		// Carve a segment of terrain out of the world, with residual sphere slice.
-		if (ShiftHeld)// && PhysicsEnabled)
+		if (ShiftHeld)
 		{
-			ofVec3f removePos = (theCamera->getLookAtDir() * 50.0f) + (theCamera->getPosition());
+			ofVec3f removePos = (theCamera->getLookAtDir() * CarveDistance) + (theCamera->getPosition());
 
 			physicsNeedsRebuilding = true;
 
@@ -459,6 +479,11 @@ void ofApp::mouseEntered(int x, int y){
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
 
+}
+
+void ofApp::mouseScrolled(int x, int y, float scrollx, float scrolly)
+{
+	CarveDistance += scrolly*2;
 }
 
 //--------------------------------------------------------------
@@ -556,12 +581,8 @@ void ofApp::onButtonChanged(ofxDatGuiButtonEvent e)
 	{
 		PhysicsWireframe = e.enabled;
 	}
-	if (e.target->getName() == "Slice")
+	if (e.target->getName() == "Clear Logs")
 	{
-
-		//Slice objects with voronoi fracturing, add to list of active sliced objects.
-		//std::vector<std::pair<ofMesh*, ofxBulletCustomShape*>> newObjects = VoronoiFracture(testBox, testBoxMesh->getMeshPtr(), thePhysicsWorld, 16, NULL);
-		//cutPhysicsObjects.insert(cutPhysicsObjects.end(), newObjects.begin(), newObjects.end());
 		updateStopwatch.ClearLogs();
 		drawStopwatch.ClearLogs();
 		
@@ -661,7 +682,7 @@ void ofApp::buildGUI()
 	physicsSlider->setPrecision(2);
 	physicsSlider->bind(PhysicsTimescale);
 	
-	auto sliceButton = physicsFolder->addButton("Slice");
+	auto clearButton = theGUI->addButton("Clear Logs");
 
 	auto logButton = theGUI->addButton("Output Logs");
 	

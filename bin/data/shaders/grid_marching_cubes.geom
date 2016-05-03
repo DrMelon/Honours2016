@@ -61,7 +61,7 @@ out vec3 lightvdir;
 out vec3 posnorm;
 
 //
-// Noise functions borrowed from: [SOURCE]
+// Noise functions borrowed from: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 //
 float hash(float n) { return fract(sin(n) * 1e4); }
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
