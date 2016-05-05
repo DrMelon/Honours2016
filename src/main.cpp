@@ -11,12 +11,14 @@
 // This is an OpenFrameworks Project, so this just creates an OpenGL context and launches the OpenFrameworks framework.
 
 
-int main( ){
+int main( )
+{
 	
 	ofGLFWWindowSettings settings;
 	settings.setGLVersion(3, 2); //we define the OpenGL version we want to use
 	settings.width = 1280;
 	settings.height = 720;
+	settings.windowMode = ofWindowMode::OF_GAME_MODE;
 	ofCreateWindow(settings);
 
 

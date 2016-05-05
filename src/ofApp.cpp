@@ -21,6 +21,8 @@ void ofApp::setup()
 	ofSetVerticalSync(true);
 	ofDisableArbTex();
 
+	HelpToggle = true;
+
 	// Set up z-buffer.
 	ofEnableDepthTest();
 
@@ -36,6 +38,10 @@ void ofApp::setup()
 	theCamera->setNearClip(0.01f);
 	theCamera->setFarClip(1500.f);
 	theCamera->setFov(59);
+
+	// Create help image
+	helpImage = new ofImage("help.png");
+	
 
 	// Create lighting shader
 	lightShader = new ofShader();
@@ -278,6 +284,13 @@ void ofApp::draw()
 	// Draw GUI
 	ofDisableDepthTest();
 	theGUI->draw();
+
+	if (HelpToggle)
+	{
+		ofSetColor(ofColor(255, 255, 255, 220));
+		helpImage->draw(25, 720 - 200);
+	}
+	
 	ofEnableDepthTest();
 
 	// Check to see if terrain rebuilt our physics during its draw phase.
@@ -335,8 +348,10 @@ void ofApp::draw()
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key)
+void ofApp::keyPressed(ofKeyEventArgs &keyargs)
 {
+	int key = keyargs.key;
+	int keycode = keyargs.keycode;
 	if (key == OF_KEY_BACKSPACE)
 	{
 		//undo csg
@@ -358,6 +373,10 @@ void ofApp::keyPressed(int key)
 		PreviewToggle = !PreviewToggle;
 	}
 
+	if (keycode == GLFW_KEY_H)
+	{
+		HelpToggle = !HelpToggle;
+	}
 	
 
 }
